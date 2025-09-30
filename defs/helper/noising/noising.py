@@ -22,13 +22,13 @@ class ConstantSchedule:
     
     def beta_t(self, t):
         """May be required in the future, returns β_t = 1 - α_t, how much of the signal is lost"""
-        return 1 - self.alpha_const
+        return 1.0 - self.alpha_const
     
     def add_noise(self, x0, t):
         """Returns  noisy x_t at time step t"""
         noise = np.random.randn(*x0.shape) # Get some random noise of the same shape
         a_bar = self.alpha_bar_t(t) # Sample the alpha bar at time step t
-        return np.sqrt(a_bar) * x0 + np.sqrt(1 - a_bar) * noise # Return the final signal, with added noise at time t
+        return np.sqrt(a_bar) * x0 + np.sqrt(1.0 - a_bar) * noise # Return the final signal, with added noise at time t
     
 class LinearSchedule:
 
@@ -43,7 +43,7 @@ class LinearSchedule:
     
     def beta_t(self, t):
         """May be required in the future, returns β_t = 1 - α_t, how much of the signal is lost"""
-        return 1 - self.alphas[t]
+        return 1.0 - self.alphas[t]
     
     def alpha_bar_t(self, t):
         """Return cumulative α_t at time step t (0 <= t <= steps)"""
@@ -56,7 +56,7 @@ class LinearSchedule:
         """Returns  noisy x_t at time step t"""
         noise = np.random.randn(*x0.shape) # Get some random noise of the same shape
         a_bar = self.alpha_bar_t(t) # Sample the alpha bar at time step t
-        return np.sqrt(a_bar) * x0 + np.sqrt(1 - a_bar) * noise # Return the final signal, with added noise at time t
+        return np.sqrt(a_bar) * x0 + np.sqrt(1.0 - a_bar) * noise # Return the final signal, with added noise at time t
 
 class CosSchedule:
     """
@@ -78,25 +78,25 @@ class CosSchedule:
 
         # Definition from the paper, page 4
         times = np.arange(0, T + 1, dtype=np.float64)
-        f = np.cos((((times / T) + s) / (1 + s) ) * np.pi / 2) ** self.exp 
+        f = np.cos((((times / T) + s) / (1.0 + s) ) * np.pi / 2) ** self.exp 
         f_0 = f[0]
         self.alpha_bars = f/f_0
 
     def beta_t(self, t):
-        return 1 - (self.alpha_bars[t] / self.alpha_bars[t-1]) # Definition from the paper, page 4
+        return 1.0 - (self.alpha_bars[t] / self.alpha_bars[t-1]) # Definition from the paper, page 4
     
     def beta_tilda_t(self, t):
-        return self.beta_t(t) * (1 - self.alpha_bars[t-1]) / (1 - self.alpha_bars[t]) # Definition from the paper, page 2
+        return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
     
     def add_noise(self, x_0, t):
         noise = np.random.randn(*x_0.shape) # Get some random noise of the same shape
         a_bar = self.alpha_bars[t] # Sample the alpha bar at time step t
-        return np.sqrt(a_bar)*x_0 + np.sqrt(1 - a_bar)*noise # Definition from the paper, page 2
+        return np.sqrt(a_bar)*x_0 + np.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
     
     def mu_tilda_t(self, x_0, t):
         x_t = self.add_noise(x_0=x_0, t=t)
         b_t = self.beta_t(t)
-        a_t = 1 - b_t
+        a_t = 1.0 - b_t
 
         # Definition from the paper, page 2
-        return (np.sqrt(self.alpha_bars[t-1]) * b_t) / (1 - self.alpha_bars[t]) * x_0 + (np.sqrt(a_t) * (1 - self.alpha_bars[t-1])) / (1 - self.alpha_bars[t]) * x_t
+        return (np.sqrt(self.alpha_bars[t-1]) * b_t) / (1.0 - self.alpha_bars[t]) * x_0 + (np.sqrt(a_t) * (1.0 - self.alpha_bars[t-1])) / (1.0 - self.alpha_bars[t]) * x_t

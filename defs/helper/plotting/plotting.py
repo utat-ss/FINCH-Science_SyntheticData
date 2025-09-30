@@ -22,17 +22,15 @@ def animate_change(spectral_matrix, wavelengths= None, interval= 50, repeat= Tru
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Reflectance + Noise")
 
-    # Initialize
     def init():
         line.set_data([], [])
-        return line,
+        return (line,)
 
-    # Update function
     def update(frame):
         y = spectral_matrix[frame]
         line.set_data(wavelengths, y)
-
-        ax.set_title(f"Spectrum Evolution (Time: {frame+1}/{n_frames})")
+        ax.set_title(f"Spectrum Evolution (Time {frame+1}/{n_frames})")
+        return (line,)
 
     animate = animation.FuncAnimation(fig, update, frames= n_frames, init_func= init, blit= True, interval= interval, repeat= repeat)
 
