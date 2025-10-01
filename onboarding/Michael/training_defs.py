@@ -38,17 +38,20 @@ def test_train_split(data):
     train_input = []
     train_output = []
     test_input = []
-    train_output = []
+    test_output = []
 
-    wl = 209  # 209 different wavelengths to append
+    start = 400
+    end = 2490
+    interval = 10
     frac = ['gv_fraction', 'npv_fraction', 'soil_fraction']
 
     for i in range(0, len(data['Spectra'])):
         # Split between training and testing
         if data['use'][i] == 'training':
-            train_input.append(data['Spectra'][i])
+            train_input.append([data[str(j)][i] for j in range(start, end + 1, interval)])
+            train_output.append([data[j][i] for j in frac])
         else:
-            test_input.append(data['Spectra'][i])
-    pass
+            test_input.append([data[str(j)][i] for j in range(start, end + 1, interval)])
+            test_output.append([data[j][i] for j in frac])
 
-data = load_csv('../[science]/FINCH-Science_SyntheticData/data/simpler_data_rwc.csv')
+    return train_input, train_output, test_input, test_output
