@@ -1,3 +1,8 @@
+"""
+Guide used to assist in creating this MLP
+Guide: https://medium.com/@mn05052002/building-a-simple-mlp-from-scratch-using-pytorch-7d50ca66512b 
+"""
+
 # Preamble
 
 import torch
@@ -37,3 +42,24 @@ class FractionMLP:
         self.z2 = torch.matmul(self.a1, self.W2) + self.b2
         self.a2 = torch.sigmoid(self.z2)  # Output layer activation
         return self.a2
+    
+    def backward(self, X, y, output, lr=0.01):
+        """
+        Backpropagation function. 
+            - Needs to take X as a torch tensor object.
+        """
+        m = X.shape[0]
+        dz2 = output - y # loss
+        dW2 = torch.matmul(self.a1.T, dz2)
+        db2 = torch.sum(dz2, axis=0) / m
+
+        da1 = torch.matmul(dz2, self.W2.T)
+        dz1 = da1*(self.a1*(1-self.a1))
+        dw1 = torch.matmul(X.T, dz1) / m
+        db1 = torch.sum(dz1, axis=0) / m
+        
+        with torch.no_grad():
+            self.W1 -= lr * dw1
+            self.b1 -= lr * db1
+            self.W2 -= lr * dW2
+            self.b2 -= lr * db2
