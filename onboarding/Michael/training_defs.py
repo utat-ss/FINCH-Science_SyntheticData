@@ -21,6 +21,34 @@ NOTE: Will probably just use the "training" and "validation" records instead of 
 
 def load_csv(file):
     """
-    Want this function to read a csv file and return a torch tensor for analysis.
+    This function reads a csv file.
     """
+
+    data = pd.read_csv(file) # Read file using pandas
+    return data
+
+def test_train_split(data):
+    """
+    Split input data into testing and training tensors.
+
+    NOTE: This function is engineered specifically for:
+        - Inputs of 400-2490 nm wavelengths (10 nm intervals)
+        - Outputs of gv_fraction, npv_fraction, soil_fraction (in that order)
+    """
+    train_input = []
+    train_output = []
+    test_input = []
+    train_output = []
+
+    wl = 209  # 209 different wavelengths to append
+    frac = ['gv_fraction', 'npv_fraction', 'soil_fraction']
+
+    for i in range(0, len(data['Spectra'])):
+        # Split between training and testing
+        if data['use'][i] == 'training':
+            train_input.append(data['Spectra'][i])
+        else:
+            test_input.append(data['Spectra'][i])
     pass
+
+data = load_csv('../[science]/FINCH-Science_SyntheticData/data/simpler_data_rwc.csv')
