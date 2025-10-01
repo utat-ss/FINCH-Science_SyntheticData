@@ -63,3 +63,17 @@ class FractionMLP:
             self.b1 -= lr * db1
             self.W2 -= lr * dW2
             self.b2 -= lr * db2
+
+    def train(self, X, y, epochs=1000, lr=0.01):
+        """
+        Training function. Returns the losses to graph if needed.
+        """
+        losses = []
+        for epoch in range(epochs):
+            output = self.forward(X)
+            #Compute loss using (Mean Squared Error)
+            loss = torch.mean((output - y) ** 2)
+            losses.append(loss.item())
+            #update weights
+            self.backward(X, y, output, lr)
+        return losses
