@@ -54,4 +54,9 @@ def test_train_split(data):
             test_input.append([data[str(j)][i] for j in range(start, end + 1, interval)])
             test_output.append([data[j][i] for j in frac])
 
+    train_input = torch.tensor(train_input)
+    train_output = torch.tensor(train_output)
+    test_input = torch.tensor(test_input)
+    test_output = torch.tensor(test_output)
+
     return train_input, train_output, test_input, test_output
