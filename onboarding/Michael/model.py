@@ -28,10 +28,11 @@ class FractionMLP:
 
         1 hidden layer for now
         """
-        self.W1 = torch.randn(input_size, hidden_size, requires_grad=True, dtype=torch.float32)
-        self.b1 = torch.randn(1, hidden_size, requires_grad=True, dtype=torch.float32)
-        self.W2 = torch.randn(hidden_size, output_size, requires_grad=True, dtype=torch.float32)
-        self.b2 = torch.randn(1, output_size, requires_grad=True, dtype=torch.float32)
+        # Initially set up as float32, changed to float64
+        self.W1 = torch.randn(input_size, hidden_size, dtype=torch.float64, requires_grad=True)
+        self.b1 = torch.randn(1, hidden_size, requires_grad=True).to(torch.float64)
+        self.W2 = torch.randn(hidden_size, output_size, requires_grad=True).to(torch.float64)
+        self.b2 = torch.randn(1, output_size, requires_grad=True).to(torch.float64)
 
     def forward(self, X):
         """
