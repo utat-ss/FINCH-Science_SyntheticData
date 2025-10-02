@@ -42,6 +42,7 @@ class FractionMLP:
         self.a1 = torch.sigmoid(self.z1)  # Hidden layer activation
         self.z2 = torch.matmul(self.a1, self.W2) + self.b2
         self.a2 = torch.sigmoid(self.z2)  # Output layer activation
+        # self.a2 = self.z2
         return self.a2
     
     def backward(self, X, y, output, lr=0.01):
