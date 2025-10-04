@@ -3,13 +3,13 @@ import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader, random_split
 
-def load_spectral_data(filename='simpler_data_rwc.csv'):
+def load_spectral_data(filename="simpler_data_rwc.csv"):
     base = os.path.dirname(__file__)
     path = os.path.join(base, filename)
     df = pd.read_csv(path)
     spectral_cols = [str(w) for w in range(400, 2491, 10)]
-    X = df[spectral_cols].values.astype('float32')
-    y = df[['gv_fraction','npv_fraction','soil_fraction']].values.astype('float32')
+    X = df[spectral_cols].values.astype("float32")
+    y = df[["gv_fraction","npv_fraction","soil_fraction"]].values.astype("float32")
     return X, y
 
 def get_dataloaders(X, y, batch_size=32, split_ratio=0.8):
