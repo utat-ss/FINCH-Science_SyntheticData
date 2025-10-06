@@ -6,6 +6,7 @@ Guide: https://medium.com/@mn05052002/building-a-simple-mlp-from-scratch-using-p
 # Preamble
 
 import torch
+import torch.nn as nn
 
 # NN classes
 
@@ -79,3 +80,25 @@ class FractionMLP:
             #update weights
             self.backward(X, y, output, lr)
         return losses
+    
+
+# Adopted from Andrew's model.py file
+
+class MLP(nn.Module):
+    """
+    Trials with modifications to Andrew's original model.
+    """
+    def __init__(self, in_dim, h_dim=128, out_dim=3):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_dim, h_dim),
+            nn.ReLU(),
+            nn.Linear(h_dim, h_dim),
+            nn.ReLU(),
+            nn.Linear(h_dim, h_dim),
+            nn.ReLU(),
+            nn.Linear(h_dim, out_dim)
+        )
+
+    def forward(self, x):
+        return self.net(x)
