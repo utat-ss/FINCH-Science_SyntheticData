@@ -37,6 +37,8 @@ class Epsilon_MLP(nn.Module):
         Initializes the network. Takes in the model config.
         """
 
+        self.n_bands = cfg_model['denoiser']['spec_dim'] # This is used in the diffusion class, useful. Represents how many spectral bands there are.
+
         # Time embedder MLP
         self.time_embed_hidden_dim = cfg_model['time_embed']['hidden_dim'] # Take in the necessary params for the embedder
         self.time_embed_hidden_n = cfg_model['time_embed']['hidden_n']
