@@ -5,7 +5,9 @@ models.
 """
 
 import numpy as np
+import torch
     
+# This has not been implemented in torch yet, and prob is not compatible with the wrapper
 class ConstantSchedule:
 
     """Creates a constant schedule for α's"""
@@ -29,7 +31,8 @@ class ConstantSchedule:
         noise = np.random.randn(*x0.shape) # Get some random noise of the same shape
         a_bar = self.alpha_bar_t(t) # Sample the alpha bar at time step t
         return np.sqrt(a_bar) * x0 + np.sqrt(1.0 - a_bar) * noise # Return the final signal, with added noise at time t
-    
+
+# This has not been implemented in torch yet, and prob is not compatible with the wrapper 
 class LinearSchedule:
 
     """Creates a linear schedule for α's"""
@@ -77,10 +80,20 @@ class CosSchedule:
         s = self.offset
 
         # Definition from the paper, page 4
-        times = np.arange(0, T + 1, dtype=np.float64)
-        f = np.cos((((times / T) + s) / (1.0 + s) ) * np.pi / 2) ** self.exp 
+        times = torch.arange(0, T + 1, dtype=torch.float64)
+        f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp 
         f_0 = f[0]
-        self.alpha_bars = f/f_0
+        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32)
+
+    def _gather(self, values, t, x_shape):
+        # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
+        if t.ndim == 0:
+            out = values[t]
+        else:
+            out = values[t]
+            while out.ndim < x_shape:
+                out = out.unsqueeze(-1)
+        return out
 
     def beta_t(self, t):
         return 1.0 - (self.alpha_bars[t] / self.alpha_bars[t-1]) # Definition from the paper, page 4
@@ -89,14 +102,14 @@ class CosSchedule:
         return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
     
     def add_noise(self, x_0, t):
-        noise = np.random.randn(*x_0.shape) # Get some random noise of the same shape
-        a_bar = self.alpha_bars[t] # Sample the alpha bar at time step t
-        return np.sqrt(a_bar)*x_0 + np.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
+        noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
+        a_bar = self._gather(self.alpha_bars, t, x_0.shape).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
+        return torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
     
     def mu_tilda_t(self, x_0, t):
-        x_t = self.add_noise(x_0=x_0, t=t)
-        b_t = self.beta_t(t)
+        x_t = self.add_noise(x_0, t)
+        b_t = self._gather(self.beta_t(t), t, x_0.shape).to(x_0.device)
         a_t = 1.0 - b_t
 
         # Definition from the paper, page 2
-        return (np.sqrt(self.alpha_bars[t-1]) * b_t) / (1.0 - self.alpha_bars[t]) * x_0 + (np.sqrt(a_t) * (1.0 - self.alpha_bars[t-1])) / (1.0 - self.alpha_bars[t]) * x_t
+        return (torch.sqrt(self.alpha_bars[t-1]) * b_t) / (1.0 - self.alpha_bars[t]) * x_0 + (torch.sqrt(a_t) * (1.0 - self.alpha_bars[t-1])) / (1.0 - self.alpha_bars[t]) * x_t
