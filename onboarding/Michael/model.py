@@ -96,7 +96,7 @@ class MLP(nn.Module):
             nn.Linear(h_dim, h_dim),
             nn.ReLU(),
             nn.Linear(h_dim, h_dim),
-            nn.ReLU(),
+            nn.Sigmoid(),
             nn.Linear(h_dim, out_dim)
         )
 
