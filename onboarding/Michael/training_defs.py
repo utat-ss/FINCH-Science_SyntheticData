@@ -61,7 +61,10 @@ def test_train_split(data):
 
     return train_input, train_output, test_input, test_output
 
-# Adopted functions from Andrew's project
+
+"""
+    Adopted functions from Andrew's project
+"""
 
 def load_spectral_data(filename="simpler_data_rwc.csv"):
     base = os.path.dirname(__file__)
