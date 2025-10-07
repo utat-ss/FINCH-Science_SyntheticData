@@ -2,9 +2,9 @@
 Define different epsilons over here
 """
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 
 class Epsilon_MLP(nn.Module):
 
@@ -15,7 +15,7 @@ class Epsilon_MLP(nn.Module):
     - ['time_embed']['hidden_dim']
     - ['time_embed']['hidden_n']
     - ['ab_embed']['hidden_dim']
-    - ['ab_embed']['hidden_dim']
+    - ['ab_embed']['hidden_n']
     - ['ab_embed']['ab_dim']
     - ['denoiser']['spec_dim'] 
     - ['denoiser']['hidden_dim']
@@ -45,13 +45,13 @@ class Epsilon_MLP(nn.Module):
 
         time_embed_layers = [] # Define an initial list to be unpacked later on
 
-        time_embed_layers.append(*[ 
+        time_embed_layers.extend([ 
             nn.Linear(1, self.time_embed_hidden_dim),
             nn.SiLU(),
         ]) # Appending the init layer
 
         for _ in range(self.time_embed_hidden_n): # Appending hidden layers
-            time_embed_layers.append(*[
+            time_embed_layers.extend([
                 nn.Linear(self.time_embed_hidden_dim, self.time_embed_hidden_dim),
                 nn.SiLU()
                 ])
@@ -63,18 +63,18 @@ class Epsilon_MLP(nn.Module):
 
         # Abundance embedder MLP
         self.ab_embed_hidden_dim = cfg_model['ab_embed']['hidden_dim'] # Take in the necessary params for the embedder
-        self.ab_embed_hidden_n = cfg_model['ab_embed']['hidden_dim']
+        self.ab_embed_hidden_n = cfg_model['ab_embed']['hidden_n']
         self.ab_embed_ab_dim = cfg_model['ab_embed']['ab_dim']
 
         ab_embed_layers = []
 
-        ab_embed_layers.append(*[
+        ab_embed_layers.extend([
             nn.Linear(self.ab_embed_ab_dim, self.ab_embed_hidden_dim),
             nn.SiLU()
         ]) # Appending the init layer
 
         for _ in range(self.ab_embed_hidden_n): # Appending hidden layers
-            ab_embed_layers.append(*[
+            ab_embed_layers.extend([
                 nn.Linear(self.ab_embed_hidden_dim, self.ab_embed_hidden_dim),
                 nn.SiLU()
             ]) 
@@ -91,13 +91,13 @@ class Epsilon_MLP(nn.Module):
 
         denoiser_layers = []
 
-        denoiser_layers.append(*[
+        denoiser_layers.extend([
             nn.Linear(self.spec_dim + self.time_embed_hidden_dim + self.ab_embed_hidden_dim, self.denoiser_hidden_dim),
             nn.SiLU()
         ]) # Init layer of the denoiser, takes in embeddings
 
         for _ in range(self.denoiser_hidden_n): # Appending hidden layers of denoiser
-            denoiser_layers.append(*[
+            denoiser_layers.extend([
                 nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim),
                 nn.SiLU()
             ])

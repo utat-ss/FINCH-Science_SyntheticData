@@ -2,9 +2,8 @@
 Define the diffusion class here
 """
 
-import numpy as np
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 class cond_diffusion(nn.Module):
 
