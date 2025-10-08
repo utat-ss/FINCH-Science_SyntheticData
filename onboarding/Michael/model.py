@@ -88,17 +88,47 @@ class MLP(nn.Module):
     """
     Trials with modifications to Andrew's original model.
     """
-    def __init__(self, in_dim, h_dim=128, out_dim=3):
+
+
+    def __init__(self, in_dim, h_dim=[128, 128], out_dim=3):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, h_dim),
-            nn.ReLU(),
-            nn.Linear(h_dim, h_dim),
-            nn.ReLU(),
-            nn.Linear(h_dim, h_dim),
-            nn.Sigmoid(),
-            nn.Linear(h_dim, out_dim)
-        )
+        self.spec_dim = in_dim
+        self.denoiser_hidden_dim = h_dim
+        self.out_dim = out_dim
+
+        denoiser_layers = []
+
+        denoiser_layers.extend([
+            nn.Linear(self.spec_dim, self.denoiser_hidden_dim[0]),
+            nn.SiLU()
+        ]) # Init layer of the denoiser, takes in embeddings
+
+        for i in range(0, len(self.denoiser_hidden_dim) - 1): # Appending hidden layers of denoiser
+            denoiser_layers.extend([
+                nn.Linear(self.denoiser_hidden_dim[i], self.denoiser_hidden_dim[i+1]),
+                nn.SiLU()
+            ])
+
+        denoiser_layers.extend([
+            nn.Linear(self.denoiser_hidden_dim[-1], self.out_dim),
+            nn.SiLU()
+        ])
+
+        # denoiser_layers.append(nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim))
+
+        self.net = nn.Sequential(*denoiser_layers)
+        
+        # self.net = nn.Sequential(
+        #     nn.Linear(in_dim, h_dim),
+        #     nn.ReLU(),
+        #     nn.Linear(h_dim, h_dim),
+        #     nn.ReLU(),
+        #     nn.Linear(h_dim, h_dim),
+        #     nn.Sigmoid(),
+        #     nn.Linear(h_dim, out_dim)
+        # )
 
     def forward(self, x):
         return self.net(x)
+
+
