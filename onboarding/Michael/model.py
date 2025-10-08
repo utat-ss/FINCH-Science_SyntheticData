@@ -100,33 +100,21 @@ class MLP(nn.Module):
 
         denoiser_layers.extend([
             nn.Linear(self.spec_dim, self.denoiser_hidden_dim[0]),
-            nn.SiLU()
-        ]) # Init layer of the denoiser, takes in embeddings
+            nn.ReLU()
+        ])
 
         for i in range(0, len(self.denoiser_hidden_dim) - 1): # Appending hidden layers of denoiser
             denoiser_layers.extend([
                 nn.Linear(self.denoiser_hidden_dim[i], self.denoiser_hidden_dim[i+1]),
-                nn.SiLU()
+                nn.ReLU()
             ])
 
-        denoiser_layers.extend([
+        denoiser_layers.extend([ 
             nn.Linear(self.denoiser_hidden_dim[-1], self.out_dim),
-            nn.SiLU()
-        ])
-
-        # denoiser_layers.append(nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim))
+            nn.Sigmoid()
+        ]) # Final output layer
 
         self.net = nn.Sequential(*denoiser_layers)
-        
-        # self.net = nn.Sequential(
-        #     nn.Linear(in_dim, h_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(h_dim, h_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(h_dim, h_dim),
-        #     nn.Sigmoid(),
-        #     nn.Linear(h_dim, out_dim)
-        # )
 
     def forward(self, x):
         return self.net(x)
