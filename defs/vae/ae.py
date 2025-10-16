@@ -2,7 +2,6 @@
 Action Item: Autoencoder (Convolutional)
 
 Ideally: Latent dimension = 3 (for gv, npv, soil)
-
 """
 
 import torch
