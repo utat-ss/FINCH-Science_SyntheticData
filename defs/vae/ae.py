@@ -7,19 +7,49 @@ Ideally: Latent dimension = 3 (for gv, npv, soil)
 import torch
 import torch.nn as nn
 
-# Taken from PyTorch documentation to learn about nn.Conv1d
-m = nn.Conv1d(16, 33, 3, stride=1, padding=1)
-input = torch.randn(20, 16, 50)
-output = m(input)
-print(len(input[0][0]), len(output[0][0]))
-
 
 class ConvLayers(nn.Module):
     """
     Convolutional layers for encoder and decoder
     """
-    def __init__(self):
-        pass
+    def __init__(self, in_dim, h_dim, out_dim, kernel_size=3, stride=1, padding=1, layers=3, pool_kernel=3, pool_stride=1):
+        super().__init__()
+        self.in_dim = in_dim
+        self.conv_hidden_dim = h_dim
+        self.out_dim = out_dim
+        self.kernel = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.pool_kernel = pool_kernel
+        self.pool_stride = pool_stride
+
+        # Adding all of the convolution layers, with ReLU and Maxpooling based on inputs
+        conv_layers = []
+        conv_layers.extend([
+            nn.Conv1d(self.in_dim, self.conv_hidden_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
+        ])
+        for _ in range(0, layers):
+            conv_layers.extend([
+                nn.Conv1d(self.conv_hidden_dim, self.conv_hidden_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+                nn.ReLU(),
+                nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
+            ])
+        conv_layers.extend([
+            nn.Conv1d(self.conv_hidden_dim, self.out_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
+        ])
+
+        self.net = nn.Sequential(*conv_layers)
+
+    def forward(self, x):
+        return self.net(x)
+
 
 
 class MLP(nn.Module):
