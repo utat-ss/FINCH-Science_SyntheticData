@@ -82,3 +82,8 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.net(x)
 
+
+class AE(nn.Module):
+    """
+    The Autoencoder class, intending to combine both ConvLayers and MLP classes.
+    """
