@@ -111,9 +111,9 @@ class CosSchedule:
         noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
         a_bar = self._gather(self.alpha_bars, t, x_0.shape).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
 
-        x_t = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
+        x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
 
-        return noise, x_t
+        return noise, x_T
     
     def mu_tilda_t(self, x_0, t):
         x_t = self.add_noise(x_0, t)
