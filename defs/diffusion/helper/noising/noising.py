@@ -94,6 +94,12 @@ class CosSchedule:
             while out.ndim < x_shape:
                 out = out.unsqueeze(-1)
         return out
+    
+    def alpha_t(self, t):
+        return 2.0 - (self.alpha_bars[t]/self.alpha_bars[t-1]) 
+        # Since beta_t = 1 - (alpha_bar_t)/(alpha_bar_(t-1))
+        # And alpha_t = 1 - beta_t
+        # We get alpha_t = 2 - (alpha_bar_t)/(alpha_bar_(t-1))
 
     def beta_t(self, t):
         return 1.0 - (self.alpha_bars[t] / self.alpha_bars[t-1]) # Definition from the paper, page 4
@@ -104,7 +110,10 @@ class CosSchedule:
     def add_noise(self, x_0, t):
         noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
         a_bar = self._gather(self.alpha_bars, t, x_0.shape).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
-        return torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
+
+        x_t = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
+
+        return noise, x_t
     
     def mu_tilda_t(self, x_0, t):
         x_t = self.add_noise(x_0, t)

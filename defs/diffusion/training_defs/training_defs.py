@@ -181,10 +181,10 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
             optimizer.zero_grad()
 
             # Add noise, denoise, and get x0_hat predictions
-            x0_hat = cond_diffusion.training_procedure(x0, abundances) 
+            x0_hat, xn, xn_hat = cond_diffusion.training_procedure(x0, abundances) 
 
             # Calculate the loss based on the reconstructed predictions and the actual spectra
-            total_loss = loss.calc(x0, x0_hat) 
+            total_loss = loss.calc(x0, x0_hat, xn, xn_hat) 
 
             # Take the backprop and take a step
             total_loss.backward()
