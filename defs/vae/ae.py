@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-class ConvLayers(nn.Module):
+class ConvEncoder(nn.Module):
     """
     Convolutional layers for encoder and decoder
     """
@@ -24,31 +24,55 @@ class ConvLayers(nn.Module):
         self.pool_stride = pool_stride
 
         # Adding all of the convolution layers, with ReLU and Maxpooling based on inputs
-        conv_layers = []
-        conv_layers.extend([
+        enc_layers = []
+        dec_layers = []
+
+        enc_layers.extend([
             nn.Conv1d(self.in_dim, self.conv_hidden_dim, 
                       kernel_size=self.kernel, stride=self.stride, padding=self.padding),
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
         ])
         for _ in range(0, layers):
-            conv_layers.extend([
+            enc_layers.extend([
                 nn.Conv1d(self.conv_hidden_dim, self.conv_hidden_dim, 
                       kernel_size=self.kernel, stride=self.stride, padding=self.padding),
                 nn.ReLU(),
                 nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
             ])
-        conv_layers.extend([
+        enc_layers.extend([
             nn.Conv1d(self.conv_hidden_dim, self.out_dim, 
                       kernel_size=self.kernel, stride=self.stride, padding=self.padding),
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
         ])
 
-        self.net = nn.Sequential(*conv_layers)
+        dec_layers.extend([
+                nn.ConvTranspose1d(self.out_dim, self.conv_hidden_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+                nn.ReLU(),
+            ])
+        for i in range(layers, 0, -1):
+            dec_layers.extend([
+                nn.ConvTranspose1d(self.conv_hidden_dim, self.conv_hidden_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+                nn.ReLU(),
+            ])
+        dec_layers.extend([
+            nn.ConvTranspose1d(self.conv_hidden_dim, self.in_dim, 
+                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+            nn.Sigmoid(),
+        ])
+
+        self.encoder = nn.Sequential(*enc_layers)
+        self.decoder = nn.Sequential(*dec_layers)
+
+        
 
     def forward(self, x):
-        return self.net(x)
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
 
 
 
