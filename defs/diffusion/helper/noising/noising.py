@@ -61,9 +61,11 @@ class LinearSchedule:
         a_bar = self.alpha_bar_t(t) # Sample the alpha bar at time step t
         return np.sqrt(a_bar) * x0 + np.sqrt(1.0 - a_bar) * noise # Return the final signal, with added noise at time t
 
+# This one has full implementation
 class CosSchedule:
+
     """
-    Creates a cosine schedule for α's
+    Creates a cosine schedule for the noise.
     Uses the definition in the paper; Nichol et al., 2021: https://arxiv.org/pdf/2102.09672
     """
 
@@ -80,10 +82,10 @@ class CosSchedule:
         s = self.offset
 
         # Definition from the paper, page 4
-        times = torch.arange(1, T + 1, dtype=torch.float64)
-        f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp 
-        f_0 = f[0]
-        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32)
+        times = torch.arange(T + 1, dtype=torch.float64)
+        f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp # Generate all the f(t) vals, by the def
+        f_0 = f[0] # Get the f_0
+        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32) # Normalize by f_0 and store as alpha bars
 
     def _gather(self, values, t, xndim):
         # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
@@ -95,19 +97,53 @@ class CosSchedule:
                 out = out.unsqueeze(-1)
         return out
     
-    def alpha_t(self, t):
-        return 2.0 - (self.alpha_bars[t]/self.alpha_bars[t-1]) 
-        # Since beta_t = 1 - (alpha_bar_t)/(alpha_bar_(t-1))
-        # And alpha_t = 1 - beta_t
-        # We get alpha_t = 2 - (alpha_bar_t)/(alpha_bar_(t-1))
-
     def beta_t(self, t):
-        return 1.0 - (self.alpha_bars[t] / self.alpha_bars[t-1]) # Definition from the paper, page 4
-    
+
+        """
+        Takes in the time tensor.
+
+        Returns β_t = 1 - (α_bar_t / α_bar_(t-1)), how much of the signal is lost
+        as defined in the paper, page 4
+
+        This one requires 
+            - Clamping to 0.99999 at high T to avoid numerical caused singularities
+            - Clamping for t=0 to avoid alpha_bars[-1]
+        """
+
+        t_minus1_safe = torch.clamp(t-1, min=0) # Clamp the time tensor, so that it can be safely used even when t=0
+
+        if torch.any(t==0):
+            return 0 # By definition beta_0 = 0
+        
+        beta = 1.0 - (self.alpha_bars[t] / self.alpha_bars[t_minus1_safe]) # Definition from the paper, page 4, use clamped time
+        return torch.clamp(beta, max=0.99999) # Clamp to 0.99999 max to avoid singularities at high t
+
+    def alpha_t(self, t):
+
+        """
+        Takes in the time tensor.
+
+        Returns α_t = 1 - β_t, how much of the signal is retained
+        """
+
+        return 1.0 - self.beta_t(t)
+        # Simply alpha_t = 1 - beta_t
+
     def beta_tilda_t(self, t):
+
+        """
+        Takes in the time tensor.
+
+        Returns the modified beta_tilda as defined in the paper, page 2
+        """
+
         return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
     
     def add_noise(self, x_0, t):
+
+        """
+        Given some initial signal x_0, add the predicted noise at time t.
+        """
 
         noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
         a_bar = self._gather(self.alpha_bars, t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
@@ -116,9 +152,20 @@ class CosSchedule:
         return noise, x_T
     
     def mu_tilda_t(self, x_0, t):
+
+        """
+        Don't exactly know what this is for honestly. Still implemented it.
+        """
+
         x_t = self.add_noise(x_0, t)
         b_t = self._gather(self.beta_t(t), t, x_0.shape).to(x_0.device)
         a_t = 1.0 - b_t
 
         # Definition from the paper, page 2
         return (torch.sqrt(self.alpha_bars[t-1]) * b_t) / (1.0 - self.alpha_bars[t]) * x_0 + (torch.sqrt(a_t) * (1.0 - self.alpha_bars[t-1])) / (1.0 - self.alpha_bars[t]) * x_t
+    
+
+class SqrtSchedule:
+
+    def __init__(self):
+        pass
