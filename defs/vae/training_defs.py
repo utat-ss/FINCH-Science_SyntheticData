@@ -24,3 +24,10 @@ def get_dataloaders(X, y, batch_size=32, split_ratio=0.8):
       DataLoader(train_ds, batch_size=batch_size, shuffle=True),
       DataLoader(val_ds, batch_size=batch_size)
     )
+
+def get_dataloader_unbatched(X, y):
+    X_t = torch.from_numpy(X)
+    y_t = torch.from_numpy(y)
+    return (
+        DataLoader(TensorDataset(X_t, y_t))
+    )
