@@ -12,68 +12,69 @@ class ConvEncoder(nn.Module):
     """
     Convolutional layers for encoder and decoder
     """
-    def __init__(self, in_dim, h_dim, out_dim, kernel_size=3, stride=1, padding=1, layers=3, pool_kernel=3, pool_stride=1):
+    def __init__(self, conv_layers:list[int], mlp_layers:list[int], out_layer:int = 3,
+                 c_d:dict = {}):
         super().__init__()
-        self.in_dim = in_dim
-        self.conv_hidden_dim = h_dim
-        self.out_dim = out_dim
-        self.kernel = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.pool_kernel = pool_kernel
-        self.pool_stride = pool_stride
+        self.conv_details = {
+            'k_size': 3,        #kernel size
+            'stride': 1,        #
+            'pad': 1,           #padding
+            'layers': 3,        #
+            'pool_k': 3,        #pool kernel size
+            'pool_stride': 1    #
+        } #Default settings for convolutional layers
+        self.conv_layers = conv_layers
+        self.mlp_layers = mlp_layers
+        self.output_layer = out_layer
 
-        # Adding all of the convolution layers, with ReLU and Maxpooling based on inputs
-        enc_layers = []
-        dec_layers = []
+        for i in c_d:
+            self.conv_details[i] = c_d[i] #Any changes to the details of the convolutional layers made here
 
-        enc_layers.extend([
-            nn.Conv1d(self.in_dim, self.conv_hidden_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
-            nn.ReLU(),
-            nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
-        ])
-        for _ in range(0, layers):
-            enc_layers.extend([
-                nn.Conv1d(self.conv_hidden_dim, self.conv_hidden_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+        # Encoder
+        encoder_layers = []
+        for i in range(0, len(self.conv_layers) - 1):
+            encoder_layers.extend([
+                nn.Conv1d(in_channels=self.conv_layers[i], 
+                          out_channels=self.conv_layers[i+1], 
+                      kernel_size=self.conv_details['k_size'], 
+                      stride=self.conv_details['stride'], 
+                      padding=self.conv_details['pad']),
                 nn.ReLU(),
-                nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
+                nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride'])
             ])
-        enc_layers.extend([
-            nn.Conv1d(self.conv_hidden_dim, self.out_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
-            nn.ReLU(),
-            nn.MaxPool1d(kernel_size=self.pool_kernel, stride=self.pool_stride)
-        ])
+        
+        self.encoder = nn.Sequential(*encoder_layers)
 
-        dec_layers.extend([
-                nn.ConvTranspose1d(self.out_dim, self.conv_hidden_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
-                nn.ReLU(),
-            ])
-        for i in range(layers, 0, -1):
-            dec_layers.extend([
-                nn.ConvTranspose1d(self.conv_hidden_dim, self.conv_hidden_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+
+        #Decoder
+        decoder_layers = []
+        for i in range(len(self.conv_layers) - 1, 0, -1):
+            decoder_layers.extend([
+                nn.ConvTranspose1d(self.conv_layers[i], self.conv_layers[i-1],
+                                   kernel_size=self.conv_details['k_size'],
+                                   stride=self.conv_details['stride'],
+                                   padding=self.conv_details['pad'],
+                                   output_padding=self.conv_details['pad']),
                 nn.ReLU(),
             ])
-        dec_layers.extend([
-            nn.ConvTranspose1d(self.conv_hidden_dim, self.in_dim, 
-                      kernel_size=self.kernel, stride=self.stride, padding=self.padding),
+        decoder_layers.extend([
+            nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
+                                kernel_size=self.conv_details['k_size'],
+                                stride=self.conv_details['stride'],
+                                padding=self.conv_details['pad'],
+                                output_padding=self.conv_details['pad']),
             nn.Sigmoid(),
         ])
 
-        self.encoder = nn.Sequential(*enc_layers)
-        self.decoder = nn.Sequential(*dec_layers)
-
-        
+        self.decoder = nn.Sequential(*decoder_layers)
 
     def forward(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
 
+    def encode(self, x):
+        return self.encoder(x)
 
 
 class MLP(nn.Module):
