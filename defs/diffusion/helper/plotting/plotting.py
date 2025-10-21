@@ -17,8 +17,8 @@ def animate_change(spectral_matrix, wavelengths= None, interval= 50, repeat= Tru
     line, = ax.plot([], [], lw=2)
 
     ax.set_xlim(wavelengths.min(), wavelengths.max())
-    ax.set_ylim(spectral_matrix.min() - 1.5*np.abs(spectral_matrix.min()),
-                spectral_matrix.max() + 0.5*np.abs(spectral_matrix.max()))
+    ax.set_ylim(-3,
+                3)
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Reflectance + Noise")
 

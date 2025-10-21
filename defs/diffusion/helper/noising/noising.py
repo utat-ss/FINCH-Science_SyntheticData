@@ -80,18 +80,18 @@ class CosSchedule:
         s = self.offset
 
         # Definition from the paper, page 4
-        times = torch.arange(0, T + 1, dtype=torch.float64)
+        times = torch.arange(1, T + 1, dtype=torch.float64)
         f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp 
         f_0 = f[0]
         self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32)
 
-    def _gather(self, values, t, x_shape):
+    def _gather(self, values, t, xndim):
         # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
         if t.ndim == 0:
             out = values[t]
         else:
             out = values[t]
-            while out.ndim < x_shape:
+            while out.ndim < xndim:
                 out = out.unsqueeze(-1)
         return out
     
@@ -108,9 +108,9 @@ class CosSchedule:
         return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
     
     def add_noise(self, x_0, t):
-        noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
-        a_bar = self._gather(self.alpha_bars, t, x_0.shape).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
 
+        noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
+        a_bar = self._gather(self.alpha_bars, t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
         x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
 
         return noise, x_T
