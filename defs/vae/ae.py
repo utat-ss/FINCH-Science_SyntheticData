@@ -19,9 +19,9 @@ class ConvEncoder(nn.Module):
             'k_size': 3,        #kernel size
             'stride': 1,        #
             'pad': 1,           #padding
-            'layers': 3,        #
-            'pool_k': 3,        #pool kernel size
-            'pool_stride': 1    #
+            'pool_k': 1,        #pool kernel size
+            'pool_stride': 1,   #
+            'out_pad': 0       #output padding for ConvTranspose1d
         } #Default settings for convolutional layers
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
@@ -48,21 +48,21 @@ class ConvEncoder(nn.Module):
 
         #Decoder
         decoder_layers = []
-        for i in range(len(self.conv_layers) - 1, 0, -1):
+        for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
                 nn.ConvTranspose1d(self.conv_layers[i], self.conv_layers[i-1],
                                    kernel_size=self.conv_details['k_size'],
-                                   stride=self.conv_details['stride'],
+                                   stride=self.conv_details['pool_stride'],
                                    padding=self.conv_details['pad'],
-                                   output_padding=self.conv_details['pad']),
+                                   output_padding=self.conv_details['out_pad']),
                 nn.ReLU(),
             ])
         decoder_layers.extend([
             nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
                                 kernel_size=self.conv_details['k_size'],
-                                stride=self.conv_details['stride'],
+                                stride=self.conv_details['pool_stride'],
                                 padding=self.conv_details['pad'],
-                                output_padding=self.conv_details['pad']),
+                                output_padding=self.conv_details['out_pad']),
             nn.Sigmoid(),
         ])
 
@@ -75,6 +75,9 @@ class ConvEncoder(nn.Module):
 
     def encode(self, x):
         return self.encoder(x)
+    
+    def decode(self, x):
+        return self.decoder(x)
 
 
 class MLP(nn.Module):
@@ -121,7 +124,6 @@ class AE(nn.Module):
             'k_size': 3,        #kernel size
             'stride': 1,        #
             'pad': 1,           #padding
-            'layers': 3,        #
             'pool_k': 3,        #pool kernel size
             'pool_stride': 1    #
         } #Default settings for convolutional layers
