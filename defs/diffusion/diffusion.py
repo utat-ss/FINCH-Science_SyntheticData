@@ -12,15 +12,6 @@ class cond_diffusion(nn.Module):
         self.epsilon = epsilon # Take in the epsilon network
         self.scheduler = scheduler # Take in the noise scheduler
 
-    def _gather_stats(self, t):
-
-        """
-        Redundant for now
-        """
-
-        self.beta_t = self.scheduler.beta_t(t)
-        self.beta_tilda_t = self.scheduler.beta_tilda_t(t)
-
     def _scheduled_call(self, x_0):
 
         """
@@ -46,7 +37,7 @@ class cond_diffusion(nn.Module):
         """
 
         eps_pred = self.epsilon(x_T, ab, t)
-        alpha_bar_t = self.scheduler._gather(self.scheduler.alpha_bars, t, x_T.ndim).to(x_T.device)
+        alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t, x_T.ndim).to(x_T.device)
         x0_pred = (x_T - torch.sqrt(1 - alpha_bar_t) * eps_pred) / torch.sqrt(alpha_bar_t)
         
         return x0_pred, eps_pred
@@ -96,28 +87,21 @@ class cond_diffusion(nn.Module):
         for t in reversed(range(1, steps+1)): # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
             t_tensor = torch.full((B,), t, dtype=torch.long, device=device)
 
-            ### THIS IS STRAIGHT UP WRONG, THE SAMPLING PROCESS MUST HAVE THE FOLLOWING RELATION:
-
-            """
-            x_(t-1) = 1/sqrt(alpha_t) * (x_t - (1-alpha_t/sqrt(1-alpha_bar_t) * epsilon(x_t,ab,t)) + z * sigma_t
-            sigma_t = sqrt(beta_tilda_t) = sqrt(beta_t * (1-alpha_bar_(t-1)/(1-alpha_bar_t))    
-            """
-
             # Predict the noise that was added last step
             eps = self.epsilon(x_t, t, ab)
 
             #Compute variance (sigma^2) / noise for stochastic sampling
             # For simplicity, use sqrt(beta_tilda_t) for this. The DDPM paper: https://arxiv.org/pdf/2006.11239
-            sigma = torch.sqrt(self.scheduler._gather(self.scheduler.beta_tilda_t(t_tensor), t_tensor, x_t.ndim))
+            sigma = torch.sqrt(self.scheduler.gather(self.scheduler.beta_tilda_t(t_tensor), t_tensor, x_t.ndim))
 
-            # Sample noise, without any noise at step t=1
-            z = torch.randn_like(x_t) if t > 1 else 0.0
+            # Sample noise, without any noise at step t=0
+            z = torch.randn_like(x_t) if t > 0 else 0.0
 
             # Gather alpha_t
-            alpha_t = self.scheduler._gather(self.scheduler.alpha_t(t_tensor), t_tensor, x_t.ndim)
+            alpha_t = self.scheduler.gather(self.scheduler.alpha_t(t_tensor), t_tensor, x_t.ndim)
 
             # Gather alpha_bar_t
-            alpha_bar_t = self.scheduler._gather(self.scheduler.alpha_bars[t_tensor], t_tensor, x_t.ndim) 
+            alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars[t_tensor], t_tensor, x_t.ndim) 
 
             # Update x_t for the next iter
             x_t = 1/np.sqrt(alpha_t) * (x_t - (1-alpha_t/np.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
