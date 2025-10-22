@@ -12,7 +12,7 @@ class ConvEncoder(nn.Module):
     """
     Convolutional layers for encoder and decoder
     """
-    def __init__(self, conv_layers:list[int], mlp_layers:list[int], out_layer:int = 3,
+    def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
                  c_d:dict = {}):
         super().__init__()
         self.conv_details = {
@@ -41,11 +41,11 @@ class ConvEncoder(nn.Module):
                       padding=self.conv_details['pad']),
                 nn.ReLU(),
                 nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride']),
-                nn.Flatten(start_dim=0)
             ])
         
         encoder_layers.extend([
-            nn.Linear(self.conv_layers[-1], self.mlp_layers[0]),
+            nn.Flatten(start_dim=0),
+            nn.Linear((self.conv_layers[-1] * num_spectra), self.mlp_layers[0]),
             nn.ReLU(),
         ])
         for i in range(0, len(self.mlp_layers) - 1):
@@ -75,7 +75,8 @@ class ConvEncoder(nn.Module):
             ])
         decoder_layers.extend([
             nn.Linear(self.mlp_layers[0], self.conv_layers[-1]),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.Unflatten(0, unflattened_size=(conv_layers[-1], 1))
         ])
         for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
@@ -84,7 +85,7 @@ class ConvEncoder(nn.Module):
                                    stride=self.conv_details['pool_stride'],
                                    padding=self.conv_details['pad'],
                                    output_padding=self.conv_details['out_pad']),
-                nn.ReLU(),
+                nn.ReLU()
             ])
         decoder_layers.extend([
             nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
