@@ -51,8 +51,7 @@ class cond_diffusion(nn.Module):
         """
 
         t, noise, x_T = self._scheduled_call(x_0)
-        x0_pred, eps_pred = self._recover_signal(x_T, ab, t) ### THIS IS ONLY A SINGLE PART OF THE TRAINING PROCEDURE!!!!
-                                                   ### ADDITIONAL TO THIS, THERE MUST BE A LOSS FOR PREDICTING THE NOISE THAT WAS ADDED USING EPSILON!!!
+        x0_pred, eps_pred = self._recover_signal(x_T, ab, t)
 
         return x0_pred, noise, eps_pred
 
