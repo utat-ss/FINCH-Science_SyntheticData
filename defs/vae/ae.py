@@ -72,9 +72,9 @@ class ConvEncoder(nn.Module):
                 nn.ReLU()
             ])
         decoder_layers.extend([
-            nn.Linear(self.mlp_layers[0], self.conv_layers[-1]),
+            nn.Linear(self.mlp_layers[0], (self.conv_layers[-1] * num_spectra)),
             nn.ReLU(),
-            nn.Unflatten(0, unflattened_size=(conv_layers[-1], 1))
+            nn.Unflatten(0, unflattened_size=(conv_layers[-1], num_spectra))
         ])
         for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
@@ -86,7 +86,7 @@ class ConvEncoder(nn.Module):
                 nn.ReLU()
             ])
         decoder_layers.extend([
-            nn.ConvTranspose1d(self.conv_layers[1], (self.conv_layers[0] * num_spectra),
+            nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
                                 kernel_size=self.conv_details['k_size'],
                                 stride=self.conv_details['pool_stride'],
                                 padding=self.conv_details['pad'],
