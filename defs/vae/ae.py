@@ -40,7 +40,23 @@ class ConvEncoder(nn.Module):
                       stride=self.conv_details['stride'], 
                       padding=self.conv_details['pad']),
                 nn.ReLU(),
-                nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride'])
+                nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride']),
+                nn.Flatten(start_dim=0)
+            ])
+        
+        encoder_layers.extend([
+            nn.Linear(self.conv_layers[-1], self.mlp_layers[0]),
+            nn.ReLU(),
+        ])
+        for i in range(0, len(self.mlp_layers) - 1):
+            encoder_layers.extend([
+                nn.Linear(self.mlp_layers[i], self.mlp_layers[i+1]),
+                nn.ReLU(),
+            ])
+        encoder_layers.extend([
+                nn.Linear(self.mlp_layers[-1], self.output_layer),
+                # nn.Sigmoid(),
+                # Not needed for encoding?
             ])
         
         self.encoder = nn.Sequential(*encoder_layers)
@@ -48,6 +64,19 @@ class ConvEncoder(nn.Module):
 
         #Decoder
         decoder_layers = []
+        decoder_layers.extend([
+                nn.Linear(self.output_layer, self.mlp_layers[-1]),
+                nn.ReLU()
+            ])
+        for i in range(len(self.mlp_layers) - 1, 0, -1):
+            decoder_layers.extend([
+                nn.Linear(self.mlp_layers[i], self.mlp_layers[i-1]),
+                nn.ReLU()
+            ])
+        decoder_layers.extend([
+            nn.Linear(self.mlp_layers[0], self.conv_layers[-1]),
+            nn.ReLU()
+        ])
         for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
                 nn.ConvTranspose1d(self.conv_layers[i], self.conv_layers[i-1],
