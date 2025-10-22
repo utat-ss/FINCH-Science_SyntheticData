@@ -2,6 +2,7 @@
 import os
 import torch
 import pandas as pd
+import numpy as np
 from torch.utils.data import Dataset, DataLoader, TensorDataset, random_split
 
 def load_spectral_data(filename="simpler_data_rwc.csv"):
