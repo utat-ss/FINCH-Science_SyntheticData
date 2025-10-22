@@ -18,7 +18,7 @@ class cond_diffusion(nn.Module):
         Randomly samples some noised data given some initial x_0, with given scheduler
         """
 
-        t = torch.randint(low=0, high=self.scheduler.steps, size=(x_0.size(0),), device=x_0.device)
+        t = torch.randint(low=0, high=self.scheduler.steps +1, size=(x_0.size(0),), device=x_0.device) # +1 at max to get T as well
         noise, x_T = self.scheduler.add_noise(x_0, t)
 
         # Return both the random time and the noised data related to it

@@ -9,107 +9,6 @@ import torch
 
 from abc import ABC, abstractmethod
 
-# This one has full implementation
-class CosSchedule_Old:
-
-    """
-    Creates a cosine schedule for the noise.
-    Uses the definition in the paper; Nichol et al., 2021: https://arxiv.org/pdf/2102.09672
-    """
-
-    def __init__(self, steps, offset= 8e-3, exp= 2):
-        self.steps = steps
-        self.offset = offset
-        self.exp = exp
-        # Precompute all the alpha bars
-        self._precompute_alpha_bars()
-
-    def _precompute_alpha_bars(self):
-
-        T = self.steps # Total time, defined by steps
-        s = self.offset
-
-        # Definition from the paper, page 4
-        times = torch.arange(T + 1, dtype=torch.float64)
-        f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp # Generate all the f(t) vals, by the def
-        f_0 = f[0] # Get the f_0
-        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32) # Normalize by f_0 and store as alpha bars
-
-    def gather(self, values, t, xndim):
-        # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
-        if t.ndim == 0:
-            out = values[t]
-        else:
-            out = values[t]
-            while out.ndim < xndim:
-                out = out.unsqueeze(-1)
-        return out
-    
-    def beta_t(self, t):
-
-        """
-        Takes in the time tensor.
-
-        Returns β_t = 1 - (α_bar_t / α_bar_(t-1)), how much of the signal is lost
-        as defined in the paper, page 4
-
-        This one requires 
-            - Clamping to 0.99999 at high T to avoid numerical caused singularities
-            - Clamping for t=0 to avoid alpha_bars[-1]
-        """
-
-        t_minus1_safe = torch.clamp(t-1, min=0) # Clamp the time tensor, so that it can be safely used even when t=0
-
-        beta = 1.0 - (self.alpha_bars[t] / self.alpha_bars[t_minus1_safe]) # Definition from the paper, page 4, use clamped time
-        return torch.clamp(beta, max=0.99999) # Clamp to 0.99999 max to avoid singularities at high t
-
-    def alpha_t(self, t):
-
-        """
-        Takes in the time tensor.
-
-        Returns α_t = 1 - β_t, how much of the signal is retained
-        """
-
-        return 1.0 - self.beta_t(t)
-        # Simply alpha_t = 1 - beta_t
-
-    def beta_tilda_t(self, t):
-
-        """
-        Takes in the time tensor.
-
-        Returns the modified beta_tilda as defined in the paper, page 2
-        """
-
-        return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
-    
-    def add_noise(self, x_0, t):
-
-        """
-        Given some initial signal x_0, add the predicted noise at time t.
-        """
-
-        noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
-        a_bar = self.gather(self.alpha_bars, t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
-        x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
-
-        return noise, x_T
-    
-    def mu_tilda_t(self, x_0, t):
-
-        """
-        Don't exactly know what this is for honestly. Still implemented it.
-        """
-
-        x_t = self.add_noise(x_0, t)
-        b_t = self.gather(self.beta_t(t), t, x_0.shape).to(x_0.device)
-        a_t = 1.0 - b_t
-
-        # Definition from the paper, page 2
-        return (torch.sqrt(self.alpha_bars[t-1]) * b_t) / (1.0 - self.alpha_bars[t]) * x_0 + (torch.sqrt(a_t) * (1.0 - self.alpha_bars[t-1])) / (1.0 - self.alpha_bars[t]) * x_t
-    
-
 class Schedule(ABC):
 
     """
@@ -186,7 +85,7 @@ class Schedule(ABC):
         """
 
         noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
-        a_bar = self.gather(self.alpha_bars, t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
+        a_bar = self.gather(self.alpha_bars.to(x_0.device), t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
         x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
 
         return noise, x_T
