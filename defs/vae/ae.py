@@ -55,8 +55,6 @@ class ConvEncoder(nn.Module):
             ])
         encoder_layers.extend([
                 nn.Linear(self.mlp_layers[-1], self.output_layer),
-                # nn.Sigmoid(),
-                # Not needed for encoding?
             ])
         
         self.encoder = nn.Sequential(*encoder_layers)
@@ -88,12 +86,13 @@ class ConvEncoder(nn.Module):
                 nn.ReLU()
             ])
         decoder_layers.extend([
-            nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
+            nn.ConvTranspose1d(self.conv_layers[1], (self.conv_layers[0] * num_spectra),
                                 kernel_size=self.conv_details['k_size'],
                                 stride=self.conv_details['pool_stride'],
                                 padding=self.conv_details['pad'],
                                 output_padding=self.conv_details['out_pad']),
             nn.Sigmoid(),
+            nn.Flatten(start_dim=0)
         ])
 
         self.decoder = nn.Sequential(*decoder_layers)
