@@ -129,7 +129,7 @@ class CosSchedule(Schedule):
         times = torch.arange(T + 1, dtype=torch.float64)
         f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp # Generate all the f(t) vals, by the def
         f_0 = f[0] # Get the f_0
-        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32) # Normalize by f_0 and store as alpha bars
+        self.alpha_bars = (f/f_0).detach().clone().to(dtype= torch.float64) # Normalize by f_0 and store as alpha bars
 
 class SqrtSchedule(Schedule):
 

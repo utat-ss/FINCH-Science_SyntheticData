@@ -9,7 +9,7 @@ import torch.nn.functional as F
 class Epsilon_MLP(nn.Module):
 
     """
-    Just a very simple very deep MLP to do noise removal given
+    Just a very simple very deep MLP to do noise prediction given
 
     The cfg_model:
     - ['time_embed']['hidden_dim']
@@ -102,7 +102,10 @@ class Epsilon_MLP(nn.Module):
                 nn.SiLU()
             ])
 
-        denoiser_layers.append(nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim))
+        denoiser_layers.extend([
+            nn.Linear(self.denoiser_hidden_dim, self.spec_dim),
+            nn.SiLU()
+        ])
 
         self.denoiser = nn.Sequential(*denoiser_layers)
 
@@ -111,16 +114,14 @@ class Epsilon_MLP(nn.Module):
         """
         Inputs:
             - x_T: (B, n_bands)
-            - t: (B,) integer time steps
+            - t: (B,1) integer time steps
             - ab: (B, n_abund=3) 
         """
 
-        # Unsqueeze to get t to be (B,1)
-        t = t.unsqueeze(-1).float()
-
         # Embed all the conditions
-        t_embedded = self.time_embed(t)
-        ab_embedded = self.ab_embed(ab)
+        t_embedded = self.time_embed(t.to(dtype=torch.float32))
+
+        ab_embedded = self.ab_embed(ab.to(dtype=torch.float32))
 
         # Concat all the conditions with the 
         h = torch.cat([x_T, t_embedded, ab_embedded], dim = -1)
