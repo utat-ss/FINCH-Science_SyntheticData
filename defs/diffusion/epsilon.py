@@ -119,12 +119,12 @@ class Epsilon_MLP(nn.Module):
         """
 
         # Embed all the conditions
-        t_embedded = self.time_embed(t.to(dtype=torch.float32))
+        t_embedded = self.time_embed(t)
+        ab_embedded = self.ab_embed(ab)
 
-        ab_embedded = self.ab_embed(ab.to(dtype=torch.float32))
-
-        # Concat all the conditions with the 
-        h = torch.cat([x_T, t_embedded, ab_embedded], dim = -1)
+        # Concat all the conditions with the noise
+        h = (torch.cat([x_T, t_embedded, ab_embedded], dim = -1))
 
         return self.denoiser(h)
+    
     
