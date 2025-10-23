@@ -9,6 +9,9 @@ import numpy as np
 class cond_diffusion(nn.Module):
 
     def __init__(self, epsilon, scheduler):
+        super().__init__()
+
+
         self.epsilon = epsilon # Take in the epsilon network
         self.scheduler = scheduler # Take in the noise scheduler
 
@@ -18,7 +21,7 @@ class cond_diffusion(nn.Module):
         Randomly samples some noised data given some initial x_0, with given scheduler
         """
 
-        t = torch.randint(low=0, high=self.scheduler.steps +1, size=(x_0.size(0),), device=x_0.device) # +1 at max to get T as well
+        t = torch.randint(low=0, high=self.scheduler.steps +1, size=(x_0.size(0),1), device=x_0.device) # +1 at max to get T as well, get T as (Batch,1)
         noise, x_T = self.scheduler.add_noise(x_0, t)
 
         # Return both the random time and the noised data related to it
@@ -36,7 +39,7 @@ class cond_diffusion(nn.Module):
         So, we simply use epsilon to predict how much noise was there on the signal that we got. And the rest is just algebra...
         """
 
-        eps_pred = self.epsilon(x_T, ab, t)
+        eps_pred = self.epsilon(x_T, t, ab)
         alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t, x_T.ndim).to(x_T.device)
         x0_pred = (x_T - torch.sqrt(1 - alpha_bar_t) * eps_pred) / torch.sqrt(alpha_bar_t)
         
@@ -51,6 +54,8 @@ class cond_diffusion(nn.Module):
         """
 
         t, noise, x_T = self._scheduled_call(x_0)
+        print(x_T.dtype)
+        print(x_0.dtype)
         x0_pred, eps_pred = self._recover_signal(x_T, ab, t)
 
         return x0_pred, noise, eps_pred
