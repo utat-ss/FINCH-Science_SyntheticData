@@ -27,7 +27,7 @@ class cond_diffusion(nn.Module):
         # Return both the random time and the noised data related to it
         return t, noise, x_T
 
-    def _recover_signal(self, x_T, ab, t):
+    def _recover_signal(self, x_T, t, ab):
 
         """
         Using the epsilon network, abundance condition, and the random noise, recover the actual signal x_0.
@@ -39,7 +39,7 @@ class cond_diffusion(nn.Module):
         So, we simply use epsilon to predict how much noise was there on the signal that we got. And the rest is just algebra...
         """
 
-        eps_pred = self.epsilon(x_T, t, ab)
+        eps_pred = self.epsilon(x_T, t.to(torch.float32), ab) # Must convert the time to float
         alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t, x_T.ndim).to(x_T.device)
         x0_pred = (x_T - torch.sqrt(1 - alpha_bar_t) * eps_pred) / torch.sqrt(alpha_bar_t)
         
@@ -54,9 +54,7 @@ class cond_diffusion(nn.Module):
         """
 
         t, noise, x_T = self._scheduled_call(x_0)
-        print(x_T.dtype)
-        print(x_0.dtype)
-        x0_pred, eps_pred = self._recover_signal(x_T, ab, t)
+        x0_pred, eps_pred = self._recover_signal(x_T, t, ab)
 
         return x0_pred, noise, eps_pred
 
@@ -88,26 +86,33 @@ class cond_diffusion(nn.Module):
 
         x_t = x_T # With such redefinition, we make sure that we preserve high temperature spectrum.
 
-        for t in reversed(range(1, steps+1)): # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
-            t_tensor = torch.full((B,), t, dtype=torch.long, device=device)
+        t_s = torch.arange(1, steps + 1) # Time steps from 1 to T
+        t_s_reverse = t_s.flip(0) # Get the time steps in reverse order, T to 1
+
+        self.alphas = self.scheduler.alpha_t(torch.cat((torch.tensor([0]), t_s))) # Precompute all the alphas for each time step in order add t=0
+        self.betas = self.scheduler.beta_t(torch.cat((torch.tensor([0]), t_s))) # Precompute all the betas for each time step in order add t=0
+        self.beta_tildas = self.scheduler.beta_tilda_t(t_s) # Precompute all the beta tildas for each time step in order
+
+        for t in t_s_reverse: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
+            t_tensor = torch.full((B,1), t, dtype=torch.long, device=device)
 
             # Predict the noise that was added last step
-            eps = self.epsilon(x_t, t, ab)
+            eps = self.epsilon(x_t, t_tensor.to(torch.float32), ab)
 
-            #Compute variance (sigma^2) / noise for stochastic sampling
+            # Compute variance (sigma^2) / noise for stochastic sampling
             # For simplicity, use sqrt(beta_tilda_t) for this. The DDPM paper: https://arxiv.org/pdf/2006.11239
-            sigma = torch.sqrt(self.scheduler.gather(self.scheduler.beta_tilda_t(t_tensor), t_tensor, x_t.ndim))
+            sigma = torch.sqrt(self.scheduler.gather(self.beta_tildas, t_tensor-1, x_t.ndim)).to(torch.float32) # -1 on the time tensor because the 0th index of beta is actually beta tilda at t=1
 
             # Sample noise, without any noise at step t=0
             z = torch.randn_like(x_t) if t > 0 else 0.0
 
             # Gather alpha_t
-            alpha_t = self.scheduler.gather(self.scheduler.alpha_t(t_tensor), t_tensor, x_t.ndim)
+            alpha_t = self.scheduler.gather(self.alphas, t_tensor, x_t.ndim).to(torch.float32)
 
             # Gather alpha_bar_t
-            alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars[t_tensor], t_tensor, x_t.ndim) 
+            alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t_tensor, x_t.ndim).to(torch.float32)
 
             # Update x_t for the next iter
             x_t = 1/np.sqrt(alpha_t) * (x_t - (1-alpha_t/np.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
-        
+
         return x_t, x_T
