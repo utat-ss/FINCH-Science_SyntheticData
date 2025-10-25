@@ -13,7 +13,7 @@ class loss_mse_sam:
         """
         self.ratio = ratio
 
-    def epsilon_loss(xn: torch.tensor, xn_hat: torch.tensor):
+    def epsilon_loss(self, xn: torch.tensor, xn_hat: torch.tensor):
         """
         Calculates the loss
 
@@ -30,7 +30,7 @@ class loss_mse_sam:
 
         return loss_epsilon
 
-    def recons_loss(x0: torch.tensor, x0_hat: torch.tensor):
+    def recons_loss(self, x0: torch.tensor, x0_hat: torch.tensor):
 
         # The SAM loss, compute cos similarity first (which is the actual SAM formula, without arccos)
         cos_sim = F.cosine_similarity(x0_hat, x0, dim=1)
@@ -54,8 +54,8 @@ class loss_mse_sam:
             - loss (float), The final combined loss
         """
 
-        epsilon_loss = self.epsilon_loss(xn=xn, xn_hat=xn_hat)
-        recons_loss = self.recons_loss(x0=x0, x0_hat=x0_hat)
+        epsilon_loss = self.epsilon_loss(xn, xn_hat)
+        recons_loss = self.recons_loss(x0, x0_hat)
 
         total_loss = epsilon_loss + self.ratio * recons_loss
 

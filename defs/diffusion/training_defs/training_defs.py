@@ -42,7 +42,7 @@ def get_vals(data_handle: str= r'data\simpler_data_rwc.csv', spec_range: list[in
     del abundances
 
     # Get the spectral names
-    names = df['Spectra'].to_list
+    names = df['Spectra'].to_list()
 
     # Get the original indices
     indices = range(len(names))
@@ -68,17 +68,17 @@ class HyperSpectralDataset(Dataset):
         self.names = names
         self.indices = indices
 
-        def __len__(self):
-            return len(self.names)
+    def __len__(self):
+        return len(self.names)
         
-        def __getitem__(self, idx):
+    def __getitem__(self, idx):
 
-            return {
-                'spectrum': self.spectra[idx],
-                'abundances': self.abundances[idx],
-                'name': self.names[idx],
-                'orig_index': self.indices[idx]
-            }
+        return {
+            'spectrum': self.spectra[idx],
+            'abundances': self.abundances[idx],
+            'names': self.names[idx],
+            'orig_index': self.indices[idx]
+        }
 
 def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict):
 
@@ -103,7 +103,7 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict):
     # Infer the amount of n_train, ensure completeness
     n_train = int(len(ds) - n_epoch*n_validate - n_test)
     assert n_train % n_epoch == 0, f"Something is wrong with the sample allocation, n_train: {n_train} is not divisible by n_epoch: {n_epoch}"
-    assert n_train/n_epoch % n_t_batch, f"Train sample per epoch: {n_train/n_epoch}, must be divisible by batch size in train: {n_t_batch}"
+    assert n_train/n_epoch % n_t_batch == 0, f"Train sample per epoch: {n_train/n_epoch}, must be divisible by batch size in train: {n_t_batch}"
 
     # Separate the dataset into validate and temporary
     ds_test, ds_temp = random_split(ds, [n_test, n_train + n_validate*n_epoch]) 
@@ -151,6 +151,7 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
     # Get the dataloaded datasets
     ds_train, ds_validation , ds_test= get_dataloaders(ds, cfg_loader=cfg_loader)
+    iterator_train = iter(ds_train); iterator_validation = iter(ds_validation); iterator_test = iter(ds_test)
 
     n_test = cfg_loader.get('test', 23)
     n_epoch = cfg_loader.get('epoch', 50)
@@ -182,14 +183,15 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
             # Get the next batch
             try:
-                batch = next(ds_train)
+                batch = next(iterator_train)
 
             except StopIteration:
                 # If the dataset is exhausted, reset the iterator for the next epoch
                 raise StopIteration("The training dataset has been exhausted.")
 
             x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
-            x0.to(cfg_train['device']), abundances.to(cfg_train['device']) # Move them to the device
+            x0= x0.to(device= cfg_train['device'])
+            abundances= abundances.to(device= cfg_train['device']) # Move them to the device
 
             # Zero all the grads
             optimizer.zero_grad()
@@ -204,10 +206,11 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
             total_loss.backward()
             optimizer.step()
 
-            total_train_loss += loss.item()
-            collector_dict['losses']['train'].append(loss.item())
+            print(total_loss, ' is total loss')
+            total_train_loss += total_loss.item()
+            collector_dict['losses']['train'].append(total_loss.item())
 
-        print(f"Epoch {epoch + 1} | Average Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
+        print(f"Epoch {epoch} | Average Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
 
         ### VALIDATION STEP ###
 
@@ -225,20 +228,22 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
                 try:
                     # Fetch the validation batch
-                    batch = next(ds_validation)
+                    batch = next(iterator_validation)
                 except StopIteration:
                     # If the dataset is exhausted, reset the iterator for the next epoch
                     raise StopIteration("The validation dataset has been exhausted.")
                 
                 x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
-                x0.to(cfg_train['device']), abundances.to(cfg_train['device']) # Move them to the device
+                x0= x0.to(cfg_train['device'])
+                abundances= abundances.to(cfg_train['device']) # Move them to the device
 
                 # Get some x0_preds, conditional on the abundances themselves
-                x0_pred = cond_diffusion.sample(ab= abundances)
+                x0_pred, x_T = cond_diffusion.sample(x_T = None, ab= abundances)
 
                 # Calculate the loss based on the reconstructed predictions and the actual spectra
                 val_loss = loss.recons_loss(x0, x0_pred)
                 collector_dict['losses']['val'].append(val_loss.item())
+                print('val loss: ', val_loss)
                 total_val_loss += val_loss.item()
 
                 # Append the actual, abundance, and generated spectra to the lists
@@ -253,7 +258,7 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
                 'generated': torch.cat(generated_list, dim=0)
             }
 
-        print(f"Epoch {epoch + 1} | Average Validation Loss: {total_val_loss:.4f}") # Validation for this epoch finished, print the results
+        print(f"Epoch {epoch} | Average Validation Loss: {total_val_loss:.4f}") # Validation for this epoch finished, print the results
 
     ### TESTING STEP ###
 
@@ -266,16 +271,17 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
             try:
                 # Fetch the test batch
-                batch = next(ds_test)
+                batch = next(iterator_test)
             except StopIteration:
                 # If the dataset is exhausted, reset the iterator for the next epoch
                 raise StopIteration("The test dataset has been exhausted.")
                 
             x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
-            x0.to(cfg_train['device']), abundances.to(cfg_train['device']) # Move them to the device
+            x0= x0.to(cfg_train['device'])
+            abundances= abundances.to(cfg_train['device']) # Move them to the device
 
             # Get some x0_preds, conditional on the abundances themselves
-            x0_pred = cond_diffusion.sample(ab= abundances)
+            x0_pred, x_T = cond_diffusion.sample(ab= abundances)
 
             # Calculate the loss based on the reconstructed predictions and the actual spectra
             test_loss = loss.recons_loss(x0, x0_pred)

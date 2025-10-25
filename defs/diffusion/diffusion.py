@@ -113,6 +113,6 @@ class cond_diffusion(nn.Module):
             alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t_tensor, x_t.ndim).to(torch.float32)
 
             # Update x_t for the next iter
-            x_t = 1/np.sqrt(alpha_t) * (x_t - (1-alpha_t/np.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
+            x_t = 1/torch.sqrt(alpha_t) * (x_t - (1-alpha_t/torch.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
 
         return x_t, x_T
