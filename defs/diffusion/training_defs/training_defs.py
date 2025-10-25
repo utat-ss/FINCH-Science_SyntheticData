@@ -281,7 +281,7 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
             abundances= abundances.to(cfg_train['device']) # Move them to the device
 
             # Get some x0_preds, conditional on the abundances themselves
-            x0_pred, x_T = cond_diffusion.sample(ab= abundances)
+            x0_pred, x_T = cond_diffusion.sample(x_T= None, ab= abundances)
 
             # Calculate the loss based on the reconstructed predictions and the actual spectra
             test_loss = loss.recons_loss(x0, x0_pred)
