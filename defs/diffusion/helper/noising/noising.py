@@ -31,6 +31,10 @@ class Schedule(ABC):
 
     def gather(self, values, t, xndim):
         # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
+        
+        if values.device != t.device:
+            values = values.to(device= t.device)
+        
         if t.ndim == 0:
             out = values[t]
         else:
