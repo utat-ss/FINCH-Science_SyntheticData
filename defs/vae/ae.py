@@ -32,6 +32,8 @@ class ConvEncoder(nn.Module):
 
         # Encoder
         encoder_layers = []
+
+        # Convolutional layers
         for i in range(0, len(self.conv_layers) - 1):
             encoder_layers.extend([
                 nn.Conv1d(in_channels=self.conv_layers[i], 
@@ -42,9 +44,10 @@ class ConvEncoder(nn.Module):
                 nn.ReLU(),
                 nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride']),
             ])
-        
+
+        # MLP layers
         encoder_layers.extend([
-            nn.Flatten(start_dim=0),
+            nn.Flatten(start_dim=0), # Flatten convolution to 1 dimension for MLP
             nn.Linear((self.conv_layers[-1] * num_spectra), self.mlp_layers[0]),
             nn.ReLU(),
         ])
@@ -60,8 +63,9 @@ class ConvEncoder(nn.Module):
         self.encoder = nn.Sequential(*encoder_layers)
 
 
-        #Decoder
+        # Decoder
         decoder_layers = []
+        # MLP layers
         decoder_layers.extend([
                 nn.Linear(self.output_layer, self.mlp_layers[-1]),
                 nn.ReLU()
@@ -74,8 +78,10 @@ class ConvEncoder(nn.Module):
         decoder_layers.extend([
             nn.Linear(self.mlp_layers[0], (self.conv_layers[-1] * num_spectra)),
             nn.ReLU(),
-            nn.Unflatten(0, unflattened_size=(conv_layers[-1], num_spectra))
+            nn.Unflatten(0, unflattened_size=(conv_layers[-1], num_spectra)) # Unflatten layer for convolution
         ])
+
+        # Convolutional layers
         for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
                 nn.ConvTranspose1d(self.conv_layers[i], self.conv_layers[i-1],
