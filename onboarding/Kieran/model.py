@@ -6,23 +6,38 @@ from torch.utils.data import DataLoader, TensorDataset
 
 class MLP(nn.Module):
     """
-    MLP with just 1 hidden layer 
+    Flexible MLP with configurable hidden layers
 
     Architecture:
-    Input: 401 Spectral bands
-    Hidden: 64 Neurons
-    Output: 3 fractions (Npv, Soil, gv)
+    Input: Spectral bands (configurable)
+    Hidden: Multiple layers with configurable sizes
+    Output: 3 fractions (GV, NPV, Soil)
     """
-    def __init__(self, input_size=401, hidden_size=64, dropout_rate=0.2):
+    def __init__(self, input_size=401, hidden_sizes=[64], dropout_rate=0.2):
         super(MLP, self).__init__()
         
-        self.layers = nn.Sequential(
-            nn.Linear(input_size, hidden_size),
-            nn.BatchNorm1d(hidden_size),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(hidden_size, 3))
+        # Build layers dynamically based on hidden_sizes list
+        layers = []
+        prev_size = input_size
+        
+        for hidden_size in hidden_sizes:
+            layers.extend([
+                nn.Linear(prev_size, hidden_size),
+                nn.BatchNorm1d(hidden_size),
+                nn.ReLU(),
+                nn.Dropout(dropout_rate)
+            ])
+            prev_size = hidden_size
+        
+        # Output layer
+        layers.append(nn.Linear(prev_size, 3))
+        
+        self.layers = nn.Sequential(*layers)
+        self.architecture = f"{input_size} → {' → '.join(map(str, hidden_sizes))} → 3"
 
     def forward(self, x):
         return self.layers(x)
+    
+    def get_architecture(self):
+        return self.architecture
 
