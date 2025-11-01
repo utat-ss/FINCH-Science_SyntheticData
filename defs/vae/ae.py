@@ -13,7 +13,7 @@ class ConvEncoder(nn.Module):
     Convolutional layers for encoder and decoder
     """
     def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
-                 c_d:dict = {}):
+                 c_d:dict = {}, ab_mlp = [3, 64, 10]):
         super().__init__()
         self.conv_details = {
             'k_size': 3,        #kernel size
@@ -26,13 +26,13 @@ class ConvEncoder(nn.Module):
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
         self.output_layer = out_layer
+        self.abundance_mlp_layers = ab_mlp
 
         for i in c_d:
             self.conv_details[i] = c_d[i] #Any changes to the details of the convolutional layers made here
 
         # Encoder
         encoder_layers = []
-
         # Convolutional layers
         for i in range(0, len(self.conv_layers) - 1):
             encoder_layers.extend([
@@ -44,7 +44,6 @@ class ConvEncoder(nn.Module):
                 nn.ReLU(),
                 nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride']),
             ])
-
         # MLP layers
         encoder_layers.extend([
             nn.Flatten(start_dim=0), # Flatten convolution to 1 dimension for MLP
@@ -59,7 +58,6 @@ class ConvEncoder(nn.Module):
         encoder_layers.extend([
                 nn.Linear(self.mlp_layers[-1], self.output_layer),
             ])
-        
         self.encoder = nn.Sequential(*encoder_layers)
 
 
@@ -67,7 +65,7 @@ class ConvEncoder(nn.Module):
         decoder_layers = []
         # MLP layers
         decoder_layers.extend([
-                nn.Linear(self.output_layer, self.mlp_layers[-1]),
+                nn.Linear(self.output_layer + self.abundance_mlp_layers[-1], self.mlp_layers[-1]),
                 nn.ReLU()
             ])
         for i in range(len(self.mlp_layers) - 1, 0, -1):
@@ -80,7 +78,6 @@ class ConvEncoder(nn.Module):
             nn.ReLU(),
             nn.Unflatten(0, unflattened_size=(conv_layers[-1], num_spectra)) # Unflatten layer for convolution
         ])
-
         # Convolutional layers
         for i in range(len(self.conv_layers) - 1, 1, -1):
             decoder_layers.extend([
@@ -100,11 +97,28 @@ class ConvEncoder(nn.Module):
             nn.Sigmoid(),
             nn.Flatten(start_dim=0)
         ])
-
         self.decoder = nn.Sequential(*decoder_layers)
 
-    def forward(self, x):
+
+        # Abundance MLP
+        ab_mlp_layers = []
+        for i in range(0, len(self.abundance_mlp_layers) - 2):
+            ab_mlp_layers.extend([
+                nn.Linear(self.abundance_mlp_layers[i], self.abundance_mlp_layers[i+1]),
+                nn.ReLU()
+            ])
+        # Last layer will be something else (sigmoid or otherwise)
+        ab_mlp_layers.extend([
+            nn.Linear(self.abundance_mlp_layers[-2], self.abundance_mlp_layers[-1]),
+            # nn.Sigmoid(),
+            nn.Flatten(start_dim = 0)
+        ])
+        self.abundance_adjust = nn.Sequential(*ab_mlp_layers)
+
+    def forward(self, x, y):
         encoded = self.encoder(x)
+        abundance_adjustment = self.abundance_adjust(y)
+        encoded = torch.cat((encoded, abundance_adjustment))
         decoded = self.decoder(encoded)
         return decoded
 
@@ -114,6 +128,8 @@ class ConvEncoder(nn.Module):
     def decode(self, x):
         return self.decoder(x)
 
+    def adjust(self, x, y):
+        return torch.cat((x, self.abundance_adjust(y)))
 
 class MLP(nn.Module):
     """
