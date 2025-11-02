@@ -1,6 +1,33 @@
 import torch.nn.functional as F
 import torch
 
+class loss_mse:
+
+    def __init__(self):
+
+        """
+        Loss function to calculate the MSE between actual and predicted noise
+        """
+
+        pass
+
+    def __call__(self, xn: torch.tensor, xn_hat: torch.tensor):
+        """
+        Calculates the loss
+
+        Parameters
+            - xn (torch.tensor), Actual noise that was added at temperature t.
+            - xn_hat (torch.tensor), The predicted xn at temperature t.
+
+        Returns
+            - Loss (float), MSE
+        """
+
+        # The MSE loss, straightforward
+        loss = F.mse_loss(xn_hat, xn) # This one already has in-built .mean() per se.
+
+        return loss
+
 class loss_mse_sam:
 
     def __init__(self, ratio: float = 0.01):
@@ -59,4 +86,4 @@ class loss_mse_sam:
 
         total_loss = epsilon_loss + self.ratio * recons_loss
 
-        return total_loss
+        return total_loss, epsilon_loss, recons_loss

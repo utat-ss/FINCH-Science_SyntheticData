@@ -38,7 +38,7 @@ class UniformSampling(Sampling):
 
         t = torch.randint(low=self.t_min, high=self.t_max, size=size, device=device)
 
-        return t.to(dtype=dtype)
+        return t.long()
 
 class NormalSampling(Sampling):
 
@@ -73,4 +73,4 @@ class NormalSampling(Sampling):
 
         t = torch.round(t_float)
 
-        return t.to(dtype=dtype)
+        return t.long()
