@@ -113,7 +113,7 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict):
 
     return DataLoader(ds_train, batch_size=n_t_batch, shuffle=True), DataLoader(ds_validate, batch_size=1, shuffle= True), DataLoader(ds_test, batch_size=1, shuffle=True) # Note: could've had the batches of val and test really big, but to preserve gpu mem, we have them as = 1. Depending on the model, it may or may not do that
 
-def train_diffusion(cfg_train: dict, cfg_diffusion: dict, cond_diffusion, loss, optimizer: torch.optim, data_handle: str=None):
+def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.optim, data_handle: str=None):
 
     """
     The function to train and validate the models, takes in:
@@ -170,8 +170,11 @@ def train_diffusion(cfg_train: dict, cfg_diffusion: dict, cond_diffusion, loss, 
 
     # Define the init dictionary where we will keep track of the generated spectra during val and test. Also, create these lists to collect all the losses
 
-    collector_dict = {'gen_spec': {'validate': {}, 'test': {}},
-                      'losses': {'train': [], 'val': [], 'test': []}} 
+    collector_dict = {'gen_spec': {'validate': {}, 
+                                   'test': {}},
+                      'losses': {'train': {'total_loss': [], 'epsilon_loss': [], 'recons_loss': []}, 
+                                 'val': [], 
+                                 'test': []}} 
 
     for epoch in range(1, n_epoch+1):
 
@@ -202,7 +205,7 @@ def train_diffusion(cfg_train: dict, cfg_diffusion: dict, cond_diffusion, loss, 
             x0_hat, xn, xn_hat = cond_diffusion.training_procedure(x0, abundances) 
 
             # Calculate the loss based on the reconstructed predictions and the actual spectra
-            total_loss = loss(x0, x0_hat, xn, xn_hat) 
+            total_loss, epsilon_loss, recons_loss = loss(x0, x0_hat, xn, xn_hat) 
 
             # Take the backprop and take a step
             total_loss.backward()
@@ -210,7 +213,9 @@ def train_diffusion(cfg_train: dict, cfg_diffusion: dict, cond_diffusion, loss, 
 
             print(total_loss, ' is total loss')
             total_train_loss += total_loss.item()
-            collector_dict['losses']['train'].append(total_loss.item())
+            collector_dict['losses']['train']['total_loss'].append(total_loss.item())
+            collector_dict['losses']['train']['epsilon_loss'].append(epsilon_loss.item())
+            collector_dict['losses']['train']['recons_loss'].append(recons_loss.item())
 
         print(f"Epoch {epoch} | Average Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
 
