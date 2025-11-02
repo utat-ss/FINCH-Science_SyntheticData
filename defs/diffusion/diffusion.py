@@ -8,12 +8,16 @@ import numpy as np
 
 class cond_diffusion(nn.Module):
 
-    def __init__(self, epsilon, scheduler):
+    def __init__(self, epsilon, scheduler, ddpm_dict):
         super().__init__()
-
 
         self.epsilon = epsilon # Take in the epsilon network
         self.scheduler = scheduler # Take in the noise scheduler
+        self.ddpm_dict = ddpm_dict # Take in the ddpm dict for any extra parameters
+
+        # Define the temperature sampler
+
+        self.t_sampler = self.ddpm_dict['t_sampler']
 
     def _scheduled_call(self, x_0):
 
@@ -21,7 +25,9 @@ class cond_diffusion(nn.Module):
         Randomly samples some noised data given some initial x_0, with given scheduler
         """
 
-        t = torch.randint(low=0, high=self.scheduler.steps +1, size=(x_0.size(0),1), device=x_0.device) # +1 at max to get T as well, get T as (Batch,1)
+        # Take in some temperature matrix using the temperature sampler
+        t = self.t_sampler(x_0) # Give the sampler the x_0 size, and get a t matrix size of (Batch,1)
+
         noise, x_T = self.scheduler.add_noise(x_0, t)
 
         # Return both the random time and the noised data related to it

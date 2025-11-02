@@ -113,7 +113,7 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict):
 
     return DataLoader(ds_train, batch_size=n_t_batch, shuffle=True), DataLoader(ds_validate, batch_size=1, shuffle= True), DataLoader(ds_test, batch_size=1, shuffle=True) # Note: could've had the batches of val and test really big, but to preserve gpu mem, we have them as = 1. Depending on the model, it may or may not do that
 
-def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.optim, data_handle: str=None):
+def train_diffusion(cfg_train: dict, cfg_diffusion: dict, cond_diffusion, loss, optimizer: torch.optim, data_handle: str=None):
 
     """
     The function to train and validate the models, takes in:
@@ -125,6 +125,8 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
                 - 'epoch' (int): How many epochs in total
             - 'range' (list): Spectral range [lower, upper]
             - 'device' : The device being used
+        - cfg_diffusion (dict):
+            - 't_sampler' (Sampling): A temperature sampling object
         - cond_diffusion (class): The conditional diffusion class, already initialized
         - loss (class): Loss function class, must have MSE and SAM at the very least
         - optimizer (torch.optim): The optimizer to use
