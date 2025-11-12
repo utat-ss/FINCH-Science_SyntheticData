@@ -47,13 +47,13 @@ class Epsilon_MLP(nn.Module):
 
         time_embed_layers.extend([ 
             nn.Linear(1, self.time_embed_hidden_dim),
-            nn.SiLU(),
+            nn.GELU(),
         ]) # Appending the init layer
 
         for _ in range(self.time_embed_hidden_n): # Appending hidden layers
             time_embed_layers.extend([
                 nn.Linear(self.time_embed_hidden_dim, self.time_embed_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
                 ])
 
         time_embed_layers.append(nn.Linear(self.time_embed_hidden_dim, self.time_embed_hidden_dim)) # Output layer, no actv for unbounded output
@@ -70,13 +70,13 @@ class Epsilon_MLP(nn.Module):
 
         ab_embed_layers.extend([
             nn.Linear(self.ab_embed_ab_dim, self.ab_embed_hidden_dim),
-            nn.SiLU()
+            nn.GELU()
         ]) # Appending the init layer
 
         for _ in range(self.ab_embed_hidden_n): # Appending hidden layers
             ab_embed_layers.extend([
                 nn.Linear(self.ab_embed_hidden_dim, self.ab_embed_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
             ]) 
 
         ab_embed_layers.append(nn.Linear(self.ab_embed_hidden_dim, self.ab_embed_hidden_dim))
@@ -93,18 +93,18 @@ class Epsilon_MLP(nn.Module):
 
         denoiser_layers.extend([
             nn.Linear(self.spec_dim + self.time_embed_hidden_dim + self.ab_embed_hidden_dim, self.denoiser_hidden_dim),
-            nn.SiLU()
+            nn.GELU()
         ]) # Init layer of the denoiser, takes in embeddings
 
         for _ in range(self.denoiser_hidden_n): # Appending hidden layers of denoiser
             denoiser_layers.extend([
                 nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
             ])
 
         denoiser_layers.extend([
             nn.Linear(self.denoiser_hidden_dim, self.spec_dim),
-            nn.SiLU()
+            nn.GELU()
         ])
 
         self.denoiser = nn.Sequential(*denoiser_layers)
