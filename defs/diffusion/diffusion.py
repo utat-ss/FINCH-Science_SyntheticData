@@ -28,26 +28,26 @@ class cond_diffusion(nn.Module):
         # Take in some temperature matrix using the temperature sampler
         t = self.t_sampler(x_0) # Give the sampler the x_0 size, and get a t matrix size of (Batch,1)
 
-        noise, x_T = self.scheduler.add_noise(x_0, t)
+        noise, x_t = self.scheduler.add_noise(x_0, t)
 
         # Return both the random time and the noised data related to it
-        return t, noise, x_T
+        return t, noise, x_t
 
-    def _recover_signal(self, x_T, t, ab):
+    def _recover_signal(self, x_t, t, ab):
 
         """
         Using the epsilon network, abundance condition, and the random noise, recover the actual signal x_0.
 
         Here, we simply rearrange the noise forward process to have:
 
-        x_0 = (1/sqrt(alpha_t)) * (x_t - sqrt(1 - alpha_t) * noise, or epsilon) 
+        x_0 = (1/sqrt(alpha_bar_t)) * (x_t - sqrt(1 - alpha_bar_t) * noise, or epsilon)
         
         So, we simply use epsilon to predict how much noise was there on the signal that we got. And the rest is just algebra...
         """
 
-        eps_pred = self.epsilon(x_T, t.to(torch.float32), ab) # Must convert the time to float
-        alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t, x_T.ndim).to(x_T.device)
-        x0_pred = (x_T - torch.sqrt(1 - alpha_bar_t) * eps_pred) / torch.sqrt(alpha_bar_t)
+        eps_pred = self.epsilon(x_t, t.to(torch.float32), ab) # Must convert the time to float
+        alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t, x_t.ndim).to(x_t.device)
+        x0_pred = (x_t - torch.sqrt(1 - alpha_bar_t) * eps_pred) / torch.sqrt(alpha_bar_t)
         
         return x0_pred, eps_pred
     
@@ -59,8 +59,8 @@ class cond_diffusion(nn.Module):
         The returned values will be used to get a loss to then backprop on epsilon (noise prediction) network.
         """
 
-        t, noise, x_T = self._scheduled_call(x_0)
-        x0_pred, eps_pred = self._recover_signal(x_T, t, ab)
+        t, noise, x_t = self._scheduled_call(x_0)
+        x0_pred, eps_pred = self._recover_signal(x_t, t, ab)
 
         return x0_pred, noise, eps_pred
 
@@ -119,6 +119,6 @@ class cond_diffusion(nn.Module):
             alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t_tensor, x_t.ndim).to(torch.float32)
 
             # Update x_t for the next iter
-            x_t = 1/torch.sqrt(alpha_t) * (x_t - (1-alpha_t/torch.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
+            x_t = 1/torch.sqrt(alpha_t) * (x_t - ((1-alpha_t)/torch.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
 
         return x_t, x_T

@@ -11,16 +11,17 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset, random_split, DataLoader
 
-def get_vals(data_handle: str= r'data\simpler_data_rwc.csv', spec_range: list[int]= [400, 2490]):
+def get_vals(data_handle:(str)= r'data\simpler_data_rwc.csv', spec_range:(list[int])= [400, 2490], normalize:(bool)= True):
 
     """
     The function to get all the datasets.
 
-    Parameters:
+    Args:
         - data_handle (str): The dataset handle, path str rooting the github repo
         - range (list[int]): A list of spectral limits
+        - normalize (bool): Whether to normalize the spectra or not
 
-    Outputs:
+    Returns:
         - spectra_tensor (torch.Tensor): Spectral val tensor
         - abundances_tensor (torch.Tensor): Abundances tensor
         - names (list): A list of all the spectral 
@@ -35,6 +36,9 @@ def get_vals(data_handle: str= r'data\simpler_data_rwc.csv', spec_range: list[in
     spectra = df[spectral_cols].values.astype("float32")
     spectra_tensor = torch.from_numpy(spectra)
     del spectra, spectral_cols
+
+    if normalize:
+        spectra_tensor = (2 * spectra_tensor) - 1 # Normalize between -1 and 1
 
     # Get the abundances
     abundances = df[["gv_fraction","npv_fraction","soil_fraction"]].values.astype("float32")
@@ -111,49 +115,42 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict):
     # Separate the temp dataset into train and test
     ds_train, ds_validate = random_split(ds_temp, [n_train, n_epoch*n_validate])
 
-    return DataLoader(ds_train, batch_size=n_t_batch, shuffle=True), DataLoader(ds_validate, batch_size=1, shuffle= True), DataLoader(ds_test, batch_size=1, shuffle=True) # Note: could've had the batches of val and test really big, but to preserve gpu mem, we have them as = 1. Depending on the model, it may or may not do that
+    dataloaders = [DataLoader(ds_train, batch_size=n_t_batch, shuffle=True), DataLoader(ds_validate, batch_size=n_validate, shuffle= True), DataLoader(ds_test, batch_size=len(ds_test), shuffle=True)]
 
-def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.optim, data_handle: str=None):
+    return  dataloaders # Make dataloaders into a list and ship them
+
+def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.optim, dataloaders: list[DataLoader]):
 
     """
-    The function to train and validate the models, takes in:
-        - cfg_train (dict): 
-            - cfg_loader (dict):
+    The function to train and validate the models
+
+    Args:
+        cfg_train (dict): 
+            'cfg_loader' (dict):
                 - 'test' (int): How many samples to be used to test at the end
                 - 't_batch' (int): How many train batches in total, to be trained on
                 - 'validate' (int): How many samples to validate on each epoch
                 - 'epoch' (int): How many epochs in total
             - 'range' (list): Spectral range [lower, upper]
             - 'device' : The device being used
-        - cfg_diffusion (dict):
-            - 't_sampler' (Sampling): A temperature sampling object
-        - cond_diffusion (class): The conditional diffusion class, already initialized
-        - loss (class): Loss function class, must have MSE and SAM at the very least
-        - optimizer (torch.optim): The optimizer to use
-        - data_handle (str): The path handle to the dataset
+            - 'tot_samples' (int): Total samples in the dataset
+        cfg_diffusion (dict):
+            't_sampler' (Sampling): A temperature sampling object
+        cond_diffusion (class): The conditional diffusion class, already initialized
+        loss (class): Loss function class, must have MSE and SAM at the very least
+        optimizer (torch.optim): The optimizer to use
+        dataloaders (list[DataLoader]): A list of dataloaders, in order: [train, validate, test]
     """
-
-
-    ### DATA COLLECTION ###
-
-    # First, we will pre-process and parse all the data
-    # Get the spectral range that we want to use
-    spec_range = cfg_train.get('range', [400, 2490])
-
-    # Parse the csv into sub-parts we want to use
-    spectra, abundances, names, indices = get_vals(data_handle=data_handle, spec_range=spec_range)
-
-    # Generate the hyperspectral dataset
-    ds = HyperSpectralDataset(spectra=spectra, abundances=abundances, names=names, indices=indices)
 
     # Dataload the giant dataset into train, test, validation datasets
     cfg_loader = cfg_train.get(
         'cfg_loader', {'test': 23, 't_batch': 1, 'validate': 4, 'epoch': 50}
     ) # Get the configs for the loader first
 
-    # Get the dataloaded datasets
-    ds_train, ds_validation , ds_test= get_dataloaders(ds, cfg_loader=cfg_loader)
-    iterator_train = iter(ds_train); iterator_validation = iter(ds_validation); iterator_test = iter(ds_test)
+    dl_train, dl_val, dl_test = dataloaders[0], dataloaders[1], dataloaders[2]
+
+    
+    iterator_train = iter(dl_train); iterator_validation = iter(dl_val); iterator_test = iter(dl_test)
 
     n_test = cfg_loader.get('test', 23)
     n_epoch = cfg_loader.get('epoch', 50)
@@ -161,9 +158,8 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
     n_validate = cfg_loader.get('validate', 4)
 
     # Infer the amount of n_train, ensure completeness
-    n_train = int(len(ds) - n_epoch*n_validate - n_test)
+    n_train = int(cfg_train['tot_samples'] - n_epoch*n_validate - n_test)
     n_train_per_epoch = n_train // n_epoch
-
 
 
     ### TRAINING, VALIDATION, TEST LOOP ###
@@ -211,13 +207,13 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
             total_loss.backward()
             optimizer.step()
 
-            print(total_loss, ' is total loss')
+            print(f'Epoch {epoch} | Batch {_ +1} | Total loss: {total_loss.item():.4f} | Epsilon loss: {epsilon_loss.item():.4f} | Recons loss: {recons_loss.item():.4f}')
             total_train_loss += total_loss.item()
             collector_dict['losses']['train']['total_loss'].append(total_loss.item())
             collector_dict['losses']['train']['epsilon_loss'].append(epsilon_loss.item())
             collector_dict['losses']['train']['recons_loss'].append(recons_loss.item())
 
-        print(f"Epoch {epoch} | Average Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
+        print(f"Epoch {epoch} | Total Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
 
         ### VALIDATION STEP ###
 
@@ -231,32 +227,29 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
         with torch.no_grad():
 
-            for _ in range(n_validate):
-
-                try:
-                    # Fetch the validation batch
-                    batch = next(iterator_validation)
-                except StopIteration:
-                    # If the dataset is exhausted, reset the iterator for the next epoch
-                    raise StopIteration("The validation dataset has been exhausted.")
+            try:
+                # Fetch the validation batch
+                batch = next(iterator_validation)
+            except StopIteration:
+                # If the dataset is exhausted, reset the iterator for the next epoch
+                raise StopIteration("The validation dataset has been exhausted.")
                 
-                x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
-                x0= x0.to(cfg_train['device'])
-                abundances= abundances.to(cfg_train['device']) # Move them to the device
+            x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
+            x0= x0.to(cfg_train['device'])
+            abundances= abundances.to(cfg_train['device']) # Move them to the device
 
-                # Get some x0_preds, conditional on the abundances themselves
-                x0_pred, x_T = cond_diffusion.sample(x_T = None, ab= abundances)
+            # Get some x0_preds, conditional on the abundances themselves
+            x0_pred, x_T = cond_diffusion.sample(x_T = None, ab= abundances)
 
-                # Calculate the loss based on the reconstructed predictions and the actual spectra
-                val_loss = loss.recons_loss(x0, x0_pred)
-                collector_dict['losses']['val'].append(val_loss.item())
-                print('val loss: ', val_loss)
-                total_val_loss += val_loss.item()
+            # Calculate the loss based on the reconstructed predictions and the actual spectra
+            val_loss = loss.recons_loss(x0, x0_pred)
+            collector_dict['losses']['val'].append(val_loss.item())
+            total_val_loss += val_loss.item()
 
-                # Append the actual, abundance, and generated spectra to the lists
-                actual_list.append(x0.detach().cpu())
-                abundance_list.append(abundances.detach().cpu())
-                generated_list.append(x0_pred.detach().cpu())
+            # Append the actual, abundance, and generated spectra to the lists
+            actual_list.append(x0.detach().cpu())
+            abundance_list.append(abundances.detach().cpu())
+            generated_list.append(x0_pred.detach().cpu())
 
             # After the validation epoch, store the generated spectra in the gen_spec dict, first turn them into tensors.
             collector_dict['gen_spec']['validate'][epoch] = {
@@ -265,7 +258,7 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
                 'generated': torch.cat(generated_list, dim=0)
             }
 
-        print(f"Epoch {epoch} | Average Validation Loss: {total_val_loss:.4f}") # Validation for this epoch finished, print the results
+        print(f"Epoch {epoch} | Average Recons Loss in Validation: {total_val_loss:.4f}") # Validation for this epoch finished, print the results
 
     ### TESTING STEP ###
 
@@ -274,38 +267,36 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
 
     with torch.no_grad():
 
-        for _ in range(n_test):
-
-            try:
-                # Fetch the test batch
-                batch = next(iterator_test)
-            except StopIteration:
-                # If the dataset is exhausted, reset the iterator for the next epoch
-                raise StopIteration("The test dataset has been exhausted.")
+        try:
+            # Fetch the test batch
+            batch = next(iterator_test)
+        except StopIteration:
+            # If the dataset is exhausted, reset the iterator for the next epoch
+            raise StopIteration("The test dataset has been exhausted.")
                 
-            x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
-            x0= x0.to(cfg_train['device'])
-            abundances= abundances.to(cfg_train['device']) # Move them to the device
+        x0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index'] # Unpack the batch data
+        x0= x0.to(cfg_train['device'])
+        abundances= abundances.to(cfg_train['device']) # Move them to the device
 
-            # Get some x0_preds, conditional on the abundances themselves
-            x0_pred, x_T = cond_diffusion.sample(x_T= None, ab= abundances)
+        # Get some x0_preds, conditional on the abundances themselves
+        x0_pred, x_T = cond_diffusion.sample(x_T= None, ab= abundances)
 
-            # Calculate the loss based on the reconstructed predictions and the actual spectra
-            test_loss = loss.recons_loss(x0, x0_pred)
-            total_test_loss += test_loss.item()
+        # Calculate the loss based on the reconstructed predictions and the actual spectra
+        test_loss = loss.recons_loss(x0, x0_pred)
+        total_test_loss += test_loss.item()
 
-            # Append the actual, abundance, and generated spectra to the lists
-            actual_list.append(x0.detach().cpu())
-            abundance_list.append(abundances.detach().cpu())
-            generated_list.append(x0_pred.detach().cpu())
+        # Append the actual, abundance, and generated spectra to the lists
+        actual_list.append(x0.detach().cpu())
+        abundance_list.append(abundances.detach().cpu())
+        generated_list.append(x0_pred.detach().cpu())
 
-            # After the test, store the generated spectra in the gen_spec dict, first turn them into tensors.
-            collector_dict['gen_spec']['test'] = {
-                'actual': torch.cat(actual_list, dim=0),
-                'abundances': torch.cat(abundance_list, dim=0),
-                'generated': torch.cat(generated_list, dim=0)
-            }
-            collector_dict['losses']['test'].append(test_loss.item())
+        # After the test, store the generated spectra in the gen_spec dict, first turn them into tensors.
+        collector_dict['gen_spec']['test'] = {
+            'actual': torch.cat(actual_list, dim=0),
+            'abundances': torch.cat(abundance_list, dim=0),
+            'generated': torch.cat(generated_list, dim=0)
+        }
+        collector_dict['losses']['test'].append(test_loss.item())
 
         print(f"Average Test Loss: {total_test_loss:.4f}") # Test finished, print the results
 
@@ -314,9 +305,11 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
     """
 
     # Convert the lists to tensors
-    collector_dict['losses']['train'] = torch.tensor(collector_dict['losses']['train'], dtype=torch.float32)
+    collector_dict['losses']['train']['total_loss'] = torch.tensor(collector_dict['losses']['train']['total_loss'], dtype=torch.float32)
+    collector_dict['losses']['train']['epsilon_loss'] = torch.tensor(collector_dict['losses']['train']['epsilon_loss'], dtype=torch.float32)
+    collector_dict['losses']['train']['recons_loss'] = torch.tensor(collector_dict['losses']['train']['recons_loss'], dtype=torch.float32)
     collector_dict['losses']['val'] = torch.tensor(collector_dict['losses']['val'], dtype=torch.float32)
     collector_dict['losses']['test'] = torch.tensor(collector_dict['losses']['test'], dtype=torch.float32)
 
-    return collector_dict, ds_train, ds_validation, ds_test, cond_diffusion # Return all the possibly useful stuff
+    return collector_dict, cond_diffusion # Return all the possibly useful stuff
     
