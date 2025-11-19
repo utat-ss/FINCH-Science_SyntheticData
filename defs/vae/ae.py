@@ -283,11 +283,11 @@ class VCCAE(nn.Module):
                                 out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
                                 conv_details=self.conv_details)
         
-        def forward(self, spectrum, abundance):
-            encoded, variation = self.encoder(spectrum)
-            deviation = torch.exp(0.5 * variation) # Exponent applied to half of each element in the variation
-            distribution = torch.randn_like(deviation) # Normal distribution mean 0 var 1, same size as deviation
-            encoded = encoded + (distribution * deviation) # Variation applied
-            adjusted = self.conditioner(encoded, abundance) # Conditioning applied
-            decoded = self.decoder(adjusted)
-            return decoded
+    def forward(self, spectrum, abundance):
+        encoded, variation = self.encoder(spectrum)
+        deviation = torch.exp(0.5 * variation) # Exponent applied to half of each element in the variation
+        distribution = torch.randn_like(deviation) # Normal distribution mean 0 var 1, same size as deviation
+        encoded = encoded + (distribution * deviation) # Variation applied
+        adjusted = self.conditioner(encoded, abundance) # Conditioning applied
+        decoded = self.decoder(adjusted)
+        return decoded, encoded, variation
