@@ -6,6 +6,7 @@ class VEncoder(nn.Module):
     Encoder for VCCAE
     """
     def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
+        super(VEncoder, self).__init__()
         self.conv_details = conv_details
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
@@ -50,6 +51,7 @@ class VDecoder(nn.Module):
     Decoder for VCCAE
     """
     def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
+        super(VDecoder, self).__init__()
         self.conv_details = conv_details
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
@@ -94,14 +96,13 @@ class VDecoder(nn.Module):
         self.decoder = nn.Sequential(*decoder_layers)
 
     def forward(self, x):
-        k = self.encoder_0(x)
-        variation = self.encoder_var(k)
-        encoded = self.encoder_1(k)
-        return encoded, variation
+        decoded = self.decoder(x)
+        return decoded
 
 class VConditioner(nn.Module):
 
     def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
+        super(VConditioner, self).__init__()
         self.conv_details = conv_details
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
@@ -256,7 +257,7 @@ class VCCAE(nn.Module):
     """
     def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
                  c_d:dict = {}, ab_mlp = [3, 64, 10]):
-        super().__init__()
+        super(VCCAE, self).__init__()
         self.conv_details = {
             'k_size': 3,        #kernel size
             'stride': 1,        #
