@@ -104,6 +104,7 @@ class cond_diffusion(nn.Module):
 
             # Predict the noise that was added last step
             eps = self.epsilon(x_t, t_tensor.to(torch.float32), ab)
+            if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
 
             # Compute variance (sigma^2) / noise for stochastic sampling
             # For simplicity, use sqrt(beta_tilda_t) for this. The DDPM paper: https://arxiv.org/pdf/2006.11239
