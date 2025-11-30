@@ -201,17 +201,16 @@ def train_diffusion(cfg_train: dict, cond_diffusion, loss, optimizer: torch.opti
             x0_hat, xn, xn_hat = cond_diffusion.training_procedure(x0, abundances) 
 
             # Calculate the loss based on the reconstructed predictions and the actual spectra
-            total_loss, epsilon_loss, recons_loss = loss(x0, x0_hat, xn, xn_hat) 
+            total_loss = loss(xn, xn_hat) 
 
             # Take the backprop and take a step
             total_loss.backward()
             optimizer.step()
 
-            print(f'Epoch {epoch} | Batch {_ +1} | Total loss: {total_loss.item():.4f} | Epsilon loss: {epsilon_loss.item():.4f} | Recons loss: {recons_loss.item():.4f}')
+            print(f'Epoch {epoch} | Batch {_ +1} | Total loss: {total_loss.item():.4f}')
             total_train_loss += total_loss.item()
             collector_dict['losses']['train']['total_loss'].append(total_loss.item())
-            collector_dict['losses']['train']['epsilon_loss'].append(epsilon_loss.item())
-            collector_dict['losses']['train']['recons_loss'].append(recons_loss.item())
+
 
         print(f"Epoch {epoch} | Total Training Loss: {total_train_loss:.4f}") # Training for this epoch finished, print the results
 
