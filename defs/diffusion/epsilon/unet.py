@@ -288,7 +288,7 @@ class Epsilon_Cond1DUnet(nn.Module):
     A conditional 1D U-Net that employs various transformer or conformer blocks and conducts convolution. For more detail about what it looks like, check page 3 of https://arxiv.org/pdf/2309.03199. 
 
     Args:
-        n_bands (int): Also widely referred to as seq_len in the code. The total number of bands of the training dataset, not used currently.
+        n_bands (int): Also widely referred to as seq_len in the code. The total number of bands of the training dataset, not used in this class, but used in the DDPM class
         in_channel (int): How many channels are being used as ins (for example, a channel is pure spectra as a channel dim, or derivs of spectra as a channel dim distinctly different than seq_len/n_bands)
         out_channel (int): How many channels are being used for outs (usually 1)
         n_endmembers (int): Defaults to 3

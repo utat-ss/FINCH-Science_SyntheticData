@@ -4,20 +4,29 @@ Define the diffusion class here
 
 import torch
 import torch.nn as nn
-import numpy as np
+from .noise.noise_scheduling import *
+from .noise.noise_sampling import *
 
-class cond_diffusion(nn.Module):
+class DDPM(nn.Module):
 
-    def __init__(self, epsilon, scheduler, ddpm_dict):
+    def __init__(self, epsilon:(nn.Module), augmenter:(nn.Module), scheduler:(Schedule), t_sampler:(Sampling)):
         super().__init__()
 
         self.epsilon = epsilon # Take in the epsilon network
+        self.augmenter = augmenter # Take in the data augmenter
         self.scheduler = scheduler # Take in the noise scheduler
-        self.ddpm_dict = ddpm_dict # Take in the ddpm dict for any extra parameters
+        self.t_sampler = t_sampler # Take in the temp scheduler
 
-        # Define the temperature sampler
+        # Precompute all the scheduler params
+        steps = self.scheduler.steps # Get the total amounts of steps from the scheduler
+        t_s = torch.arange(1, steps + 1); self.register_buffer('t_s', t_s) # Time steps from 1 to T
+        self.register_buffer('t_s_reverse', t_s.flip(0)) # Get the time steps in reverse order, T to 1
+        self.register_buffer('alphas', self.scheduler.alpha_t(torch.cat((torch.tensor([0]), t_s)))) # Precompute all the alphas for each time step in order add t=0
+        self.register_buffer('betas', self.scheduler.beta_t(torch.cat((torch.tensor([0]), t_s)))) # Precompute all the betas for each time step in order add t=0
+        self.register_buffer('beta_tildas', self.scheduler.beta_tilda_t(t_s)) # Precompute all the beta tildas for each time step in order
 
-        self.t_sampler = self.ddpm_dict['t_sampler']
+        # Get the bands from the epsilon
+        self.n_bands = self.epsilon.n_bands # Get the bands, used to randomly generate noise
 
     def _scheduled_call(self, x_0):
 
@@ -27,7 +36,6 @@ class cond_diffusion(nn.Module):
 
         # Take in some temperature matrix using the temperature sampler
         t = self.t_sampler(x_0) # Give the sampler the x_0 size, and get a t matrix size of (Batch,1)
-
         noise, x_t = self.scheduler.add_noise(x_0, t)
 
         # Return both the random time and the noised data related to it
@@ -52,54 +60,39 @@ class cond_diffusion(nn.Module):
         return x0_pred, eps_pred
     
     def training_procedure(self, x_0, ab):
-
         """
         Given some batched x_0 and ab (abundances related), it returns the predicted x_0. 
         Such predicted x_0 come from an entire procedure of forward noising and denoising using epsilon.
         The returned values will be used to get a loss to then backprop on epsilon (noise prediction) network.
         """
+        x_0 = self.augmenter(x_0) # Augment the inputted data
+        t, noise, x_t = self._scheduled_call(x_0) # Add some noise to it randomly
+        x0_pred, eps_pred = self._recover_signal(x_t, t, ab) # Recover the signal and pred the noise
 
-        t, noise, x_t = self._scheduled_call(x_0)
-        x0_pred, eps_pred = self._recover_signal(x_t, t, ab)
-
-        return x0_pred, noise, eps_pred
+        return x0_pred, x_0, noise, eps_pred
 
     def sample(self, x_T, ab):
-
         """
         Sample a signal using the diffusion model.
 
-        Parameters:
-            - ab (Tensor); Abundance condition, shape [B, n_ab]
-            - x_T (Tensor, optional); Starting noisy signal. If none, Gaussian noise is used.
+        Args:
+            ab (Tensor); Abundance condition, shape [B, n_ab]
+            x_T (Tensor, optional); Starting noisy signal. If none, Gaussian noise is used.
 
         Returns:
-            - x_0: (Tensor); Generated spectra, shape [B, n_bands]
-            - x_T: (Tensor); The high temperature spectrum before denoising, shape [B, n_bands]
+            x_0: (Tensor); Generated spectra, shape [B, n_bands]
+            x_T: (Tensor); The high temperature spectrum before denoising, shape [B, n_bands]
         """
-
         device = ab.device # Get the device using ab 
         B = ab.size(0) # Get the batch number using ab
 
-        steps = self.scheduler.steps # Get the total amounts of steps
-
-        n_bands = self.epsilon.n_bands # Get the bands, used to randomly generate noise
-
         if x_T is None: # If no x_T is given, define some using gaussian
-            x_T = torch.randn(B, n_bands, device=device)
+            x_T = torch.randn(B, self.n_bands, device=device)
         
         # Reverse diffusion loop, for more detail on DDPM, check the paper on it.
-
         x_t = x_T # With such redefinition, we make sure that we preserve high temperature spectrum.
 
-        t_s = torch.arange(1, steps + 1) # Time steps from 1 to T
-        t_s_reverse = t_s.flip(0) # Get the time steps in reverse order, T to 1
-
-        self.alphas = self.scheduler.alpha_t(torch.cat((torch.tensor([0]), t_s))) # Precompute all the alphas for each time step in order add t=0
-        self.betas = self.scheduler.beta_t(torch.cat((torch.tensor([0]), t_s))) # Precompute all the betas for each time step in order add t=0
-        self.beta_tildas = self.scheduler.beta_tilda_t(t_s) # Precompute all the beta tildas for each time step in order
-
-        for t in t_s_reverse: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
+        for t in self.t_s_reverse: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
             t_tensor = torch.full((B,1), t, dtype=torch.long, device=device)
 
             # Predict the noise that was added last step
