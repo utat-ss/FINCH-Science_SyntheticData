@@ -3,8 +3,6 @@ This file is used to define all the noise scheduling classes.
 These are incredibly useful in the training of diffusion
 models.
 """
-
-import numpy as np
 import torch
 
 from abc import ABC, abstractmethod
