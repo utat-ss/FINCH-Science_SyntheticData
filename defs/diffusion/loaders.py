@@ -39,8 +39,8 @@ def load_epsilon(cfg_epsilon_setup):
     else:
         raise ValueError(f"Unknown/Unsupported epsilon type: {epsilon_type}")
 
-    epsilon = epsilon_cls(**epsilon_type)
-    epsilon
+    epsilon = epsilon_cls(**cfg_epsilon)
+    return epsilon
 
 def load_optim(cfg_optim_setup, epsilon):
 
@@ -59,7 +59,7 @@ def load_optim(cfg_optim_setup, epsilon):
 
     if 'cfg_lrscheduler_setup' in cfg_optim_setup and cfg_optim_setup['cfg_lrscheduler_setup']:
 
-        lrscheduler_setup = cfg_optim_setup['lrcfg_scheduler_setup']
+        lrscheduler_setup = cfg_optim_setup['cfg_lrscheduler_setup']
         lrscheduler_type = lrscheduler_setup['lrscheduler_type']
         cfg_lrscheduler = lrscheduler_setup.get('cfg_lrscheduler', {})
 

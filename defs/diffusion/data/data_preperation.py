@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, random_split, DataLoader
 from typing import Iterator, Union
+import math
 
 
 """
@@ -135,31 +136,34 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict) -> list[DataLoad
     Args:
         ds (HyperSpectralDataset): The entire dataset as a HyperSpectralDataset class.
         cfg_loader (dict):
-            n_epoch (int): How many epochs
-            n_val_epoch (int): How many validation points per epoch
+            n_val (int): How many validation points in total
             n_test (int): How many test samples in total
             n_train_batch (int): Train dataloader batch size
+            seed (int): Seed for random split
     
     Returns:
         dataloaders (list[DataLoader]): A list of the prepared dataloaders
     """
 
-    # Take in the values from the dict
-    n_epoch = cfg_loader.get('n_epoch', 50)
-    n_val_epoch = cfg_loader.get('n_val_epoch', 4)
+    # Take in the important values from the loader
+    n_val = cfg_loader.get('n_val', 200)
     n_test = cfg_loader.get('n_test', 123)
     n_train_batch = cfg_loader.get('n_train_batch', 5)
 
     # Infer the amount of n_train, ensure completeness
-    n_train = int(len(ds) - n_epoch*n_val_epoch - n_test)
+    n_train = int(len(ds) - n_val - n_test)
+
+    # Get the RNG, for reproducibility
+    generator = torch.Generator()
+    generator.manual_seed(cfg_loader['seed'])
 
     # Separate the dataset into validate and temporary
-    ds_test, ds_temp = random_split(ds, [n_test, n_train + n_val_epoch*n_epoch]) 
+    ds_test, ds_temp = random_split(ds, [n_test, n_train + n_val], generator) 
 
     # Separate the temp dataset into train and test
-    ds_train, ds_validate = random_split(ds_temp, [n_train, n_val_epoch*n_epoch])
+    ds_train, ds_validate = random_split(ds_temp, [n_train, n_val], generator)
 
-    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, shuffle=True), DataLoader(ds_validate, batch_size=n_val_epoch, shuffle= True), DataLoader(ds_test, batch_size=n_test, shuffle=True)]
+    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, shuffle=True), DataLoader(ds_validate, batch_size=n_val, shuffle= True), DataLoader(ds_test, batch_size=n_test, shuffle=True)]
 
     return  dataloaders # Make dataloaders into a list and ship them
 
@@ -200,7 +204,7 @@ def get_data(cfg_data:(dict)):
 
     iterators = [
         *get_inf_iterators(dataloaders[0]),
-        iter(dataloaders[1]),
+        *get_inf_iterators(dataloaders[1]),
         iter(dataloaders[2])
     ]
 
@@ -208,8 +212,23 @@ def get_data(cfg_data:(dict)):
 
     return [iterators, norm_out]
 
+def get_unnormalizer(data_norm_dict:(dict)):
+    """
+    The function to get the unnormalizer function of a given data normalizer.
+    """
 
-
+    if data_norm_dict['norm_type']=='classic':
+        return lambda normed_data: (normed_data+1)/2
+    elif data_norm_dict['norm_type']=='dynamic':
+        max_vals, min_vals = data_norm_dict['max_vals'], data_norm_dict['min_vals']
+        return lambda normed_data: ((normed_data + 1)*(max_vals - min_vals))/2 + min_vals
+    elif data_norm_dict['norm_type']=='log':
+        max_vals, min_vals, eps = data_norm_dict['max_vals'], data_norm_dict['min_vals'], data_norm_dict['eps']
+        return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals - min_vals))/2 + min_vals) + eps
+    elif data_norm_dict['norm_type']=='none':
+        return lambda normed_data: normed_data
+    else:
+        raise ValueError(f"Unknown/Unsupported normalization type {data_norm_dict['norm_type']}.")
 
 
 

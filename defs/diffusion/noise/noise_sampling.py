@@ -10,9 +10,9 @@ from torch.distributions import Normal
 
 class Sampling(ABC):
 
-    def __init__(self, scheduler, t_min=0):
+    def __init__(self, t_max, t_min=0):
 
-        self.t_max = scheduler.steps
+        self.t_max = t_max
         self.t_min = t_min
 
     @abstractmethod
@@ -24,8 +24,8 @@ class UniformSampling(Sampling):
     """
     Uniform temperature sampler
     """
-    def __init__(self, scheduler, t_min=0):
-        super().__init__(scheduler, t_min)
+    def __init__(self, t_max, t_min=0):
+        super().__init__(t_max, t_min)
 
     def __call__(self, x_0):
 
@@ -46,8 +46,8 @@ class NormalSampling(Sampling):
     Temperature sampler with normal distribution
     """
 
-    def __init__(self, scheduler, t_min:int = 0, containment_percentage:float = 0.999):
-        super().__init__(scheduler, t_min)
+    def __init__(self, t_max, t_min:int = 0, containment_percentage:float = 0.999):
+        super().__init__(t_max, t_min)
 
         self.mean = round((self.t_max - self.t_min) / 2) # Sets the mean of the normal distribution as the mid-point temperature
 

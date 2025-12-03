@@ -67,11 +67,48 @@ class DDPM(nn.Module):
         """
         x_0 = self.augmenter(x_0) # Augment the inputted data
         t, noise, x_t = self._scheduled_call(x_0) # Add some noise to it randomly
-        x0_pred, eps_pred = self._recover_signal(x_t, t, ab) # Recover the signal and pred the noise
+        x_0_hat, eps_pred = self._recover_signal(x_t, t, ab) # Recover the signal and pred the noise
 
-        return x0_pred, x_0, noise, eps_pred
+        return x_0_hat, x_0, eps_pred, noise
 
-    def sample(self, x_T, ab):
+    def _sample_step(self, x_t, t, ab):
+        """
+        A sampling substep where the signal is moved from x_t to x_(t-1).
+
+        Args:
+            x_t (torch.Tensor): Signal at time t
+            t (int): Integer of time, temperature
+            ab (torch.Tensor): Abundances tensor, condition for the epsilon
+
+        Returns:
+            x_(t-1): Signal at time t-1, noise of time t removed
+        """
+
+        t_tensor = torch.full((x_t.size(0),1), t, dtype=torch.long, device=x_t.device) # Create an empty tensor of the timesteps, size of (B,1)
+
+        # Predict the noise that was added last step
+        eps = self.epsilon(x_t, t_tensor.to(torch.float32), ab)
+        if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
+
+        # Compute variance (sigma^2) / noise for stochastic sampling
+        # For simplicity, use sqrt(beta_tilda_t) for this. The DDPM paper: https://arxiv.org/pdf/2006.11239
+        sigma = torch.sqrt(self.scheduler.gather(self.beta_tildas, t_tensor-1, x_t.ndim)).to(torch.float32) # -1 on the time tensor because the 0th index of beta is actually beta tilda at t=1
+
+        # Sample noise, without any noise at step t=0
+        z = torch.randn_like(x_t) if t > 1 else 0.0
+
+        # Gather alpha_t
+        alpha_t = self.scheduler.gather(self.alphas, t_tensor, x_t.ndim).to(torch.float32)
+
+        # Gather alpha_bar_t
+        alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t_tensor, x_t.ndim).to(torch.float32)
+
+        # Update x_t for the next iter
+        x_t = 1/torch.sqrt(alpha_t) * (x_t - ((1-alpha_t)/torch.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
+
+        return x_t
+
+    def sample(self, ab, x_T=None):
         """
         Sample a signal using the diffusion model.
 
@@ -93,26 +130,7 @@ class DDPM(nn.Module):
         x_t = x_T # With such redefinition, we make sure that we preserve high temperature spectrum.
 
         for t in self.t_s_reverse: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1
-            t_tensor = torch.full((B,1), t, dtype=torch.long, device=device)
 
-            # Predict the noise that was added last step
-            eps = self.epsilon(x_t, t_tensor.to(torch.float32), ab)
-            if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
-
-            # Compute variance (sigma^2) / noise for stochastic sampling
-            # For simplicity, use sqrt(beta_tilda_t) for this. The DDPM paper: https://arxiv.org/pdf/2006.11239
-            sigma = torch.sqrt(self.scheduler.gather(self.beta_tildas, t_tensor-1, x_t.ndim)).to(torch.float32) # -1 on the time tensor because the 0th index of beta is actually beta tilda at t=1
-
-            # Sample noise, without any noise at step t=0
-            z = torch.randn_like(x_t) if t > 0 else 0.0
-
-            # Gather alpha_t
-            alpha_t = self.scheduler.gather(self.alphas, t_tensor, x_t.ndim).to(torch.float32)
-
-            # Gather alpha_bar_t
-            alpha_bar_t = self.scheduler.gather(self.scheduler.alpha_bars, t_tensor, x_t.ndim).to(torch.float32)
-
-            # Update x_t for the next iter
-            x_t = 1/torch.sqrt(alpha_t) * (x_t - ((1-alpha_t)/torch.sqrt(1-alpha_bar_t) * eps)) + sigma * z  
+            x_t = self._sample_step(x_t, t, ab)
 
         return x_t, x_T
