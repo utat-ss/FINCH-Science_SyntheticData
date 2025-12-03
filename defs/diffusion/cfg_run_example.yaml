@@ -1,0 +1,81 @@
+cfg_data:
+  cfg_import:
+    data_handle: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\data' # Path for the data file
+    spec_range: [900, 1700] # Spectral range, inclusive
+
+  cfg_normalize:
+    norm_type: 'dynamic' # Options are classic, dynamic, log, none. Normalizes data
+
+  cfg_loader:
+    n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_test: 123 # Number of test points at the end of training
+    n_train_batch: 5 # The training batch size
+    seed: 3169 # Seed for the data splitters
+
+cfg_train: 
+  n_epoch: 50
+  n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
+  device: 'gpu' # Device to be used
+  dtype: 'float32' # Datatype to be used
+  
+cfg_export:
+  project: 'Conditional U-Net Synthetic Data Generation'
+  name: '1st Training Run'
+  model_save: 'cond_unet.pth' # The save path for the model that was trained, can have .pth, adds it automatically
+  test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
+  local_log: 'test_logs.txt' # Path for the local loggging of alerts prints, etc
+  save_unnormalized: True # Whether to save the test data after unnormalizing them
+  save_unnormalizer: True # Whether to save the necessary info to be used by the data unnormalizer, need to save it if will infer from this model
+
+cfg_diffusion_setup:
+  diffusion_type: 'DDPM' # The name of the diffusion class
+  # The specific configs of the diffusion get built in the script
+
+cfg_epsilon_setup: 
+  epsilon_type: 'Epsilon_Cond1DUnet'
+  cfg_epsilon:
+    ... # The specific configs for the epsilon
+
+cfg_augmenter_setup:
+  augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
+  cfg_augmenter:
+    seed: 3169
+    jiter_scale: 1e-4
+    amp_scale: 1e-2
+
+cfg_scheduler_setup:
+  scheduler_type: 'CosSchedule' # Name of the noise scheduler class
+  cfg_scheduler:
+    steps: 3000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
+    offset: 8e-3
+    exp: 2
+
+cfg_tsampler_setup:
+  tsampler_type: 'NormalSampling'
+  cfg_tsampler: 
+    t_max: 3000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
+    t_min: 0  
+
+cfg_optim_setup:
+  cfg_optim_type: 'AdamW'
+  cfg_optim:
+    lr: 1e-3
+    weight_decay: 1e-2
+ 
+  cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
+    lrscheduler_type: 'CosineAnealingLR'
+    cfg_lrscheduler:
+      ...
+
+cfg_loss_setup:
+  loss_type: 'LossDDPM' 
+  cfg_loss:
+    noise_loss_type: 'huber'
+    use_recons_loss: 'observe'
+
+
+
+
+   
+
+  

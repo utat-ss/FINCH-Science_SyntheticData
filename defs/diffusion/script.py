@@ -88,12 +88,11 @@ def parse_cfg_dict(cfg_run:(dict)):
 
 from loaders import *
 from data.data_preperation import *
-
 from train import train_diffusion
-
-from auxiliary import setup_wandb
+from auxiliary import setup_wandb, setup_logging
 
 import traceback
+import logging
 
 if __name__ == "__main__":
 
@@ -101,11 +100,16 @@ if __name__ == "__main__":
     cfg_run = cfg_from_args()
     cfg_data, cfg_train, cfg_export, cfg_diffusion_setup, cfg_epsilon_setup, cfg_augmenter_setup, cfg_scheduler_setup, cfg_tsampler_setup, cfg_optim_setup, cfg_loss_setup = parse_cfg_dict(cfg_run)
 
-    # Setup wandb
+    # Setup wandb and logging
     run = setup_wandb(cfg_run, cfg_export)
+    setup_logging(cfg_export)
+
+    logging.info("Cfgs taken in, parsed. WandB and logging configured")
 
     # Figure out data
     configured_data = get_data(cfg_data)
+
+    logging.info("Data has been parsed and configured")
 
     # Initialize stuff
     cfg_diffusion_setup['cfg_diffusion'] = {
@@ -119,12 +123,17 @@ if __name__ == "__main__":
     optimizer, lr_scheduler = load_optim(cfg_optim_setup)
     loss_fn = load_loss(cfg_loss_setup)
 
+    logging.info("The diffusion model, optimizer, loss function etc. has been configured")
+
     try:
-        train_diffusion()
+        logging.info("Training function started")
+        train_diffusion(cfg_train, cfg_export, diffusion_model, loss_fn, optimizer, lr_scheduler, configured_data)
+        logging.info("Training finished")
 
     except Exception as e:
         run.alert(title= "Training crashed", text=str(e))
         traceback.print_exc()
+        raise e
 
     finally:
         run.finish()
