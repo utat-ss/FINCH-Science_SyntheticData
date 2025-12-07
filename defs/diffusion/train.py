@@ -3,7 +3,6 @@ import torch
 from torch.utils.data import DataLoader
 from .data.data_preperation import get_unnormalizer
 
-from sklearn.metrics import r2_score, mean_absolute_error
 import logging
 from .auxiliary import get_n_params
 from .plotting import plot_to_wandb
