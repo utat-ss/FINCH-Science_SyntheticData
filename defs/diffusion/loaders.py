@@ -1,0 +1,127 @@
+import diffusion
+
+from .epsilon import unet
+from .epsilon import mlp
+
+import torch.optim as optim
+
+import loss as custom_losses
+import torch.nn as nn
+
+from .noise.noise_scheduling import *
+
+from .noise.noise_sampling import *
+
+from .data import data_augmentation
+
+def load_diffusion (cfg_diffusion_setup):
+
+    diffusion_type = cfg_diffusion_setup['diffusion_type']
+    cfg_diffusion = cfg_diffusion_setup['cfg_diffusion']
+
+    if hasattr(diffusion, diffusion_type):
+        diffusion_cls = getattr(diffusion, diffusion_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported diffusion type: {diffusion_type}")
+    
+    diffusion_model = diffusion_cls(**cfg_diffusion)
+    return diffusion_model
+
+def load_epsilon(cfg_epsilon_setup):
+
+    epsilon_type = cfg_epsilon_setup['epsilon_type']
+    cfg_epsilon = cfg_epsilon_setup['cfg_epsilon']
+
+    if hasattr(unet, epsilon_type):
+        epsilon_cls = getattr(unet, epsilon_type)
+    elif hasattr(mlp, epsilon_type):
+        epsilon_cls = getattr(mlp, epsilon_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported epsilon type: {epsilon_type}")
+
+    epsilon = epsilon_cls(**cfg_epsilon)
+    return epsilon
+
+def load_optim(cfg_optim_setup, epsilon):
+
+    optim_type = cfg_optim_setup['optim_type']
+    cfg_optim = cfg_optim_setup.get('cfg_optim', {})
+
+    try:
+        opt_cls = getattr(optim, optim_type)
+    except:
+        raise ValueError(f"Optimizer '{optim_type}' is not a valid optimizer in torch.optim. "
+                         f"Check spelling (e.g., 'Adam' vs 'adam').")
+    
+    optimizer = opt_cls(epsilon.parameters(), **cfg_optim)
+
+    lr_scheduler = None
+
+    if 'cfg_lrscheduler_setup' in cfg_optim_setup and cfg_optim_setup['cfg_lrscheduler_setup']:
+
+        lrscheduler_setup = cfg_optim_setup['cfg_lrscheduler_setup']
+        lrscheduler_type = lrscheduler_setup['lrscheduler_type']
+        cfg_lrscheduler = lrscheduler_setup.get('cfg_lrscheduler', {})
+
+        try:
+            scheduler_cls = getattr(optim.lr_scheduler, lrscheduler_type)
+        except:
+            raise ValueError(f"Scheduler: {lrscheduler_type} does not exist in torch.optim.lr_scheduler")
+        
+        lr_scheduler = scheduler_cls(optimizer, **cfg_lrscheduler)
+
+    return optimizer, lr_scheduler
+
+def load_loss(cfg_loss_setup):
+
+    loss_type = cfg_loss_setup['loss_type']
+    cfg_loss = cfg_loss_setup.get('cfg_loss', {})
+
+    if hasattr(custom_losses, loss_type):
+        loss_cls = getattr(custom_losses, loss_type)
+    elif hasattr(nn, loss_type):
+        loss_cls = getattr(nn, loss_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported loss in either loss.py or torch.nn: {loss_type}")
+
+    loss = loss_cls(**cfg_loss)
+    return loss
+
+def load_scheduler(cfg_scheduler_setup):
+
+    scheduler_type = cfg_scheduler_setup['scheduler_type']
+    cfg_scheduler = cfg_scheduler_setup['cfg_scheduler']
+
+    if hasattr(Schedule, scheduler_type):
+        scheduler_cls = getattr(Schedule, scheduler_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported noising scheduler type: {scheduler_type}")
+    
+    scheduler = scheduler_cls(**cfg_scheduler)
+    return scheduler
+
+def load_tsampler(cfg_tsampler_setup):
+
+    tsampler_type = cfg_tsampler_setup['tsampler_type']
+    cfg_tsampler = cfg_tsampler_setup['cfg_tsampler']
+
+    if hasattr(Sampling, tsampler_type):
+        tsampler_cls = getattr(Sampling, tsampler_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported time sampler type: {tsampler_type}")
+    
+    tsampler = tsampler_cls(**cfg_tsampler)
+    return tsampler
+
+def load_augmenter(cfg_augmenter_setup):
+
+    augmenter_type = cfg_augmenter_setup['augmenter_type']
+    cfg_augmenter = cfg_augmenter_setup.get('cfg_augmenter', {})
+
+    if hasattr(data_augmentation, augmenter_type):
+        augmenter_cls = getattr(data_augmentation, augmenter_type)
+    else:
+        raise ValueError(f"Unknown/Unsupported augmenter type: {augmenter_type}")
+    
+    augmenter = augmenter_cls(**cfg_augmenter)
+    return augmenter

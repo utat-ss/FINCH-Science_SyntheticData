@@ -1,5 +1,5 @@
 """
-Define different epsilons over here
+Define incredibly simple epsilons, such as MLP over here.
 """
 
 import torch
@@ -9,7 +9,7 @@ import torch.nn.functional as F
 class Epsilon_MLP(nn.Module):
 
     """
-    Just a very simple very deep MLP to do noise removal given
+    Just a very simple very deep MLP to do noise prediction given
 
     The cfg_model:
     - ['time_embed']['hidden_dim']
@@ -47,13 +47,13 @@ class Epsilon_MLP(nn.Module):
 
         time_embed_layers.extend([ 
             nn.Linear(1, self.time_embed_hidden_dim),
-            nn.SiLU(),
+            nn.GELU(),
         ]) # Appending the init layer
 
         for _ in range(self.time_embed_hidden_n): # Appending hidden layers
             time_embed_layers.extend([
                 nn.Linear(self.time_embed_hidden_dim, self.time_embed_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
                 ])
 
         time_embed_layers.append(nn.Linear(self.time_embed_hidden_dim, self.time_embed_hidden_dim)) # Output layer, no actv for unbounded output
@@ -70,13 +70,13 @@ class Epsilon_MLP(nn.Module):
 
         ab_embed_layers.extend([
             nn.Linear(self.ab_embed_ab_dim, self.ab_embed_hidden_dim),
-            nn.SiLU()
+            nn.GELU()
         ]) # Appending the init layer
 
         for _ in range(self.ab_embed_hidden_n): # Appending hidden layers
             ab_embed_layers.extend([
                 nn.Linear(self.ab_embed_hidden_dim, self.ab_embed_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
             ]) 
 
         ab_embed_layers.append(nn.Linear(self.ab_embed_hidden_dim, self.ab_embed_hidden_dim))
@@ -93,16 +93,19 @@ class Epsilon_MLP(nn.Module):
 
         denoiser_layers.extend([
             nn.Linear(self.spec_dim + self.time_embed_hidden_dim + self.ab_embed_hidden_dim, self.denoiser_hidden_dim),
-            nn.SiLU()
+            nn.GELU()
         ]) # Init layer of the denoiser, takes in embeddings
 
         for _ in range(self.denoiser_hidden_n): # Appending hidden layers of denoiser
             denoiser_layers.extend([
                 nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim),
-                nn.SiLU()
+                nn.GELU()
             ])
 
-        denoiser_layers.append(nn.Linear(self.denoiser_hidden_dim, self.denoiser_hidden_dim))
+        denoiser_layers.extend([
+            nn.Linear(self.denoiser_hidden_dim, self.spec_dim),
+            nn.GELU()
+        ])
 
         self.denoiser = nn.Sequential(*denoiser_layers)
 
@@ -111,19 +114,16 @@ class Epsilon_MLP(nn.Module):
         """
         Inputs:
             - x_T: (B, n_bands)
-            - t: (B,) integer time steps
+            - t: (B,1) integer time steps
             - ab: (B, n_abund=3) 
         """
-
-        # Unsqueeze to get t to be (B,1)
-        t = t.unsqueeze(-1).float()
 
         # Embed all the conditions
         t_embedded = self.time_embed(t)
         ab_embedded = self.ab_embed(ab)
 
-        # Concat all the conditions with the 
-        h = torch.cat([x_T, t_embedded, ab_embedded], dim = -1)
+        # Concat all the conditions with the noise
+        h = (torch.cat([x_T, t_embedded, ab_embedded], dim = -1))
 
         return self.denoiser(h)
     
