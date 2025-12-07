@@ -3,8 +3,6 @@ This file is used to define all the noise scheduling classes.
 These are incredibly useful in the training of diffusion
 models.
 """
-
-import numpy as np
 import torch
 
 from abc import ABC, abstractmethod
@@ -31,6 +29,10 @@ class Schedule(ABC):
 
     def gather(self, values, t, xndim):
         # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
+        
+        if values.device != t.device:
+            values = values.to(device= t.device)
+        
         if t.ndim == 0:
             out = values[t]
         else:
@@ -88,7 +90,7 @@ class Schedule(ABC):
         a_bar = self.gather(self.alpha_bars.to(x_0.device), t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
         x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
 
-        return noise, x_T
+        return noise, x_T.to(torch.float32)
     
     def mu_tilda_t(self, x_0, t):
 
@@ -129,7 +131,7 @@ class CosSchedule(Schedule):
         times = torch.arange(T + 1, dtype=torch.float64)
         f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp # Generate all the f(t) vals, by the def
         f_0 = f[0] # Get the f_0
-        self.alpha_bars = torch.tensor(f/f_0, dtype=torch.float32) # Normalize by f_0 and store as alpha bars
+        self.alpha_bars = (f/f_0).detach().clone() # Normalize by f_0 and store as alpha bars
 
 class SqrtSchedule(Schedule):
 
@@ -145,10 +147,10 @@ class SqrtSchedule(Schedule):
         T = self.steps # Total time, defined by steps
 
         # Get the times array
-        times = torch.arange(T + 1, dtype=torch.float64)
+        times = torch.arange(T + 1)
 
         # Definition from the paper, appendix A
-        self.alpha_bars = 1.0 - torch.sqrt(times / (T))
+        self.alpha_bars = (1.0 - torch.sqrt(times / (T)))
 
     """
     The above def is good enough, once it is made sure that the current CosSchedule works, a superclass will be made such that _precompute_alpha_bars is an abstract method.
