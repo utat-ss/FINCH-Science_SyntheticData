@@ -201,7 +201,7 @@ def train_diffusion_deprecated(cfg_train: dict, cond_diffusion, loss, optimizer:
 
     return collector_dict, cond_diffusion # Return all the possibly useful stuff
 
-def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.nn.Module), loss_fn:(torch.nn.Module), optimizer:(torch.optim), lr_scheduler, configured_data:(list[DataLoader])):
+def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.nn.Module), loss_fn:(torch.nn.Module), optimizer:(torch.optim), lr_scheduler:(torch.optim.lr_scheduler), configured_data):
 
     """
     This function is to train the conditional diffusion model
@@ -223,8 +223,8 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
     # Setup the save paths
     model_save = cfg_export['model_save']
     if not model_save.endswith('.pth'): model_save += '.pth'
-    val_save = cfg_export['test_save']
-    if not val_save.endswith('.parquet'): val_save += '.parquet'
+    test_save = cfg_export['test_save']
+    if not test_save.endswith('.parquet'): test_save += '.parquet'
     best_val_loss = float('inf') # We'll use this to save the best model
 
     # Log the param amount for model

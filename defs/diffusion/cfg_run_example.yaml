@@ -11,6 +11,10 @@ cfg_data:
     n_test: 123 # Number of test points at the end of training
     n_train_batch: 5 # The training batch size
     seed: 3169 # Seed for the data splitters
+  
+  cfg_dataset_save:
+    psi1_path: ... # Save path for the psi1 dataset
+    psi2_path: ... # Save path for the psi2 dataset 
 
 cfg_train: 
   n_epoch: 50
@@ -57,15 +61,14 @@ cfg_tsampler_setup:
     t_min: 0  
 
 cfg_optim_setup:
-  cfg_optim_type: 'AdamW'
+  optim_type: 'AdamW'
   cfg_optim:
     lr: 1e-3
     weight_decay: 1e-2
- 
-  cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
-    lrscheduler_type: 'CosineAnealingLR'
-    cfg_lrscheduler:
-      ...
+    cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
+      lrscheduler_type: 'CosineAnealingLR'
+      cfg_lrscheduler:
+        ...
 
 cfg_loss_setup:
   loss_type: 'LossDDPM' 

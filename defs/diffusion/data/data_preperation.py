@@ -53,7 +53,6 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     spectral_cols = [str(w) for w in range(spec_range[0], spec_range[1]+1, 10)]
     spectra = df[spectral_cols].values.astype("float32")
     spectra_tensor = torch.from_numpy(spectra)
-    del spectra, spectral_cols
 
     norm_type = cfg_normalize['norm_type']
     if norm_type=='classic': # Classic, very blunt normalization
@@ -110,7 +109,7 @@ class HyperSpectralDataset(Dataset):
         names (list): Names of the spectra, as a list
         indices (list): Indices in order, as a list
     """
-    def __init__(self, spectra: torch.Tensor, abundances: torch.Tensor, names: list, indices: list):
+    def __init__(self, spectra:(torch.Tensor), abundances:(torch.Tensor), names:(list[str]), indices:(list[int])):
 
         self.spectra = spectra
         self.abundances = abundances
@@ -128,8 +127,60 @@ class HyperSpectralDataset(Dataset):
             'names': self.names[idx],
             'orig_index': self.indices[idx]
         }
+    
+    def save_to_csv(self, save_path:(str), norm_type:(dict), spec_range:(list[int])):
 
-def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict) -> list[DataLoader]:
+        """
+        Saves the normalized version of the HyperSpectralDataset into a given save path as a csv.
+
+        Args:
+            self (included): Contains the spectrum, abundances, names, orig_index
+            save_path (str): The save path of the dataset (must not have .csv at the end)
+            norm_type (str): The normalization type of the given dataset
+            spec_range (list[int]): An int list of two entries with inclusive spectral range
+
+        Returns:
+            saved (.csv): A csv file with original indices, names, abundances, and the normalized spectrum at path 'path'_'norm_type'.csv
+        """
+
+        import pandas as pd
+
+        if save_path.endswith('.csv'): save_path = save_path.removesuffix('.csv') # Control the save path
+        save_path += f"_{norm_type}"; save_path += '.csv' # Prepared save path
+
+        df = pd.DataFrame()
+
+        df['orig_index'] = self.indices
+        df['Spectra'] = self.names
+        df[['gv_fraction', 'npv_fraction', 'soil_fraction']] = self.abundances.detach().cpu().numpy()
+        spectral_cols = [w for w in range(spec_range[0], spec_range[1]+1, 10)]
+        df[spectral_cols] = self.spectra.detach().cpu().numpy()
+        df.sort_values(by='orig_index', inplace=True)
+        df.to_csv(save_path)
+
+def save_split_wrapper(subset, save_path, norm_type, spec_range):
+    """
+    Takes a subset of HyperSpectralDataset, converts it to a full HyperSpectralDataset, and then saves it
+    """
+
+    parent_ds = subset.dataset
+    split_indices = subset.indices
+
+    sub_spectra = parent_ds.spectra[split_indices]
+    sub_abundances = parent_ds.abundances[split_indices]
+    sub_names = [parent_ds.names[i] for i in split_indices]
+    sub_orig_indices = [parent_ds.indices[i] for i in split_indices]
+
+    temp_ds = HyperSpectralDataset(
+        spectra=sub_spectra, 
+        abundances=sub_abundances, 
+        names=sub_names, 
+        indices=sub_orig_indices
+    )
+
+    temp_ds.save_to_csv(save_path, norm_type, spec_range)
+
+def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_save:(dict)) -> list[DataLoader]:
     """
     Gets the dataloaders for train, test, validate datasets.
 
@@ -140,7 +191,12 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict) -> list[DataLoad
             n_test (int): How many test samples in total
             n_train_batch (int): Train dataloader batch size
             seed (int): Seed for random split
-    
+        cfg_dataset_save (dict):
+            psi1_path (str): Save path for the psi1 dataset (train of simpler_data)
+            psi2_path (str): Save path for the psi2 dataset (val+test of simpler data)
+            spec_range (list[int]): the spectral range, inclusive, as a list
+            norm_type (str): Type of normalization applied to spectra
+
     Returns:
         dataloaders (list[DataLoader]): A list of the prepared dataloaders
     """
@@ -157,13 +213,15 @@ def get_dataloaders(ds: HyperSpectralDataset, cfg_loader: dict) -> list[DataLoad
     generator = torch.Generator()
     generator.manual_seed(cfg_loader['seed'])
 
-    # Separate the dataset into validate and temporary
-    ds_test, ds_temp = random_split(ds, [n_test, n_train + n_val], generator) 
+    # Separate the dataset into train and temporary
+    ds_train, ds_temp = random_split(ds, [n_train, n_test + n_val], generator) 
+    save_split_wrapper(ds_train, cfg_dataset_save['psi1_path'], cfg_dataset_save['norm_type'], cfg_dataset_save['spec_range'])
+    save_split_wrapper(ds_temp, cfg_dataset_save['psi2_path'], cfg_dataset_save['norm_type'], cfg_dataset_save['spec_range'])
 
     # Separate the temp dataset into train and test
-    ds_train, ds_validate = random_split(ds_temp, [n_train, n_val], generator)
+    ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
 
-    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, shuffle=True), DataLoader(ds_validate, batch_size=n_val, shuffle= True), DataLoader(ds_test, batch_size=n_test, shuffle=True)]
+    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
 
     return  dataloaders # Make dataloaders into a list and ship them
 
@@ -200,7 +258,8 @@ def get_data(cfg_data:(dict)):
     ds = HyperSpectralDataset(spectra_tensor, abundances_tensor, names, indices) # Create a ds using the vals
 
     cfg_loader = cfg_data['cfg_loader'] # Get the dict to input to get_dataloaders
-    dataloaders = get_dataloaders(ds, cfg_loader) # Get the dataloaders as a list
+    cfg_dataset_save = cfg_data['cfg_dataset_save']; cfg_dataset_save['spec_range'] = cfg_import['spec_range']; cfg_dataset_save['norm_type'] = norm_out['norm_type']
+    dataloaders = get_dataloaders(ds, cfg_loader, cfg_dataset_save) # Get the dataloaders as a list
 
     iterators = [
         *get_inf_iterators(dataloaders[0]),
