@@ -17,7 +17,7 @@ class Schedule(ABC):
     def __init__(self, steps):
         self.steps = steps
         # Precompute all the alpha bars
-        self._precompute_alpha_bars()
+        self._precompute_alpha_bars() # This gets the alphabars tensor, which is [steps+1]
 
     @abstractmethod
     def _precompute_alpha_bars(self):
@@ -26,25 +26,11 @@ class Schedule(ABC):
     """
     The rest of the methods are common to all schedules. They follow the paper: Nichol et al., 2021: https://arxiv.org/pdf/2102.09672
     """
-
-    def gather(self, values, t, xndim):
-        # Needed to make sampled ts compatible with differences within the same batch, essentially makes batches have different sampled ts within them
-        
-        if values.device != t.device:
-            values = values.to(device= t.device)
-        
-        if t.ndim == 0:
-            out = values[t]
-        else:
-            out = values[t]
-            while out.ndim < xndim:
-                out = out.unsqueeze(-1)
-        return out
     
     def beta_t(self, t):
 
         """
-        Takes in the time tensor.
+        Takes in the time tensor. Can return [steps+1]
 
         Returns β_t = 1 - (α_bar_t / α_bar_(t-1)), how much of the signal is lost
         as defined in the paper, page 4
@@ -62,7 +48,7 @@ class Schedule(ABC):
     def alpha_t(self, t):
 
         """
-        Takes in the time tensor.
+        Takes in the time tensor. Can return [steps+1]
 
         Returns α_t = 1 - β_t, how much of the signal is retained
         """
@@ -75,22 +61,26 @@ class Schedule(ABC):
         """
         Takes in the time tensor.
 
-        Returns the modified beta_tilda as defined in the paper, page 2
+        Returns the modified beta_tilda as defined in the paper, page 2.
+        Handles t=0 and t=1 edge cases safely.
         """
 
-        return self.beta_t(t) * (1.0 - self.alpha_bars[t-1]) / (1.0 - self.alpha_bars[t]) # Definition from the paper, page 2
-    
-    def add_noise(self, x_0, t):
+        # Safe previous index to avoid accessing alpha_bars[-1]
+        t_minus1_safe = torch.clamp(t - 1, min=0)
 
-        """
-        Given some initial signal x_0, add the predicted noise at time t.
-        """
+        # Get values
+        ab_prev = self.alpha_bars[t_minus1_safe]
+        ab_t = self.alpha_bars[t]
+        
+        # At t=1: 1.0 - 1.0 = 0.0 (Correct, variance is 0)
+        numerator = 1.0 - ab_prev
 
-        noise = torch.randn_like(x_0, device=x_0.device) # Get some random noise of the same shape
-        a_bar = self.gather(self.alpha_bars.to(x_0.device), t, x_0.ndim).to(x_0.device) # Sample the alpha bar at time step t for each item in a batch
-        x_T = torch.sqrt(a_bar)*x_0 + torch.sqrt(1.0 - a_bar)*noise # Definition from the paper, page 2
+        # At t=0: 1.0 - 1.0 = 0.0 -> Risk of Division by Zero!
+        # We clamp it to a tiny value so we get 0/epsilon = 0 instead of 0/0 = NaN
+        denominator = torch.clamp(1.0 - ab_t, min=1e-10)
 
-        return noise, x_T.to(torch.float32)
+        # Compute and return
+        return self.beta_t(t) * numerator / denominator
     
     def mu_tilda_t(self, x_0, t):
 
@@ -113,8 +103,8 @@ class CosSchedule(Schedule):
     """
 
     # Needs its own init since it takes extra params
-    def __init__(self, steps, offset= 8e-3, exp= 2):
-  
+    def __init__(self, steps:(int), offset:(float)=8e-3, exp:(float)= 2):
+
         # Take in the non-common params
         self.offset = offset
         self.exp = exp

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from diffusers.models.activations import get_activation
 
-from defs.diffusion.epsilon.auxiliary.epsilon_addons import Transformer1D, Conformer1D
+from .auxiliary.epsilon_addons import Transformer1D, Conformer1D
 
 import math
 

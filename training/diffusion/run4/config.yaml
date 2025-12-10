@@ -1,20 +1,20 @@
 cfg_data:
   cfg_import:
     data_handle: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv' # Path for the data file
-    spec_range: [900, 1700] # Spectral range, inclusive
+    spec_range: [400, 2490] # Spectral range, inclusive
 
   cfg_normalize:
-    norm_type: 'dynamic' # Options are classic, dynamic, log, none. Normalizes data
+    norm_type: 'statistical' # Options are classic, dynamic, log, statistical, none. Normalizes data
 
   cfg_loader:
-    n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_val: 10 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
     n_test: 123 # Number of test points at the end of training
     n_train_batch: 5 # The training batch size
     seed: 3169 # Seed for the data splitters
   
   cfg_dataset_save:
-    psi1_path: ... # Save path for the psi1 dataset
-    psi2_path: ... # Save path for the psi2 dataset 
+    psi1_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run4\psi1' # Save path for the psi1 dataset
+    psi2_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run4\psi2' # Save path for the psi2 dataset 
 
 cfg_train: 
   n_epoch: 50
@@ -25,10 +25,10 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: 'Conditional U-Net Synthetic Data Generation'
-  name: '1st Training Run'
-  model_save: 'cond_unet.pth' # The save path for the model that was trained, can have .pth, adds it automatically
-  test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
-  local_log: 'test_logs.txt' # Path for the local loggging of alerts prints, etc
+  name: 'Trying Statistical Normalizer'
+  model_save: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run4\cond_unet.pth' # The save path for the model that was trained, can have .pth, adds it automatically
+  test_save: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run4\generated_test_samples.parquet' # Save path for the generated test samples
+  local_log: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run4\test_logs.txt' # Path for the local loggging of alerts prints, etc
   save_unnormalized: True # Whether to save the test data after unnormalizing them
   save_unnormalizer: True # Whether to save the necessary info to be used by the data unnormalizer, need to save it if will infer from this model
 
@@ -36,13 +36,26 @@ cfg_diffusion_setup:
   diffusion_type: 'DDPM' # The name of the diffusion class
   cfg_diffusion:
     compressed_sampling: False
-    clipped_sampling: True
   # The rest of specific configs of the diffusion get built in the script
 
 cfg_epsilon_setup: 
   epsilon_type: 'Epsilon_Cond1DUnet'
-  cfg_epsilon:
-    ... # The specific configs for the epsilon
+  cfg_epsilon: # The specific configs for the epsilon
+    n_bands: 210
+    in_channel: 1
+    out_channel: 1
+    n_endmembers: 3
+    channels: [64,128,256]
+    n_former_blocks: 2
+    n_mid_blocks: 2
+    dropout: 0.05
+    dim_head: 64
+    down_type: 'conformer'
+    mid_type: 'conformer'
+    down_type: 'conformer'
+    conv_kernel_size: 9
+    conv_expansion_factor: 2
+    time_embed_dim: 64
 
 cfg_augmenter_setup:
   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
@@ -54,31 +67,32 @@ cfg_augmenter_setup:
 cfg_scheduler_setup:
   scheduler_type: 'CosSchedule' # Name of the noise scheduler class
   cfg_scheduler:
-    steps: 3000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
+    steps: 1000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
     offset: 8.0e-3
     exp: 2
 
 cfg_tsampler_setup:
-  tsampler_type: 'NormalSampling'
+  tsampler_type: 'UniformSampling'
   cfg_tsampler: 
-    t_max: 3000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
+    t_max: 1000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
     t_min: 0  
 
 cfg_optim_setup:
   optim_type: 'AdamW'
   cfg_optim:
-    lr: 1.0e-5
+    lr: 1.0e-2
     weight_decay: 1.0e-2
     cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
       lrscheduler_type: 'CosineAnealingLR'
       cfg_lrscheduler:
-        ...
+        T_max: 50
 
 cfg_loss_setup:
   loss_type: 'LossDDPM' 
   cfg_loss:
     noise_loss_type: 'huber'
     use_recons_loss: 'observe'
+    ratio_noise_recons: 1.0e-1
 
 
 

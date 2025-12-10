@@ -81,6 +81,19 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
             'min_vals': min_vals,
             'eps': eps
         }
+    elif norm_type == 'statistical': # Standardizes to Zero Mean, Unit Variance
+        mean_vals = torch.mean(spectra_tensor)
+        std_vals = torch.std(spectra_tensor)
+        
+        # Standardize: (X - mu) / sigma
+        # 1e-8 is added to prevent division by zero if a feature is constant
+        spectra_tensor = (spectra_tensor - mean_vals) / (std_vals + 1e-8)
+        
+        norm_out = {
+            'norm_type': norm_type,
+            'mean_vals': mean_vals,
+            'std_vals': std_vals
+        }
     elif norm_type=='none':
         norm_out = {
             'norm_type': norm_type
@@ -154,9 +167,15 @@ class HyperSpectralDataset(Dataset):
         df['Spectra'] = self.names
         df[['gv_fraction', 'npv_fraction', 'soil_fraction']] = self.abundances.detach().cpu().numpy()
         spectral_cols = [w for w in range(spec_range[0], spec_range[1]+1, 10)]
-        df[spectral_cols] = self.spectra.detach().cpu().numpy()
+        spectra_df = pd.DataFrame(
+            self.spectra.detach().cpu().numpy(),
+            columns=spectral_cols,
+            index=df.index  # Critical: ensures rows match up
+        )
+        df = pd.concat([df, spectra_df], axis=1)
+
         df.sort_values(by='orig_index', inplace=True)
-        df.to_csv(save_path)
+        df.to_csv(save_path, index=False)
 
 def save_split_wrapper(subset, save_path, norm_type, spec_range):
     """
@@ -284,6 +303,10 @@ def get_unnormalizer(data_norm_dict:(dict)):
     elif data_norm_dict['norm_type']=='log':
         max_vals, min_vals, eps = data_norm_dict['max_vals'], data_norm_dict['min_vals'], data_norm_dict['eps']
         return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals - min_vals))/2 + min_vals) + eps
+    if data_norm_dict['norm_type'] == 'statistical':
+        mean_vals = data_norm_dict['mean_vals']
+        std_vals =data_norm_dict['std_vals']
+        return lambda normed_data: (normed_data * std_vals) + mean_vals
     elif data_norm_dict['norm_type']=='none':
         return lambda normed_data: normed_data
     else:
