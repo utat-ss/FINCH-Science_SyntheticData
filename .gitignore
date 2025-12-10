@@ -19,3 +19,6 @@ venv/
 # Tensorboard logs
 runs/*
 !runs/**/*.ipynb
+
+# WandB stuff
+wandb/*
