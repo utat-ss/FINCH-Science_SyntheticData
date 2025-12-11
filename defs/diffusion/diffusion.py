@@ -10,7 +10,15 @@ from .noise.noise_sampling import *
 
 class DDPM(nn.Module):
 
-    def __init__(self, epsilon:(nn.Module), augmenter:(nn.Module), scheduler:(Schedule), t_sampler:(Sampling), compressed_sampling:(bool)=False, dynamicthresh_sampling:(bool)=True):
+    def __init__(
+            self, 
+            epsilon:(nn.Module), 
+            augmenter:(nn.Module), 
+            scheduler:(Schedule), 
+            t_sampler:(Sampling), 
+            compressed_sampling:(bool)=False, 
+            dynamicthresh_sampling:(bool)=True, 
+            temperature:(float)=0.8):
         """
         The Denoising Diffusion Probabilistic Model
 
@@ -21,6 +29,7 @@ class DDPM(nn.Module):
             t_sampler: Temperature sampler
             compressed_sampling (bool): If want to use float16 for sampling, this makes sampling faster with lower accuracy
             dynamicthresh_sampling (bool): If we want to apply dynamic thresholding during our smapling process
+            temperature (float): The temperature of the sampler
         """
         super().__init__()
 
@@ -30,6 +39,7 @@ class DDPM(nn.Module):
         self.t_sampler = t_sampler # Take in the temp scheduler
         self.compressed_sampling = compressed_sampling
         self.dynamicthresh_sampling = dynamicthresh_sampling
+        self.temp = temperature
 
         # Precompute all the scheduler params. Here, T=steps
         steps = self.scheduler.steps # Get the total amounts of steps from the scheduler
@@ -126,6 +136,7 @@ class DDPM(nn.Module):
             x_t (torch.Tensor): Signal at time t
             t (int): Integer of time, temperature
             ab (torch.Tensor): Abundances tensor, condition for the epsilon
+            temp (float): The temperature to be used, higher means more risky generation, less means more deterministic, 0 means full determinisim, 1 means full indeterminism
 
         Returns:
             x_(t-1): Signal at time t-1, noise of time t removed
@@ -156,8 +167,8 @@ class DDPM(nn.Module):
         # Sample noise, without any noise at step t=0
         z = torch.randn_like(x_t) if t > 1 else 0.0
 
-        # Update x_t for the next iter
-        x_t = mu_t + coef_sigma * z
+        # Update x_t for the next iter, multiply z by temperature
+        x_t = mu_t + coef_sigma * (z * self.temp)
 
         return x_t
     
@@ -211,12 +222,13 @@ class DDPM(nn.Module):
         Sample a signal using the diffusion model.
 
         Args:
-            ab (Tensor); Abundance condition, shape [B, n_ab]
-            x_T (Tensor, optional); Starting noisy signal. If none, Gaussian noise is used.
+            ab (torch.Tensor); Abundance condition, shape [B, n_ab]
+            x_T (torch.Tensor, optional): Starting noisy signal. If none, Gaussian noise is used.
+            temp (float): The temperature to be used during sampling. Hihger temp, the more risks and crazy spectra are, less temperature means more deterministic
 
         Returns:
-            x_0: (Tensor); Generated spectra, shape [B, n_bands]
-            x_T: (Tensor); The high temperature spectrum before denoising, shape [B, n_bands]
+            x_0 (torch.Tensor): Generated spectra, shape [B, n_bands]
+            x_T (torch.Tensor): The high temperature spectrum before denoising, shape [B, n_bands]
         """
         device = ab.device # Get the device using ab
 
