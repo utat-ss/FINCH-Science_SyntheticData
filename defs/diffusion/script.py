@@ -58,6 +58,9 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_optim_setup = cfg_run['cfg_optim_setup']
     cfg_loss_setup = cfg_run['cfg_loss_setup']
 
+    # Add psi paths to the export path
+    cfg_export['psi1_path'] = cfg_data['cfg_dataset_save']['psi1_path']
+    cfg_export['psi2_path'] = cfg_data['cfg_dataset_save']['psi2_path']
 
     # Dtype config
     dtype_str = cfg_train['dtype']
@@ -129,7 +132,7 @@ if __name__ == "__main__":
     try:
         logging.info("Training function started")
         train_diffusion(cfg_train, cfg_export, diffusion_model, loss_fn, optimizer, lr_scheduler, configured_data)
-        logging.info("Training finished")
+        logging.info("Training finished, everything logged to wandb.")
 
     except Exception as e:
         run.alert(title= "Training crashed", text=str(e))

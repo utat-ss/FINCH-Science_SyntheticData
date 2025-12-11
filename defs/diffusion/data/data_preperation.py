@@ -141,7 +141,7 @@ class HyperSpectralDataset(Dataset):
             'orig_index': self.indices[idx]
         }
     
-    def save_to_csv(self, save_path:(str), norm_type:(dict), spec_range:(list[int])):
+    def save_to_csv(self, save_path:(str), spec_range:(list[int])):
 
         """
         Saves the normalized version of the HyperSpectralDataset into a given save path as a csv.
@@ -158,8 +158,7 @@ class HyperSpectralDataset(Dataset):
 
         import pandas as pd
 
-        if save_path.endswith('.csv'): save_path = save_path.removesuffix('.csv') # Control the save path
-        save_path += f"_{norm_type}"; save_path += '.csv' # Prepared save path
+        if not save_path.endswith('.csv'):  save_path += '.csv' # Control the save path
 
         df = pd.DataFrame()
 
@@ -177,7 +176,7 @@ class HyperSpectralDataset(Dataset):
         df.sort_values(by='orig_index', inplace=True)
         df.to_csv(save_path, index=False)
 
-def save_split_wrapper(subset, save_path, norm_type, spec_range):
+def save_split_wrapper(subset, save_path, spec_range):
     """
     Takes a subset of HyperSpectralDataset, converts it to a full HyperSpectralDataset, and then saves it
     """
@@ -197,7 +196,7 @@ def save_split_wrapper(subset, save_path, norm_type, spec_range):
         indices=sub_orig_indices
     )
 
-    temp_ds.save_to_csv(save_path, norm_type, spec_range)
+    temp_ds.save_to_csv(save_path, spec_range)
 
 def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_save:(dict)) -> list[DataLoader]:
     """
@@ -234,8 +233,8 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
 
     # Separate the dataset into train and temporary
     ds_train, ds_temp = random_split(ds, [n_train, n_test + n_val], generator) 
-    save_split_wrapper(ds_train, cfg_dataset_save['psi1_path'], cfg_dataset_save['norm_type'], cfg_dataset_save['spec_range'])
-    save_split_wrapper(ds_temp, cfg_dataset_save['psi2_path'], cfg_dataset_save['norm_type'], cfg_dataset_save['spec_range'])
+    save_split_wrapper(ds_train, cfg_dataset_save['psi1_path'], cfg_dataset_save['spec_range'])
+    save_split_wrapper(ds_temp, cfg_dataset_save['psi2_path'], cfg_dataset_save['spec_range'])
 
     # Separate the temp dataset into train and test
     ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
