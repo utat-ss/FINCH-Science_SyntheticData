@@ -47,9 +47,9 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name, orig_idx, unnorm_func,n_samples:(int), epoch:(int)=None):
+def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name, orig_idx, unnorm_func, n_samples:(int), epoch:(int)=None):
     """
-    This function plots reconstructed graph to plotly, which is interactive.
+    This function plots reconstructed spectra after unnormalizing graph to plotly, which is interactive.
     """
 
     x_real = x_real.detach().cpu(); x_gen = x_gen.detach().cpu(); abundances = abundances.detach().cpu()

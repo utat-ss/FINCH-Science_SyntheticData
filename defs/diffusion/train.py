@@ -1,10 +1,11 @@
 import wandb
+import json
 import torch
 from torch.utils.data import DataLoader
 from .data.data_preperation import get_unnormalizer
 
 import logging
-from .auxiliary import get_n_params
+from .auxiliary import get_n_params, convert_tensors_to_ints
 from .plotting import plot_to_wandb
 
 def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.nn.Module), loss_fn:(torch.nn.Module), optimizer:(torch.optim), lr_scheduler:(torch.optim.lr_scheduler), configured_data):
@@ -19,18 +20,28 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
     n_epoch = cfg_train['n_epoch'] # Number of epochs
     n_tb_epoch = cfg_train['n_tb_epoch'] # Number of training instances/batches per epoch (this means if have B as batch, total train samples will be n_tb * B)
 
+    # Setup the save paths
+    master_path = cfg_export['master_path']
+    model_save = cfg_export['model_save']
+    if not model_save.endswith('.pth'): model_save += '.pth'
+    model_save = master_path + model_save
+    test_save = cfg_export['test_save']
+    if not test_save.endswith('.parquet'): test_save += '.parquet'
+    test_save = master_path + test_save
+    norm_save = cfg_export['norm_save']
+    if not norm_save.endswith('.json'): norm_save += '.json'
+    norm_save = master_path + norm_save
+    locallog_save = master_path + cfg_export['locallog_save']
+
     # Get the iterators, the data unnormalizer etc.
     iterators, data_norm_dict = configured_data
     iter_train, iter_val, iter_test = iterators
     unnorm_lambda = get_unnormalizer(data_norm_dict)
+    
+    with open(norm_save, "w") as f: # Save the data_norm_dict so that we can unnormalize data in future synthesis cases
+        json.dump(convert_tensors_to_ints(data_norm_dict), f, indent=4)
 
     diffusion_model.to(device) # Move the epsilon and all the vars to the device
-
-    # Setup the save paths
-    model_save = cfg_export['model_save']
-    if not model_save.endswith('.pth'): model_save += '.pth'
-    test_save = cfg_export['test_save']
-    if not test_save.endswith('.parquet'): test_save += '.parquet'
     best_val_loss = float('inf') # We'll use this to save the best model
 
     # Log the param amount for model
@@ -118,6 +129,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             wandb.run.summary["val/loss_best"] = best_val_loss
     
     logging.info(f"Finished {n_epoch} Epochs, Testing Step")
+
     ### TESTING STEP
     diffusion_model.eval()
 
@@ -138,5 +150,23 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         })
         plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, None) # Plot the testing results
 
-    logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'")
+    logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'. Now moving the model, logs, psi1/psi2, norm dict, etc. as artifacts to WandB.") 
 
+    if cfg_export['save_to_wandb']:
+        # Now dump every single thing to wandb
+        # The trained diffusion model
+        model_art = wandb.Artifact(name="trained_model", type="model")
+        model_art.add_file(model_save)
+        wandb.run.log_artifact(model_art)
+
+        # Generated data through data initialization
+        data_art = wandb.Artifact(name="run_data", type="dataset")
+        data_art.add_file(cfg_export['psi1_path'])
+        data_art.add_file(cfg_export['psi2_path'])
+        wandb.run.log_artifact(data_art)
+
+        # Data normalization specifics and test logs
+        meta_art = wandb.Artifact(name="run_metadata", type="metadata")
+        meta_art.add_file(locallog_save)
+        meta_art.add_file(norm_save)
+        wandb.run.log_artifact(meta_art)

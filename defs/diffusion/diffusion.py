@@ -10,7 +10,7 @@ from .noise.noise_sampling import *
 
 class DDPM(nn.Module):
 
-    def __init__(self, epsilon:(nn.Module), augmenter:(nn.Module), scheduler:(Schedule), t_sampler:(Sampling), compressed_sampling:(bool)=True, clipped_sampling:(bool)=True):
+    def __init__(self, epsilon:(nn.Module), augmenter:(nn.Module), scheduler:(Schedule), t_sampler:(Sampling), compressed_sampling:(bool)=False, dynamicthresh_sampling:(bool)=True):
         """
         The Denoising Diffusion Probabilistic Model
 
@@ -20,6 +20,7 @@ class DDPM(nn.Module):
             scheduler: Noise scheduler
             t_sampler: Temperature sampler
             compressed_sampling (bool): If want to use float16 for sampling, this makes sampling faster with lower accuracy
+            dynamicthresh_sampling (bool): If we want to apply dynamic thresholding during our smapling process
         """
         super().__init__()
 
@@ -28,7 +29,7 @@ class DDPM(nn.Module):
         self.scheduler = scheduler # Take in the noise scheduler
         self.t_sampler = t_sampler # Take in the temp scheduler
         self.compressed_sampling = compressed_sampling
-        self.clipped_sampling = clipped_sampling
+        self.dynamicthresh_sampling = dynamicthresh_sampling
 
         # Precompute all the scheduler params. Here, T=steps
         steps = self.scheduler.steps # Get the total amounts of steps from the scheduler
@@ -130,10 +131,6 @@ class DDPM(nn.Module):
             x_(t-1): Signal at time t-1, noise of time t removed
         """
 
-        def _dynamic_threshold():
-
-            pass
-
         t_tensor = torch.full((x_t.size(0),1), t, dtype=torch.long, device=x_t.device) # Create an empty tensor of the timesteps, size of (B,1)
 
         # Predict the noise that was added last step
@@ -151,6 +148,9 @@ class DDPM(nn.Module):
         coef_eps_x = (self._get_coef_at_t(self.sampcoef_eps_x, t_tensor, x_t.ndim)).to(x_t.dtype) # (1-α)/sqrt(1-ᾱ)
         coef_sigma = (self._get_coef_at_t(self.sampcoef_sigma, t_tensor, x_t.ndim)).to(x_t.dtype) # Sigma, equivalent to sqrt(beta_tilda) as per the DDPM paper: https://arxiv.org/pdf/2006.11239
 
+        if self.dynamicthresh_sampling:
+            eps = self._dynamic_threshold(x_t, eps, t_tensor) # Applies the threshold in the "x_0 space"
+
         mu_t = coef_x * (x_t - coef_eps_x * eps)
 
         # Sample noise, without any noise at step t=0
@@ -160,6 +160,51 @@ class DDPM(nn.Module):
         x_t = mu_t + coef_sigma * z
 
         return x_t
+    
+    def _dynamic_threshold(self, x_t, eps, t_tensor):
+
+        """
+        Applies some thresholding in the spectrum space
+        """
+
+        # Take in the original dtype of x
+        init_dtype = x_t.dtype
+
+        # Cast them to float32 because we'll be doing a lot of very critical math cals
+        x_t = x_t.to(torch.float32)
+        eps = x_t.to(torch.float32)
+
+        # infer sqrt(ᾱ) and sqrt(1-ᾱ) 
+        sqrt_alpha_bar = self._get_coef_at_t(self.traincoef_div, t_tensor, x_t.ndim).to(torch.float32)
+        sqrt_one_minus_alpha_bar = self._get_coef_at_t(self.traincoef_eps_x, t_tensor, x_t.ndim).to(torch.float32)
+
+        # Predict the actual x0 from the given timestep
+        pred_x0 = (x_t - sqrt_one_minus_alpha_bar * eps) / sqrt_alpha_bar
+
+        # Assume some percentile for which entries they'll be threshed
+        static_thresh = 4.0  
+        percentile = 0.995
+
+        # Flatten the whole thing
+        pred_x0_flat = pred_x0.abs().reshape(pred_x0.shape[0], -1)
+
+        # Get the vals that are in quantile
+        s = torch.quantile(pred_x0_flat, percentile, dim=1)
+        s = torch.maximum(s, torch.full_like(s, static_thresh))
+
+        # Reshape it
+        s = s.view(-1, *([1]*(pred_x0.ndim-1)))
+
+        # Clamp it hard
+        pred_x0 = torch.clamp(pred_x0, -s, s) 
+        
+        # Rescale everything
+        pred_x0 = pred_x0 * (static_thresh / s)
+
+        # Get back the epsilon predictions
+        eps_new = (x_t - sqrt_alpha_bar * pred_x0) / sqrt_one_minus_alpha_bar
+
+        return eps_new.to(init_dtype)
 
     def sample(self, ab, x_T=None):
         """
