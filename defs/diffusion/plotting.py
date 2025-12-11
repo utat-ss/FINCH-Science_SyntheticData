@@ -103,7 +103,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             hovermode="x unified",
             template="plotly_white"
         )
-        wandb.log({"test/interactive_plot": fig})
+        wandb.log({"test/interactive_plot": wandb.Html(fig.to_html())})
     
     else:
         fig.update_layout(
@@ -113,5 +113,5 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             template="plotly_white"
         )
 
-        wandb.log({"val/interactive_plot": fig, "epoch": epoch})
+        wandb.log({"val/interactive_plot": wandb.Html(fig.to_html()), "epoch": epoch})
 
