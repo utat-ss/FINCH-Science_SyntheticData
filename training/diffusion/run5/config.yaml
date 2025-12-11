@@ -40,6 +40,8 @@ cfg_diffusion_setup:
     compressed_sampling: False
     dynamicthresh_sampling: True
     temperature: 0.0
+    guidance_scale: 3.0
+    uncond_prob: 0.1
   # The rest of specific configs of the diffusion get built in the script
 
 cfg_epsilon_setup: 

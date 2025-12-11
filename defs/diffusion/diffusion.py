@@ -8,6 +8,9 @@ import torch.nn as nn
 from .noise.noise_scheduling import *
 from .noise.noise_sampling import *
 
+import copy
+from contextlib import contextmanager
+
 class DDPM(nn.Module):
 
     def __init__(
@@ -18,7 +21,13 @@ class DDPM(nn.Module):
             t_sampler:(Sampling), 
             compressed_sampling:(bool)=False, 
             dynamicthresh_sampling:(bool)=True, 
-            temperature:(float)=0.8):
+            sampling_method:(str)='ddpm',
+            temperature:(float)=0.8,
+            guidance_scale:(float)=2.0,
+            uncond_prob:(float)=0.1,
+            ema_decay:(float)= 0.9999,
+            ddim_steps:(int)=50
+        ):
         """
         The Denoising Diffusion Probabilistic Model
 
@@ -29,7 +38,12 @@ class DDPM(nn.Module):
             t_sampler: Temperature sampler
             compressed_sampling (bool): If want to use float16 for sampling, this makes sampling faster with lower accuracy
             dynamicthresh_sampling (bool): If we want to apply dynamic thresholding during our smapling process
+            sampling_method (str): Uses either 'ddpm' backend or 'ddim' backend as a sampling method
             temperature (float): The temperature of the sampler
+            guidance_scale (float): The scale for clasifier free guidance
+            uncond_prob (float): Probability that during training conditional input gets dropped
+            ema_decay (float): The decay amount for Exponential Moving Average (EMA)
+            ddim_steps (int): Step amount for ddim sampling option
         """
         super().__init__()
 
@@ -39,7 +53,12 @@ class DDPM(nn.Module):
         self.t_sampler = t_sampler # Take in the temp scheduler
         self.compressed_sampling = compressed_sampling
         self.dynamicthresh_sampling = dynamicthresh_sampling
+        self.sampling_method = sampling_method
         self.temp = temperature
+        self.guidance_scale = guidance_scale
+        self.uncond_prob = uncond_prob
+        self.ema_decay = ema_decay
+        self.ddim_steps = ddim_steps
 
         # Precompute all the scheduler params. Here, T=steps
         steps = self.scheduler.steps # Get the total amounts of steps from the scheduler
@@ -62,6 +81,9 @@ class DDPM(nn.Module):
 
         # Get the bands from the epsilon
         self.n_bands = self.epsilon.n_bands # Get the bands, used to randomly generate noise
+
+        # Get an EMA copy at the start, we'll be using this to track Exponential Moving Average
+        self.epsilon_ema = copy.deepcopy(self.epsilon).eval().requires_grad_(False)
 
     def _get_coef_at_t(self, buffer:(torch.Tensor), t:(torch.Tensor), x_ndim:(int)):
         """
@@ -124,11 +146,19 @@ class DDPM(nn.Module):
         """
         x_0 = self.augmenter(x_0) # Augment the inputted data
         t, noise, x_t = self._add_noise(x_0) # Add some noise to it randomly
-        x_0_hat, eps_pred = self._recover_signal(x_t, t, ab) # Recover the signal and pred the noise
+
+        # Logic for conditional droping probability
+        if self.uncond_prob > 0.0 and self.training: # If we have such a probability and in the training mode, drop the abundance
+            mask = torch.rand(ab.size(0), 1, device=ab.device) < self.uncond_prob # Allows non uniform dropping within a batch
+            ab_masked = torch.where(mask, torch.zeros_like(ab), ab) # If dropped, get zeros like, if not, get the full thing
+        else: # If we are not dropping at all, just pass in the undropped abundances
+            ab_masked = ab 
+
+        x_0_hat, eps_pred = self._recover_signal(x_t, t, ab_masked) # Recover the signal and pred the noise
 
         return x_0_hat, x_0, eps_pred, noise
 
-    def _sample_step(self, x_t, t, ab):
+    def _sample_step_ddpm(self, x_t, t, ab):
         """
         A sampling substep where the signal is moved from x_t to x_(t-1).
 
@@ -136,8 +166,7 @@ class DDPM(nn.Module):
             x_t (torch.Tensor): Signal at time t
             t (int): Integer of time, temperature
             ab (torch.Tensor): Abundances tensor, condition for the epsilon
-            temp (float): The temperature to be used, higher means more risky generation, less means more deterministic, 0 means full determinisim, 1 means full indeterminism
-
+           
         Returns:
             x_(t-1): Signal at time t-1, noise of time t removed
         """
@@ -146,14 +175,7 @@ class DDPM(nn.Module):
 
         # Predict the noise that was added last step
 
-        if self.compressed_sampling:
-            with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
-                eps.to(x_t.dtype)
-        else:
-            eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
-
-        if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
+        eps = self._cfg_forward(x_t, t_tensor, ab)
 
         coef_x = (self._get_coef_at_t(self.sampcoef_x, t_tensor, x_t.ndim)).to(x_t.dtype) # 1/sqrt(α)
         coef_eps_x = (self._get_coef_at_t(self.sampcoef_eps_x, t_tensor, x_t.ndim)).to(x_t.dtype) # (1-α)/sqrt(1-ᾱ)
@@ -172,6 +194,51 @@ class DDPM(nn.Module):
 
         return x_t
     
+    def _sample_step_ddim(x_t, t_now, t_next, ab):
+
+        pass
+
+    def _cfg_forward(self, x_t, t_tensor, ab):
+        """
+        A forward process to get the epsilon, for the sampling step. This function allows the option to use CFG.
+        It also has methods to conduct compressed sampling i.e. running the epsilon network in float16.
+        """
+
+        if self.guidance_scale > 1.0: # If guidance scale is more than one, return somewhat unquided epsilon
+
+            x_in = torch.cat([x_t, x_t])
+            t_in = torch.cat([t_tensor, t_tensor])
+            ab_in = torch.cat([ab, torch.zeros_like(ab)])
+
+            if self.compressed_sampling:
+                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
+                    eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
+                    eps = eps.to(x_t.dtype)
+            else:
+                eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
+
+            if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
+
+            eps_cond, eps_uncond = eps.chunk(2)
+
+            return eps_uncond + self.guidance_scale * (eps_cond - eps_uncond)
+        
+        elif self.guidance_scale == 1.0: # If guidance scale is 1, return the regular, fully guided sampling
+
+            if self.compressed_sampling:
+                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
+                    eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
+                    eps = eps.to(x_t.dtype)
+            else:
+                eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
+
+            if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
+
+            return eps
+
+        else:
+            raise ValueError(f"Unknown guidance scale: {self.guidance_scale}. Must be >= 1.0")
+
     def _dynamic_threshold(self, x_t, eps, t_tensor):
 
         """
@@ -224,7 +291,6 @@ class DDPM(nn.Module):
         Args:
             ab (torch.Tensor); Abundance condition, shape [B, n_ab]
             x_T (torch.Tensor, optional): Starting noisy signal. If none, Gaussian noise is used.
-            temp (float): The temperature to be used during sampling. Hihger temp, the more risks and crazy spectra are, less temperature means more deterministic
 
         Returns:
             x_0 (torch.Tensor): Generated spectra, shape [B, n_bands]
@@ -240,7 +306,31 @@ class DDPM(nn.Module):
         # Reverse diffusion loop, for more detail on DDPM, check the paper on it.
         x_t = x_T # With such redefinition, we make sure that we preserve high temperature spectrum.
 
-        for t in self.t_s_reverse[:-1]: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1. By slicing, we prevent t=0, which is when we have no noise.
-            x_t = self._sample_step(x_t, t, ab)
+        if self.sampling_method == 'ddpm':
+            for t in self.t_s_reverse[:-1]: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1. By slicing, we prevent t=0, which is when we have no noise.
+                x_t = self._sample_step_ddpm(x_t, t, ab)
+
+                return x_t, x_T
+        
+        elif self.sampling_method == 'ddim':
+            step_size = self.scheduler.steps // self.ddim_steps
+            seq = list(range(0, self.scheduler.steps, step_size))
+            seq = list(reversed(seq)) + [0] # Ensure we end at 0
+
+            # Iterate pairs: (1000, 980), (980, 960)...
+            for i in range(len(seq) - 1):
+                t_now = seq[i]
+                t_next = seq[i+1] # This is t-1 in the formula
+                # Note: DDIM usually ignores 'temp' or uses it differently (eta)
+                x_t = self._sample_step_ddim(x_t, t_now, t_next, ab)
 
         return x_t, x_T
+
+    def update_ema(self):
+
+        pass
+
+    @contextmanager
+    def use_ema(self):
+
+        pass
