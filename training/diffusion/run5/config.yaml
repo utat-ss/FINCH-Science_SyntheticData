@@ -35,7 +35,7 @@ cfg_export:
   save_to_wandb: False
 
 cfg_diffusion_setup:
-  diffusion_type: 'DDPM' # The name of the diffusion class
+  diffusion_type: 'GaussianDiffusion' # The name of the diffusion class
   cfg_diffusion:
     compressed_sampling: False
     dynamicthresh_sampling: True

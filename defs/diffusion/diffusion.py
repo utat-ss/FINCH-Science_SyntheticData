@@ -11,7 +11,7 @@ from .noise.noise_sampling import *
 import copy
 from contextlib import contextmanager
 
-class DDPM(nn.Module):
+class GaussianDiffusion(nn.Module):
 
     def __init__(
             self, 
@@ -51,14 +51,14 @@ class DDPM(nn.Module):
         self.augmenter = augmenter # Take in the data augmenter
         self.scheduler = scheduler # Take in the noise scheduler
         self.t_sampler = t_sampler # Take in the temp scheduler
-        self.compressed_sampling = compressed_sampling
-        self.dynamicthresh_sampling = dynamicthresh_sampling
-        self.sampling_method = sampling_method
-        self.temp = temperature
-        self.guidance_scale = guidance_scale
-        self.uncond_prob = uncond_prob
-        self.ema_decay = ema_decay
-        self.ddim_steps = ddim_steps
+        self.compressed_sampling = compressed_sampling # Boolean for compressing the epsilon of sampling step to float16
+        self.dynamicthresh_sampling = dynamicthresh_sampling # Boolean for dynamically thresholding during sampling
+        self.sampling_method = sampling_method # The sampling method, either ddpm or ddim
+        self.temp = temperature # Temperature to change the chaoticity of the model during training, 1 is full
+        self.guidance_scale = guidance_scale # The guidance scale to change the 'importance' of conditions
+        self.uncond_prob = uncond_prob # Unconditionality probability during training
+        self.ema_decay = ema_decay # The amount of decay for t-1 step of EMA while adding t step of model
+        self.ddim_steps = ddim_steps # If DDIM is passed as an option for sampling method, this is used to determine delta_t
 
         # Precompute all the scheduler params. Here, T=steps
         steps = self.scheduler.steps # Get the total amounts of steps from the scheduler
@@ -84,6 +84,7 @@ class DDPM(nn.Module):
 
         # Get an EMA copy at the start, we'll be using this to track Exponential Moving Average
         self.epsilon_ema = copy.deepcopy(self.epsilon).eval().requires_grad_(False)
+        self.ema_step = 0 # Set the step count to track how many times we have updated ema
 
     def _get_coef_at_t(self, buffer:(torch.Tensor), t:(torch.Tensor), x_ndim:(int)):
         """
@@ -194,9 +195,45 @@ class DDPM(nn.Module):
 
         return x_t
     
-    def _sample_step_ddim(x_t, t_now, t_next, ab):
+    def _sample_step_ddim(self, x_t, t_now, t_next, ab):
+        """
+        Sampling step using the DDIM logic. Takes the x_t sample at t_now/t_1/t_current and samples x_t at 
+        t_next/t_2/t_target; such that t_1 > t_2. This is done by taking x_(t_1) to x_0 then back to x_(t_2).
 
-        pass
+        Args:
+            x_t: The sample at t_now/t_1/t_current
+            t_now: The current time the sample is at, equivalent to t_1/t_current
+            t_next: The next time we want the sample sampled at, equivalent to t_2/t_target
+            ab: The abundance condition vector
+            
+        Returns:
+            x_target: The sampled x_t where t = t_2/t_next/t_target
+        """
+        # Get the tensors of current time (t_1) and the next time (t_2) such that t_1 > t_2
+        t_tensor_current = torch.full((x_t.size(0),1), t_now, dtype=torch.long, device=x_t.device)
+        t_tensor_target = torch.full((x_t.size(0),1), t_next, dtype=torch.long, device=x_t.device)
+
+        # Predict the noise of the sample at t_current/t_now, apply classifier free guidance if needed
+        eps = self._cfg_forward(x_t, t_tensor_current, ab)
+
+        # Apply dynamiic threshing if it exists
+        if self.dynamicthresh_sampling:
+            eps = self._dynamic_threshold(x_t, eps, t_tensor_current)
+
+        # Get the sqrt(alpha_bar) and sqrt(1-alpha_bar) for both t_current and t_target
+        sqrt_alpha_bar_current = self._get_coef_at_t(self.traincoef_div, t_tensor_current, x_t.ndim)
+        sqrt_minus_alpha_bar_current = self._get_coef_at_t(self.traincoef_eps_x, t_tensor_current, x_t.ndim)
+        sqrt_alpha_bar_target = self._get_coef_at_t(self.traincoef_div, t_tensor_target, x_t.ndim)
+        sqrt_minus_alpha_bar_target = self._get_coef_at_t(self.traincoef_eps_x, t_tensor_target, x_t.ndim)
+    
+        # Predict the x_0 given current time (t_1/t_now/t_current)
+        pred_x_0 = (x_t - sqrt_minus_alpha_bar_current * eps) / sqrt_alpha_bar_current
+
+        # Now, assuming that we have the clear x_0, we want to get x_t at t_2/t_next/t_target
+        dir_x_t = sqrt_minus_alpha_bar_target * eps # Predict the direction that will change x_0 to x_(t_2)
+        x_target = sqrt_alpha_bar_target * pred_x_0 + dir_x_t # Add the change
+        
+        return x_target # Return the target x_(t_2/t_next/t_target)
 
     def _cfg_forward(self, x_t, t_tensor, ab):
         """
@@ -223,7 +260,7 @@ class DDPM(nn.Module):
 
             return eps_uncond + self.guidance_scale * (eps_cond - eps_uncond)
         
-        elif self.guidance_scale == 1.0: # If guidance scale is 1, return the regular, fully guided sampling
+        elif self.guidance_scale == 1.0: # If guidance scale is 1, return the regular, 1 scale guided sampling
 
             if self.compressed_sampling:
                 with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
@@ -297,7 +334,6 @@ class DDPM(nn.Module):
             x_T (torch.Tensor): The high temperature spectrum before denoising, shape [B, n_bands]
         """
         device = ab.device # Get the device using ab
-
         B = ab.size(0) # Get the batch number using ab
 
         if x_T is None: # If no x_T is given, define some using gaussian
@@ -309,28 +345,41 @@ class DDPM(nn.Module):
         if self.sampling_method == 'ddpm':
             for t in self.t_s_reverse[:-1]: # Reversing the range so that: t = T, T-1, T-2, ..., 2, 1. By slicing, we prevent t=0, which is when we have no noise.
                 x_t = self._sample_step_ddpm(x_t, t, ab)
-
-                return x_t, x_T
         
         elif self.sampling_method == 'ddim':
             step_size = self.scheduler.steps // self.ddim_steps
-            seq = list(range(0, self.scheduler.steps, step_size))
+            seq = list(range(0, self.scheduler.steps + 1, step_size))
             seq = list(reversed(seq)) + [0] # Ensure we end at 0
-
             # Iterate pairs: (1000, 980), (980, 960)...
             for i in range(len(seq) - 1):
                 t_now = seq[i]
                 t_next = seq[i+1] # This is t-1 in the formula
-                # Note: DDIM usually ignores 'temp' or uses it differently (eta)
                 x_t = self._sample_step_ddim(x_t, t_now, t_next, ab)
 
         return x_t, x_T
 
     def update_ema(self):
-
-        pass
+        """
+        Update the EMA epsilon we are keeping track of, given the current parameters of epsilon
+        """
+        self.ema_step += 1
+        with torch.no_grad():
+            # Iterate over both the online parameters and the EMA parameters
+            for p_online, p_ema in zip(self.epsilon.parameters(), self.epsilon_ema.parameters()):
+                # Update by simply:
+                # p_ema = gamma * p_ema + p_online * (1 - gamma)
+                p_ema.data.mul_(self.ema_decay).add_(p_online.data, alpha= 1 - self.ema_decay)
 
     @contextmanager
     def use_ema(self):
-
-        pass
+        """
+        Context manager to handle swapping the EMA parameters in and out, so that we can sample with EMA params if needed.
+        """
+        # Backup the online version of epsilon to the cpu, to keep vram usage lower
+        # We cannot simply do a deep copy since it copies everything from vram to vram
+        online_backup = {key: value.cpu() for key, value in self.epsilon.state_dict().items()} # A very large dict of epsilon
+        self.epsilon.load_state_dict(self.epsilon_ema.state_dict()) # Load the EMA version of epsilon to the class epsilon
+        try:
+            yield # Within the context, use the EMA parameters
+        finally:
+            self.epsilon.load_state_dict(online_backup) # Once we are done with the context, reload the online epsilon version
