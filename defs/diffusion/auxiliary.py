@@ -17,8 +17,9 @@ def setup_wandb(cfg_run, cfg_export):
     )
 
     run = wandb.init(
-        project= cfg_export['project_name'],
-        name= cfg_export.get('run_name', 'default'),
+        entity= cfg_export['entity'],
+        project= cfg_export['project'],
+        name= cfg_export.get('name', 'default'),
         config= cfg_run,
         job_type= 'training',
         settings=settings
@@ -30,14 +31,41 @@ def setup_logging(cfg_export):
     import logging
     import sys
 
-    local_log = cfg_export['local_log']
+    master_path = cfg_export['master_path']
+    locallog_save = cfg_export['locallog_save']
+    if not locallog_save.endswith('.txt'): locallog_save += '.txt'
+    locallog_path = master_path + locallog_save
 
     logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     handlers=[
-        logging.FileHandler(local_log, mode='w'), # 'w' overwrites, 'a' appends
+        logging.FileHandler(locallog_path, mode='w'), # 'w' overwrites, 'a' appends
         logging.StreamHandler(sys.stdout)                  # Keeps console output active for W&B
         ]
     )
+
+def convert_tensors_to_ints(data):
+    """
+    Recursively converts all single-element PyTorch tensors in a dictionary 
+    to standard Python integers.
+    """
+    import torch
+
+    if isinstance(data, dict):
+        return {k: convert_tensors_to_ints(v) for k, v in data.items()}
+    
+    elif isinstance(data, list):
+        return [convert_tensors_to_ints(i) for i in data]
+    
+    elif isinstance(data, torch.Tensor):
+        # Check if the tensor is a single entry (scalar)
+        if data.numel() == 1:
+            return float(data.item())
+        else:
+            # Return original tensor if it contains multiple elements
+            return data
+            
+    else:
+        return data
