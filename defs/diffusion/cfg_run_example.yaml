@@ -9,7 +9,7 @@ cfg_data:
   cfg_loader:
     n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
     n_test: 123 # Number of test points at the end of training
-    n_train_batch: 5 # The training batch size
+    n_train_batch: 32 # The training batch size
     seed: 3169 # Seed for the data splitters
   
   cfg_dataset_save:
@@ -17,7 +17,7 @@ cfg_data:
     psi2_path: ... # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
-  n_epoch: 50
+  n_epoch: 75
   n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
   device: 'cuda' # Device to be used
   dtype: 'float32' # Datatype to be used
@@ -36,9 +36,12 @@ cfg_diffusion_setup:
   cfg_diffusion:
     compressed_sampling: False
     dynamicthresh_sampling: True
+    sampling_method: 'ddim'
     temperature: 0.8
     guidance_scale: 3.0
     uncond_prob: 0.1
+    ema_decay: 0.999
+    ddim_steps: 50
   # The rest of specific configs of the diffusion get built in the script
 
 cfg_epsilon_setup: 

@@ -78,6 +78,8 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             torch.nn.utils.clip_grad_norm_(diffusion_model.epsilon.parameters(), max_norm=1.0) # Clip grads
             optimizer.step()
 
+            diffusion_model.update_ema() # Update the EMA parameters after each batch in training
+
             # Log train step results
             total_train_loss += train_loss.item()
             log_payload = {
@@ -112,7 +114,8 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             x_0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
             x_0 = x_0.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
 
-            x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
+            with diffusion_model.use_ema(): # Use the Exponential Moving Average model to sample
+                x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
 
             val_loss = loss_fn.sample_loss(x_0_hat, x_0)
             wandb.log({
@@ -141,7 +144,8 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         x_0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
         x_0 = x_0.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
 
-        x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
+        with diffusion_model.use_ema(): # Use the Exponential Moving Average model to sample
+            x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
 
         test_loss = loss_fn.sample_loss(x_0_hat, x_0)
 
