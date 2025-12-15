@@ -239,7 +239,7 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     # Separate the temp dataset into train and test
     ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
 
-    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
+    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
 
     return  dataloaders # Make dataloaders into a list and ship them
 

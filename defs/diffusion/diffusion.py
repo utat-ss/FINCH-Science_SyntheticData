@@ -25,7 +25,7 @@ class GaussianDiffusion(nn.Module):
             temperature:(float)=0.8,
             guidance_scale:(float)=2.0,
             uncond_prob:(float)=0.1,
-            ema_decay:(float)= 0.9999,
+            ema_decay:(float)= 0.999,
             ddim_steps:(int)=50
         ):
         """
@@ -42,7 +42,7 @@ class GaussianDiffusion(nn.Module):
             temperature (float): The temperature of the sampler
             guidance_scale (float): The scale for clasifier free guidance
             uncond_prob (float): Probability that during training conditional input gets dropped
-            ema_decay (float): The decay amount for Exponential Moving Average (EMA)
+            ema_decay (float): The decay amount for Exponential Moving Average (EMA), keep in mind memory = 1/(1-ema_decay)
             ddim_steps (int): Step amount for ddim sampling option
         """
         super().__init__()
@@ -367,7 +367,7 @@ class GaussianDiffusion(nn.Module):
             # Iterate over both the online parameters and the EMA parameters
             for p_online, p_ema in zip(self.epsilon.parameters(), self.epsilon_ema.parameters()):
                 # Update by simply:
-                # p_ema = gamma * p_ema + p_online * (1 - gamma)
+                # p_ema = beta * p_ema + p_online * (1 - beta). Where beta = ema_decay
                 p_ema.data.mul_(self.ema_decay).add_(p_online.data, alpha= 1 - self.ema_decay)
 
     @contextmanager
