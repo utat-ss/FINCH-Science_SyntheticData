@@ -29,14 +29,11 @@ class UniformSampling(Sampling):
 
     def __call__(self, x_0):
 
-        # Add 1 to the t_max, because of how  randint handles the high value. By doing that, we include t_max as a possibility too.
-        self.t_max += 1
-
         size = (x_0.size(0),1) # Take in the size of t
         device = x_0.device    # Take in the device of t
         dtype = x_0.dtype      # Take in the dtype of t
 
-        t = torch.randint(low=self.t_min, high=self.t_max, size=size, device=device)
+        t = torch.randint(low=self.t_min, high=(self.t_max+1), size=size, device=device)
 
         return t.long()
 

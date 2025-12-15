@@ -1,17 +1,15 @@
-import diffusion
+from . import diffusion
 
 from .epsilon import unet
 from .epsilon import mlp
 
 import torch.optim as optim
 
-import loss as custom_losses
+from . import loss as custom_losses
 import torch.nn as nn
 
-from .noise.noise_scheduling import *
-
-from .noise.noise_sampling import *
-
+from .noise import noise_scheduling
+from .noise import noise_sampling
 from .data import data_augmentation
 
 def load_diffusion (cfg_diffusion_setup):
@@ -53,13 +51,14 @@ def load_optim(cfg_optim_setup, epsilon):
         raise ValueError(f"Optimizer '{optim_type}' is not a valid optimizer in torch.optim. "
                          f"Check spelling (e.g., 'Adam' vs 'adam').")
     
-    optimizer = opt_cls(epsilon.parameters(), **cfg_optim)
+    cfg_optim_temp = cfg_optim; cfg_optim_temp.pop('cfg_lrscheduler_setup', None)
+    optimizer = opt_cls(epsilon.parameters(), **cfg_optim_temp)
 
     lr_scheduler = None
 
-    if 'cfg_lrscheduler_setup' in cfg_optim_setup and cfg_optim_setup['cfg_lrscheduler_setup']:
+    if 'cfg_lrscheduler_setup' in cfg_optim and cfg_optim['cfg_lrscheduler_setup']:
 
-        lrscheduler_setup = cfg_optim_setup['cfg_lrscheduler_setup']
+        lrscheduler_setup = cfg_optim['cfg_lrscheduler_setup']
         lrscheduler_type = lrscheduler_setup['lrscheduler_type']
         cfg_lrscheduler = lrscheduler_setup.get('cfg_lrscheduler', {})
 
@@ -92,8 +91,8 @@ def load_scheduler(cfg_scheduler_setup):
     scheduler_type = cfg_scheduler_setup['scheduler_type']
     cfg_scheduler = cfg_scheduler_setup['cfg_scheduler']
 
-    if hasattr(Schedule, scheduler_type):
-        scheduler_cls = getattr(Schedule, scheduler_type)
+    if hasattr(noise_scheduling, scheduler_type):
+        scheduler_cls = getattr(noise_scheduling, scheduler_type)
     else:
         raise ValueError(f"Unknown/Unsupported noising scheduler type: {scheduler_type}")
     
@@ -105,8 +104,8 @@ def load_tsampler(cfg_tsampler_setup):
     tsampler_type = cfg_tsampler_setup['tsampler_type']
     cfg_tsampler = cfg_tsampler_setup['cfg_tsampler']
 
-    if hasattr(Sampling, tsampler_type):
-        tsampler_cls = getattr(Sampling, tsampler_type)
+    if hasattr(noise_sampling, tsampler_type):
+        tsampler_cls = getattr(noise_sampling, tsampler_type)
     else:
         raise ValueError(f"Unknown/Unsupported time sampler type: {tsampler_type}")
     

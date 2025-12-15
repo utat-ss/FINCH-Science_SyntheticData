@@ -9,6 +9,34 @@ from torch.utils.data import DataLoader, TensorDataset
 from model import MLP
 
 
+class HybridLoss(nn.Module):
+    """
+    Hybrid loss function combining MSE loss with abundance sum constraint.
+    
+    Loss = MSE(pred, target) + lambda * |1 - sum(pred)|
+    
+    Args:
+        lambda_weight (float): Weight for the abundance sum constraint term
+    """
+    def __init__(self, lambda_weight=1.0):
+        super(HybridLoss, self).__init__()
+        self.lambda_weight = lambda_weight
+        self.mse_loss = nn.MSELoss()
+    
+    def forward(self, pred, target):
+        # Standard MSE loss
+        mse_term = self.mse_loss(pred, target)
+        
+        # Abundance sum constraint: |1 - sum(pred)|
+        abundance_sum = torch.sum(pred, dim=1)  # Sum across the 3 fractions for each sample
+        constraint_term = torch.mean(torch.abs(1.0 - abundance_sum))
+        
+        # Combined loss
+        total_loss = mse_term + self.lambda_weight * constraint_term
+        
+        return total_loss
+
+
 def load_data(csv_path="simpler_data_rwc.csv", test_size=0.2, batch_size=32):
     """Load and prepare the data for training 
     - CSV file: Path of the csv data file 
@@ -65,18 +93,19 @@ def load_data(csv_path="simpler_data_rwc.csv", test_size=0.2, batch_size=32):
     return train_loader, val_loader, test_loader, scaler
 
 
-def train_model(input_size=210, hidden_size=64, dropout_rate=0.2, learning_rate=0.001, 
-                num_epochs=50, patience=10):
+def train_model(input_size=210, hidden_sizes=[64], dropout_rate=0.2, learning_rate=0.001, 
+                num_epochs=50, patience=10, lambda_weight=1.0):
     """
     Simplified MLP training for vegetation fraction prediction.
     
     Args:
         input_size: Number of spectral bands (default: 210 for 400-2490nm)
-        hidden_size: Hidden layer neurons
+        hidden_sizes: List of hidden layer sizes (e.g., [128, 128] for 128-128-3)
         dropout_rate: Dropout regularization
         learning_rate: Adam learning rate
         num_epochs: Maximum training epochs
         patience: Early stopping patience
+        lambda_weight: Weight for abundance sum constraint in hybrid loss
     
     Returns:
         model: Trained MLP
@@ -88,14 +117,14 @@ def train_model(input_size=210, hidden_size=64, dropout_rate=0.2, learning_rate=
     train_loader, val_loader, test_loader, scaler = load_data()
     
     # Create model (matches MLP architecture)
-    model = MLP(input_size=input_size, hidden_size=hidden_size, dropout_rate=dropout_rate)
+    model = MLP(input_size=input_size, hidden_sizes=hidden_sizes, dropout_rate=dropout_rate)
     
     # Setup training
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    criterion = nn.MSELoss()
+    criterion = HybridLoss(lambda_weight=lambda_weight)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
     
-    print(f"Training MLP: {input_size} → {hidden_size} → 3 fractions")
+    print(f"Training MLP: {model.get_architecture()}")
     
     best_loss = float('inf')
     patience_count = 0
