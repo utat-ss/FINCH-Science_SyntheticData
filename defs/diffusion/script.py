@@ -58,6 +58,9 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_optim_setup = cfg_run['cfg_optim_setup']
     cfg_loss_setup = cfg_run['cfg_loss_setup']
 
+    # Add psi paths to the export path
+    cfg_export['psi1_path'] = cfg_data['cfg_dataset_save']['psi1_path']
+    cfg_export['psi2_path'] = cfg_data['cfg_dataset_save']['psi2_path']
 
     # Dtype config
     dtype_str = cfg_train['dtype']
@@ -86,10 +89,10 @@ def parse_cfg_dict(cfg_run:(dict)):
 
 #region Main Loop
 
-from loaders import *
-from data.data_preperation import *
-from train import train_diffusion
-from auxiliary import setup_wandb, setup_logging
+from .loaders import *
+from .data.data_preperation import *
+from .train import train_diffusion
+from .auxiliary import setup_wandb, setup_logging
 
 import traceback
 import logging
@@ -112,15 +115,16 @@ if __name__ == "__main__":
     logging.info("Data has been parsed and configured")
 
     # Initialize stuff
-    cfg_diffusion_setup['cfg_diffusion'] = {
+    cfg_diffusion_addon = {
         'epsilon': load_epsilon(cfg_epsilon_setup),
         'augmenter': load_augmenter(cfg_augmenter_setup),
         'scheduler': load_scheduler(cfg_scheduler_setup),
         't_sampler': load_tsampler(cfg_tsampler_setup)
     }
+    cfg_diffusion_setup['cfg_diffusion'].update(cfg_diffusion_addon)
     diffusion_model = load_diffusion(cfg_diffusion_setup)
 
-    optimizer, lr_scheduler = load_optim(cfg_optim_setup)
+    optimizer, lr_scheduler = load_optim(cfg_optim_setup, diffusion_model.epsilon)
     loss_fn = load_loss(cfg_loss_setup)
 
     logging.info("The diffusion model, optimizer, loss function etc. has been configured")
@@ -128,7 +132,7 @@ if __name__ == "__main__":
     try:
         logging.info("Training function started")
         train_diffusion(cfg_train, cfg_export, diffusion_model, loss_fn, optimizer, lr_scheduler, configured_data)
-        logging.info("Training finished")
+        logging.info("Training finished, everything logged to wandb.")
 
     except Exception as e:
         run.alert(title= "Training crashed", text=str(e))
