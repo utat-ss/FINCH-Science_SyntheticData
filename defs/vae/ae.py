@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class VEncoder(nn.Module):
     """
     Encoder for VCCAE
@@ -42,10 +43,11 @@ class VEncoder(nn.Module):
 
     def forward(self, x):
         k = self.encoder_0(x)
-        variation = self.encoder_var(k)
+        variation = self.encoder_var(k) # Produce some variation with respect to the inputted spectrum
         encoded = self.encoder_1(k)
         return encoded, variation
     
+
 class VDecoder(nn.Module):
     """
     Decoder for VCCAE
@@ -99,6 +101,7 @@ class VDecoder(nn.Module):
         decoded = self.decoder(x)
         return decoded
 
+
 class VConditioner(nn.Module):
 
     def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
@@ -125,11 +128,80 @@ class VConditioner(nn.Module):
         self.abundance_adjust = nn.Sequential(*ab_mlp_layers)
 
     def forward(self, encoded, abundance):
-        return torch.cat((encoded, self.abundance_adjust(abundance)))
+        """
+        Forward method for conditioner.
 
+        Applies an MLP on inputted abundances, and concatenates the vector onto the encoded latent vector to produce
+        a conditioned vector.
+        """
+        return torch.cat((encoded, self.abundance_adjust(abundance))) 
+
+
+class VCCAE(nn.Module):
+    """
+    Will use VEncoder, VConditioner and VDecoder classes, and playing around with their layers
+
+    Args:
+        - conv_layers: Both size and number of convolution layers
+        - mlp_layers: Size and number of layers in MLP
+        - num_spectra: number of individual data points to be taken. (Default at 210)
+        - out_layer: Size of output layer
+        - c_d: Contains information about the convolution's parameters. (Included in definition below)
+        - ab_mlp: Size and number of conditioner MLP layers.
+    """
+    def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
+                 c_d:dict = {}, ab_mlp = [3, 64, 10]):
+        super(VCCAE, self).__init__()
+        self.conv_details = {
+            'k_size': 3,        #kernel size
+            'stride': 1,        #
+            'pad': 1,           #padding
+            'pool_k': 1,        #pool kernel size
+            'pool_stride': 1,   #
+            'out_pad': 0       #output padding for ConvTranspose1d
+        } #Default settings for convolutional layers
+        self.conv_layers = conv_layers
+        self.mlp_layers = mlp_layers
+        self.output_layer = out_layer
+        self.abundance_mlp_layers = ab_mlp
+
+        for i in c_d:
+            self.conv_details[i] = c_d[i] #Any changes to the details of the convolutional layers made here
+
+        self.encoder = VEncoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
+                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
+                                conv_details=self.conv_details)
+        self.decoder = VDecoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
+                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
+                                conv_details=self.conv_details)
+        self.conditioner = VConditioner(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
+                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
+                                conv_details=self.conv_details)
+        
+    def forward(self, spectrum, abundance):
+        """
+        Forward method for VCCAE.
+
+        Will acquire an encoded latent and variation vectors due to encoder, adding a deviation with respect to the variation.
+        It will then condition the varied latent vector with its abundances of gv, npv and soil.
+        Then, will decode and return 3 values: The decoded spectrum, the encoded latent vector and its variation vector.
+        """
+        encoded, variation = self.encoder(spectrum)
+        deviation = torch.exp(0.5 * variation) # Exponent applied to half of each element in the variation
+        distribution = torch.randn_like(deviation) # Normal distribution with mean 0, variance 1, same size as deviation
+        encoded = encoded + (distribution * deviation) # Variation applied
+        adjusted = self.conditioner(encoded, abundance) # Conditioning applied
+        decoded = self.decoder(adjusted) # Decoded for final result
+        return decoded, encoded, variation
+    
+
+"""
+Outdated models
+"""
 class ConvEncoder(nn.Module):
     """
-    Convolutional layers for encoder and decoder
+    Convolutional layers for encoder and decoder 
+    NOTE: (Outdated)
     """
     def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
                  c_d:dict = {}, ab_mlp = [3, 64, 10]):
@@ -249,46 +321,3 @@ class ConvEncoder(nn.Module):
 
     def adjust(self, x, y): # Concatenate encoded x and conditioning on y
         return torch.cat((x, self.abundance_adjust(y)))
-
-
-class VCCAE(nn.Module):
-    """
-    Will use VEncoder and VDecoder classes, and playing around with their layers
-    """
-    def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
-                 c_d:dict = {}, ab_mlp = [3, 64, 10]):
-        super(VCCAE, self).__init__()
-        self.conv_details = {
-            'k_size': 3,        #kernel size
-            'stride': 1,        #
-            'pad': 1,           #padding
-            'pool_k': 1,        #pool kernel size
-            'pool_stride': 1,   #
-            'out_pad': 0       #output padding for ConvTranspose1d
-        } #Default settings for convolutional layers
-        self.conv_layers = conv_layers
-        self.mlp_layers = mlp_layers
-        self.output_layer = out_layer
-        self.abundance_mlp_layers = ab_mlp
-
-        for i in c_d:
-            self.conv_details[i] = c_d[i] #Any changes to the details of the convolutional layers made here
-
-        self.encoder = VEncoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
-                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
-                                conv_details=self.conv_details)
-        self.decoder = VDecoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
-                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
-                                conv_details=self.conv_details)
-        self.conditioner = VConditioner(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
-                                out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
-                                conv_details=self.conv_details)
-        
-    def forward(self, spectrum, abundance):
-        encoded, variation = self.encoder(spectrum)
-        deviation = torch.exp(0.5 * variation) # Exponent applied to half of each element in the variation
-        distribution = torch.randn_like(deviation) # Normal distribution with mean 0, variance 1, same size as deviation
-        encoded = encoded + (distribution * deviation) # Variation applied
-        adjusted = self.conditioner(encoded, abundance) # Conditioning applied
-        decoded = self.decoder(adjusted)
-        return decoded, encoded, variation
