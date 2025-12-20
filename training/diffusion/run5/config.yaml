@@ -1,6 +1,6 @@
 cfg_data:
   cfg_import:
-    data_handle: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv' # Path for the data file
+    data_handle: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv' # Path for the data file
     spec_range: [400, 2490] # Spectral range, inclusive
 
   cfg_normalize:
@@ -13,8 +13,8 @@ cfg_data:
     seed: 3169 # Seed for the data splitters
   
   cfg_dataset_save:
-    psi1_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run5\psi1.csv' # Save path for the psi1 dataset
-    psi2_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run5\psi2.csv' # Save path for the psi2 dataset 
+    psi1_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\run5\psi1.csv' # Save path for the psi1 dataset
+    psi2_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\run5\psi2.csv' # Save path for the psi2 dataset 
 
 cfg_train: 
   n_epoch: 75
@@ -25,10 +25,11 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: 'Conditional U-Net Synthetic Data Generation'
-  name: 'Trying Statistical Normalizer' 
+  name: 'Trying new workflow' 
 
-  master_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\run5\' # The master save path both model, test, logs, and unnorm dict will be saved to
+  master_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\run5\' # The master save path both model, test, logs, and unnorm dict will be saved to
   model_save: 'diffusion_model.pth' # Rest of the path path for the diffusion model that was trained, can have .pth, adds it automatically
+  modelinits_save: 'cfg_diffusion_setup.json' # Rest of the path for the diffusion model inits, this will be used to build the model again during mass-sampling
   test_save: 'generated_test_samples.parquet' # Rest of the path path for the generated test samples
   locallog_save: 'test_logs.txt' # Rest of the path for the local loggging of alerts prints, etc
   norm_save: 'norm_dict.json'
@@ -70,8 +71,8 @@ cfg_augmenter_setup:
   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
   cfg_augmenter:
     seed: 3169
-    jitter_scale: 1.0e-4
-    amp_scale: 1.0e-2
+    jitter_scale: 0
+    amp_scale: 0
 
 cfg_scheduler_setup:
   scheduler_type: 'CosSchedule' # Name of the noise scheduler class

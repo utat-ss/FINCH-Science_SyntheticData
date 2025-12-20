@@ -244,12 +244,12 @@ class GaussianDiffusion(nn.Module):
         if self.guidance_scale > 1.0: # If guidance scale is more than one, return somewhat unquided epsilon
 
             x_in = torch.cat([x_t, x_t])
-            t_in = torch.cat([t_tensor, t_tensor])
+            t_in = torch.cat([t_tensor, t_tensor]).to(x_t.dtype)
             ab_in = torch.cat([ab, torch.zeros_like(ab)])
 
             if self.compressed_sampling:
                 with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                    eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
+                    eps = self.epsilon(x_in, t_in, ab_in)
                     eps = eps.to(x_t.dtype)
             else:
                 eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
@@ -287,7 +287,7 @@ class GaussianDiffusion(nn.Module):
 
         # Cast them to float32 because we'll be doing a lot of very critical math cals
         x_t = x_t.to(torch.float32)
-        eps = x_t.to(torch.float32)
+        eps = eps.to(torch.float32)
 
         # infer sqrt(ᾱ) and sqrt(1-ᾱ) 
         sqrt_alpha_bar = self._get_coef_at_t(self.traincoef_div, t_tensor, x_t.ndim).to(torch.float32)
@@ -349,7 +349,7 @@ class GaussianDiffusion(nn.Module):
         elif self.sampling_method == 'ddim':
             step_size = self.scheduler.steps // self.ddim_steps
             seq = list(range(0, self.scheduler.steps + 1, step_size))
-            seq = list(reversed(seq)) + [0] # Ensure we end at 0
+            seq = list(reversed(seq)) # Ensure we end at 0
             # Iterate pairs: (1000, 980), (980, 960)...
             for i in range(len(seq) - 1):
                 t_now = seq[i]
