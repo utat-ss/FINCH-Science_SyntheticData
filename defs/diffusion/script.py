@@ -92,7 +92,7 @@ def parse_cfg_dict(cfg_run:(dict)):
 from .loaders import *
 from .data.data_preperation import *
 from .train import train_diffusion
-from .auxiliary import setup_wandb, setup_logging
+from .auxiliary import setup_wandb, setup_logging, save_diffusion_inits
 
 import traceback
 import logging
@@ -106,12 +106,11 @@ if __name__ == "__main__":
     # Setup wandb and logging
     run = setup_wandb(cfg_run, cfg_export)
     setup_logging(cfg_export)
-
+    save_diffusion_inits(cfg_export, cfg_diffusion_setup, cfg_epsilon_setup, cfg_augmenter_setup, cfg_scheduler_setup, cfg_tsampler_setup)
     logging.info("Cfgs taken in, parsed. WandB and logging configured")
 
     # Figure out data
     configured_data = get_data(cfg_data)
-
     logging.info("Data has been parsed and configured")
 
     # Initialize stuff
@@ -126,7 +125,6 @@ if __name__ == "__main__":
 
     optimizer, lr_scheduler = load_optim(cfg_optim_setup, diffusion_model.epsilon)
     loss_fn = load_loss(cfg_loss_setup)
-
     logging.info("The diffusion model, optimizer, loss function etc. has been configured")
 
     try:
