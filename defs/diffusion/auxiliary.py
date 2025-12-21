@@ -69,3 +69,22 @@ def convert_tensors_to_ints(data):
             
     else:
         return data
+    
+def save_diffusion_inits(cfg_export, cfg_diffusion_setup, cfg_epsilon_setup, cfg_augmenter_setup, cfg_scheduler_setup, cfg_tsampler_setup):
+    import json
+
+    modelinits_save = cfg_export['modelinits_save']
+    master_path = cfg_export['master_path']
+    if not modelinits_save.endswith('.json'): modelinits_save += '.json'
+    modelinits_save = master_path + modelinits_save
+
+    cfg_diffusion_addon = {
+        'epsilon': cfg_epsilon_setup,
+        'augmenter': cfg_augmenter_setup,
+        'scheduler': cfg_scheduler_setup,
+        't_sampler': cfg_tsampler_setup
+    }
+    cfg_diffusion_setup['cfg_diffusion'].update(cfg_diffusion_addon)
+
+    with open(modelinits_save, 'w') as f:
+        json.dump(cfg_diffusion_setup, f, indent=4)

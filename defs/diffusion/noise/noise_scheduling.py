@@ -118,7 +118,7 @@ class CosSchedule(Schedule):
         s = self.offset
 
         # Definition from the paper, page 4
-        times = torch.arange(T + 1, dtype=torch.float64)
+        times = torch.arange(T + 1)
         f = torch.cos((((times / T) + s) / (1.0 + s) ) * torch.pi / 2) ** self.exp # Generate all the f(t) vals, by the def
         f_0 = f[0] # Get the f_0
         self.alpha_bars = (f/f_0).detach().clone() # Normalize by f_0 and store as alpha bars
@@ -157,7 +157,7 @@ class LinearSchedule(Schedule):
     
     def _precompute_alpha_bars(self):
         # Precompute the array of alphas, signal retentions, with linear reduction
-        self.alphas = torch.linspace(self.alpha_start, self.alpha_end, self.steps +1, dtype=torch.float64)
+        self.alphas = torch.linspace(self.alpha_start, self.alpha_end, self.steps +1)
 
         self.alpha_bars = torch.cumprod(self.alphas, dim=0)
 
@@ -196,9 +196,9 @@ class ConstantSchedule(Schedule):
 
         T = self.steps
 
-        self.alphas = self.alpha_const* torch.ones(T + 1, dtype=torch.float64) # Just a constant def
+        self.alphas = self.alpha_const* torch.ones(T + 1) # Just a constant def
 
-        self.alpha_bars = torch.cumprod(self.alphas, dim=0, dtype=torch.float64)
+        self.alpha_bars = torch.cumprod(self.alphas, dim=0)
 
     # Get these while we are at it
     def alpha_t(self, t):

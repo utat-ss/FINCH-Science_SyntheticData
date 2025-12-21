@@ -63,7 +63,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             batch = next(iter_train)
 
             x_0, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
-            x_0 = x_0.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
+            x_0 = x_0.to(device=device, dtype=dtype, non_blocking=True); abundances = abundances.to(device=device, dtype=dtype, non_blocking=True)
 
             # Zero the grads
             optimizer.zero_grad()
