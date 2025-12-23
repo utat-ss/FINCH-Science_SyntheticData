@@ -2,7 +2,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 
-class LossDDPM(nn.Module):
+class LossGaussianDiffusion(nn.Module):
     """
     A very flexible loss the be used in our DDPM and above models.
 
@@ -11,7 +11,7 @@ class LossDDPM(nn.Module):
         use_recons_loss (str): What to do with the spectral reconstruction, options are 'add_loss' (add to loss), 'observe' (returned, not used in tot_loss), 'none' (not returned, or added)
         ratio_noise_recons (float): Ratio to sum the recons and noise loss ratio is defined as recons/noise
     """
-    def __init__(self, noise_loss_type:(str)='l2', use_recons_loss:(str)='observe', ratio_noise_recons:(float)=0.01):
+    def __init__(self, noise_loss_type:(str)='huber', use_recons_loss:(str)='observe', ratio_noise_recons:(float)=0.01):
         super().__init__()
 
         if noise_loss_type == 'l1': self.noise_criterion = nn.L1Loss()
@@ -25,7 +25,11 @@ class LossDDPM(nn.Module):
                 self.ratio_noise_recons = ratio_noise_recons
         else: raise ValueError(f"Unknown/Unsupported use_recons_loss: {use_recons_loss}")
 
-    def _recons_loss(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor)) -> torch.Tensor:
+    def _recons_loss(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), unnorm_func=None) -> torch.Tensor:
+
+        # Unnormalize the passed in spectra first
+        x_0_hat = unnorm_func(x_0_hat)
+        x_0 = unnorm_func(x_0)
 
         # The SAM loss, compute cos similarity first (which is the actual SAM formula, without arccos)
         eps = 1e-7
@@ -36,7 +40,7 @@ class LossDDPM(nn.Module):
         # The sam loss of spectral reconstruction
         return loss_sam
     
-    def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), x_n_hat:(torch.Tensor), x_n:(torch.Tensor)):
+    def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), x_n_hat:(torch.Tensor), x_n:(torch.Tensor), unnorm_func=None):
 
         """
         Gets the loss given some x_0 reconstruction, and predicted x_n
@@ -46,6 +50,7 @@ class LossDDPM(nn.Module):
             x_0 (torch.Tensor): Actual clean spectra at t=0
             x_n_hat (torch.Tensor): Predicted noise at temperature t
             x_n (torch.Tensor): Actual noise at temperature t
+            unnorm_func (lambda): The lambda that acts as unnormalizer of data
 
         Returns:
             total_loss (torch.Tensor): The total loss to be backpropagated
@@ -59,14 +64,14 @@ class LossDDPM(nn.Module):
         
         elif self.use_recons_loss == 'observe':
             noise = self.noise_criterion(x_n_hat, x_n)
-            recons = self._recons_loss(x_0_hat, x_0)
+            recons = self._recons_loss(x_0_hat, x_0, unnorm_func)
             return noise, noise, recons
 
         elif self.use_recons_loss == 'add_loss':
             noise = self.noise_criterion(x_n_hat, x_n)
-            recons = self._recons_loss(x_0_hat, x_0)
+            recons = self._recons_loss(x_0_hat, x_0, unnorm_func)
             return noise + self.ratio_noise_recons * recons, noise, recons
         
-    def sample_loss(self, x_0_hat, x_0):
+    def sample_loss(self, x_0_hat, x_0, unnorm_func):
 
-        return self._recons_loss(x_0_hat, x_0)
+        return self._recons_loss(x_0_hat, x_0, unnorm_func)

@@ -157,7 +157,7 @@ class GaussianDiffusion(nn.Module):
 
         x_0_hat, eps_pred = self._recover_signal(x_t, t, ab_masked) # Recover the signal and pred the noise
 
-        return x_0_hat, x_0, eps_pred, noise
+        return x_0_hat, x_0, eps_pred, noise, t
 
     def _sample_step_ddpm(self, x_t, t, ab):
         """

@@ -3,6 +3,7 @@ import json
 import torch
 from torch.utils.data import DataLoader
 from .data.data_preperation import get_unnormalizer
+import gc
 
 import logging
 from .auxiliary import get_n_params, convert_tensors_to_ints
@@ -19,6 +20,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
     dtype = cfg_train['dtype']
     n_epoch = cfg_train['n_epoch'] # Number of epochs
     n_tb_epoch = cfg_train['n_tb_epoch'] # Number of training instances/batches per epoch (this means if have B as batch, total train samples will be n_tb * B)
+    verbose = cfg_train['verbose']
 
     # Setup the save paths
     master_path = cfg_export['master_path']
@@ -69,11 +71,14 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             optimizer.zero_grad()
 
             # Add noise, denoise, and get x_0 hat preds after internally augmenting the data (hat means pred)
-            x_0_hat, x_0, x_n_hat, x_n = diffusion_model.training_procedure(x_0, abundances)
+            x_0_hat, x_0, x_n_hat, x_n, t = diffusion_model.training_procedure(x_0, abundances)
             # x_0 is augmented data, x_0_hat is the "fully recovered data", x_n is the added noise, x_n_hat is predicted noise
-
             # Calculate the loss
-            train_loss, noise_loss, recons_loss = loss_fn(x_0_hat, x_0, x_n_hat, x_n)
+            train_loss, noise_loss, recons_loss = loss_fn(x_0_hat, x_0, x_n_hat, x_n, unnorm_lambda)
+            if verbose:
+                logging.info(f'T Tensor: {t}')
+                logging.info(f'Pred Var: {x_n_hat.var().item():.4f} | GT Var: {x_n.var().item():.4f}')
+                logging.info(f'Train loss: {train_loss}, noise_loss: {noise_loss}, recons_loss: {recons_loss}')
             train_loss.backward() # Packprop the loss
             torch.nn.utils.clip_grad_norm_(diffusion_model.epsilon.parameters(), max_norm=1.0) # Clip grads
             optimizer.step()
@@ -105,6 +110,10 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         # Set model to eval
         diffusion_model.eval()
 
+        # Release all the cache from training
+        gc.collect()
+        torch.cuda.empty_cache()
+
         logging.info(f"Epoch {epoch}, Validation Step")
         with torch.no_grad():
 
@@ -117,7 +126,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             with diffusion_model.use_ema(): # Use the Exponential Moving Average model to sample
                 x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
 
-            val_loss = loss_fn.sample_loss(x_0_hat, x_0)
+            val_loss = loss_fn.sample_loss(x_0_hat, x_0, unnorm_lambda)
             wandb.log({
                 "general/validation_average_loss": val_loss.item()
             })
@@ -147,7 +156,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         with diffusion_model.use_ema(): # Use the Exponential Moving Average model to sample
             x_0_hat, x_T = diffusion_model.sample(abundances) # Pass the abundances to get a prediction for our spectrum
 
-        test_loss = loss_fn.sample_loss(x_0_hat, x_0)
+        test_loss = loss_fn.sample_loss(x_0_hat, x_0, unnorm_lambda)
 
         wandb.log({
             "general/test_average_loss": test_loss.item()
