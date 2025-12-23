@@ -91,14 +91,16 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
         fig.add_trace(
             go.Scatter(
                 x=x_axis, y=gen_plot, mode='lines', name=f'Reconstruction', 
-                line=dict(color='red', width=2, dash='dash'),
+                line=dict(color='red', width=2),
                 legendgroup='group2', showlegend=(i==0)
             ), row=i+1, col=1
         )
 
+    h = 2000
+
     if epoch is None:      
         fig.update_layout(
-            height=300 * n_samples, 
+            height=h * n_samples, 
             title_text=f"Test Reconstruction",
             hovermode="x unified",
             template="plotly_white"
@@ -107,7 +109,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
     
     else:
         fig.update_layout(
-            height=300 * n_samples, 
+            height=h * n_samples, 
             title_text=f"Epoch {epoch} Reconstruction",
             hovermode="x unified",
             template="plotly_white"

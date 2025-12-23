@@ -294,22 +294,45 @@ def get_unnormalizer(data_norm_dict:(dict)):
     The function to get the unnormalizer function of a given data normalizer.
     """
 
-    if data_norm_dict['norm_type']=='classic':
+    if data_norm_dict['norm_type'] == 'classic':
+
         return lambda normed_data: (normed_data+1)/2
-    elif data_norm_dict['norm_type']=='dynamic':
+    
+    elif data_norm_dict['norm_type'] == 'dynamic':
+
         max_vals, min_vals = data_norm_dict['max_vals'], data_norm_dict['min_vals']
-        return lambda normed_data: ((normed_data + 1)*(max_vals - min_vals))/2 + min_vals
-    elif data_norm_dict['norm_type']=='log':
+
+        # Ensure they are tensors (if they are floats, this does nothing which is fine)
+        if not torch.is_tensor(max_vals): max_vals = torch.tensor(max_vals)
+        if not torch.is_tensor(min_vals): min_vals = torch.tensor(min_vals)
+
+        return lambda normed_data: ((normed_data + 1) * (max_vals.to(normed_data.device) - min_vals.to(normed_data.device))) / 2 + min_vals.to(normed_data.device)
+    
+    elif data_norm_dict['norm_type'] == 'log':
+
         max_vals, min_vals, eps = data_norm_dict['max_vals'], data_norm_dict['min_vals'], data_norm_dict['eps']
-        return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals - min_vals))/2 + min_vals) + eps
+
+        if not torch.is_tensor(max_vals): max_vals = torch.tensor(max_vals)
+        if not torch.is_tensor(min_vals): min_vals = torch.tensor(min_vals)
+        if not torch.is_tensor(eps): eps = torch.tensor(eps)
+
+        return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals.to(normed_data.device) - min_vals.to(normed_data.device)))/2 + min_vals) + eps.to(normed_data.device)
+    
     if data_norm_dict['norm_type'] == 'statistical':
+
         mean_vals = data_norm_dict['mean_vals']
-        std_vals =data_norm_dict['std_vals']
-        return lambda normed_data: (normed_data * std_vals) + mean_vals
+        std_vals = data_norm_dict['std_vals']
+        
+        if not torch.is_tensor(mean_vals): mean_vals = torch.tensor(mean_vals)
+        if not torch.is_tensor(std_vals): std_vals = torch.tensor(std_vals)
+
+        return lambda normed_data: (normed_data * std_vals.to(normed_data.device)) + mean_vals.to(normed_data.device)
+    
     elif data_norm_dict['norm_type']=='none':
+
         return lambda normed_data: normed_data
-    else:
-        raise ValueError(f"Unknown/Unsupported normalization type {data_norm_dict['norm_type']}.")
+    
+    else: raise ValueError(f"Unknown/Unsupported normalization type {data_norm_dict['norm_type']}.")
 
 
 
