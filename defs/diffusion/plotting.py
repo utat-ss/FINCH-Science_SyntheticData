@@ -71,7 +71,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
         rows=n_samples, cols=1,
         shared_xaxes=True, 
         vertical_spacing=0.05,
-        subplot_titles=[f"Sample {i+1}" for i in range(n_samples)]
+        subplot_titles=[plot_titles[i] for i in range(n_samples)]
     )
 
     for i in range(n_samples):
