@@ -65,7 +65,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         diffusion_model.train()
         total_losses = {k: 0.0 for k in loss_str_tracker.keys()} # Initialize the total losses tracker dict
 
-        logging.info(f"Epoch {epoch}: Training Step")
+        logging.info(f"Epoch {epoch}: Training Step{f', LR: {lr_scheduler.get_last_lr():.8f}' if lr_scheduler else ''}")
         for _ in range(n_tb_epoch):
 
             # Get the batch and unpack it, and move to the relevant device:
