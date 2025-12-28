@@ -130,7 +130,7 @@ if __name__ == "__main__":
     try:
         logging.info("Training function started")
         train_diffusion(cfg_train, cfg_export, diffusion_model, loss_fn, optimizer, lr_scheduler, configured_data)
-        logging.info("Training finished, everything logged to wandb.")
+        logging.info("Training script finished")
 
     except Exception as e:
         run.alert(title= "Training crashed", text=str(e))

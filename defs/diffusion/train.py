@@ -160,15 +160,16 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
                 (v_tv,     'TV',       'general_detailed/validation_average_tv_loss')
             ]
             log_payload, print_parts = {}, []
-            for tensor, name, key in val_metrics:
+            for tensor, display_name, key in val_metrics:
                 if tensor is not None and tensor.item() != 0:
                     val = tensor.item()
                     log_payload[key] = val
-                    print_parts.append(f"{name} Loss: {val:.4f}")
+                    print_parts.append(f"{display_name} Loss: {val:.4f}")
             wandb.log(log_payload)
             if print_parts:
                 print_parts[0] = f"Epoch {epoch} Val Losses: " + print_parts[0]
                 logging.info(' | '.join(print_parts))
+            plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, epoch)
 
         # Save the diffusion model if it is the best
         if v_total < best_val_loss:
@@ -201,11 +202,11 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             (t_tv, 'TV', 'general_detailed/test_average_tv_loss')
         ]
         log_payload, print_parts = {}, []
-        for tensor, name, key in t_metrics:
+        for tensor, display_name, key in t_metrics:
             if tensor is not None and tensor.item() != 0:
                 val = tensor.item()
                 log_payload[key] = val
-                print_parts.append(f"{name} Loss: {val:.4f}")
+                print_parts.append(f"{display_name} Loss: {val:.4f}")
         wandb.log(log_payload)
         if print_parts:
             print_parts[0] = "Test Losses: " + print_parts[0]
@@ -213,7 +214,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
 
         plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, None) # Plot the testing results
 
-    logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'. Now moving the model, logs, psi1/psi2, norm dict, etc. as artifacts to WandB.") 
+    logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'. Now moving the model, logs, psi1/psi2, norm dict, etc. as artifacts to WandB if enabled.") 
 
     if cfg_export['save_to_wandb']:
         # Now dump every single thing to wandb

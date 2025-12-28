@@ -52,6 +52,8 @@ class LossGaussianDiffusion(nn.Module):
                 self.ratio_tv_loss = ratio_tv_loss
         else: raise ValueError(f"Unknown/Unsupported use_tv_loss: {use_tv_loss}")
 
+        self.eps = 1e-7
+
     def _recons_loss(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), unnorm_func:(Optional[Callable[[torch.Tensor], torch.Tensor]])=None) -> torch.Tensor:
         """
         This loss calculates the spectral angle between the reconstructed and true spectra, to get a rough measure
@@ -76,9 +78,8 @@ class LossGaussianDiffusion(nn.Module):
             x_0 = unnorm_func(x_0)
 
         # The SAM loss, compute cos similarity first (which is the actual SAM formula, without arccos)
-        eps = 1e-7
         cos_sim = F.cosine_similarity(x_0_hat, x_0, dim=1)
-        loss_sam = torch.acos(torch.clamp(cos_sim, -1.0 + eps, 1.0 - eps)).mean() # Take the mean so that we get a scalar
+        loss_sam = torch.acos(torch.clamp(cos_sim, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
                                                                                   # Clamp it with some eps, to prevent instability
  
         # The sam loss of spectral reconstruction
@@ -103,14 +104,18 @@ class LossGaussianDiffusion(nn.Module):
             A_abs = abs(A); B_abs = abs(B)
             loss_fft = L1(A_abs, B_abs)
         """
+        # We have to clamp the input reconstructed tensor because fft loss is incredibly prone to
+        # being affected by instabilities
+        x_0_hat = torch.clamp(x_0_hat, -6, 6) # Gets the 6 sigma values, assuming statistical norming
+
         # Applies the fast fourier transform along the last dimension in real domain, since it is (Batch, n_bands)
         # We don't have an in place option for this, :( the pytorch team did not think it was cool enough
-        x_0_hat = torch.fft.rfft(x_0_hat, dim=-1)
-        x_0 = torch.fft.rfft(x_0, dim=-1)
+        x_0_hat = torch.fft.rfft(x_0_hat, dim=-1, norm='ortho')
+        x_0 = torch.fft.rfft(x_0, dim=-1, norm='ortho')
 
         # Takes the absolute value, since we don't need the phase information
-        x_0_hat = torch.abs(x_0_hat)
-        x_0 = torch.abs(x_0)
+        x_0_hat = torch.abs(x_0_hat) + self.eps
+        x_0 = torch.abs(x_0) + self.eps
 
         # The FFT loss component, L1 loss between the absolute FFT values
         loss_fft = self.fft_loss_component(x_0_hat, x_0)
@@ -138,6 +143,10 @@ class LossGaussianDiffusion(nn.Module):
             variation := Abs(shift)
             loss_tv = 1/(n_bands-1) * Sum(variation)
         """
+        # We have to clamp the input reconstructed tensor because tv loss is incredibly prone to
+        # being affected by instabilities
+        x_0_hat = torch.clamp(x_0_hat, -6, 6) # Gets the 6 sigma values, assuming statistical norming
+
         # They are norm invariant for linear norm, so, we'll save the compute assuming the normer is linear
         # Shift and subtract the two tensors
         shift = x_0_hat[..., 1:] - x_0_hat[..., :-1]
