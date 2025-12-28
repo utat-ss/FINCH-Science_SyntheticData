@@ -13,8 +13,8 @@ cfg_data:
     seed: 3169 # Seed for the data splitters
   
   cfg_dataset_save:
-    psi1_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ege_run6\psi1.csv' # Save path for the psi1 dataset
-    psi2_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ege_run6\psi2.csv' # Save path for the psi2 dataset 
+    psi1_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-0\psi1.csv' # Save path for the psi1 dataset
+    psi2_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-0\psi2.csv' # Save path for the psi2 dataset 
 
 cfg_train: 
   n_epoch: 200
@@ -26,8 +26,8 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: 'Conditional U-Net Synthetic Data Generation'
-  name: 'ExpAnalysis_001.3' 
-  master_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ege_run6\' # The master save path both model, test, logs, and unnorm dict will be saved to
+  name: 'ExpAnalysis_002-0' 
+  master_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-0\' # The master save path both model, test, logs, and unnorm dict will be saved to
   model_save: 'diffusion_model.pth' # Rest of the path path for the diffusion model that was trained, can have .pth, adds it automatically
   modelinits_save: 'cfg_diffusion_setup.json' # Rest of the path for the diffusion model inits, this will be used to build the model again during mass-sampling
   test_save: 'generated_test_samples.parquet' # Rest of the path path for the generated test samples
@@ -95,7 +95,7 @@ cfg_optim_setup:
     lr: 3.0e-4
     weight_decay: 1.0e-4
     cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
-      lrscheduler_type: 'CosineAnealingLR'
+      lrscheduler_type: 'CosineAnnealingLR'
       cfg_lrscheduler:
         T_max: 200
 
@@ -104,7 +104,11 @@ cfg_loss_setup:
   cfg_loss:
     noise_loss_type: 'l2'
     use_recons_loss: 'add_loss'
-    ratio_noise_recons: 0.5
+    use_fft_loss: 'observe'
+    use_tv_loss: 'observe'
+    ratio_recons_loss: 0.5
+    ratio_fft_loss: 0
+    ratio_tv_loss: 0
 
     
 
