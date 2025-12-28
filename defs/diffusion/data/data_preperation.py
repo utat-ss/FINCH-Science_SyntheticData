@@ -57,7 +57,7 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     norm_type = cfg_normalize['norm_type']
     if norm_type=='classic': # Classic, very blunt normalization
         spectra_tensor = (2 * spectra_tensor) - 1 # Bluntly normalize it
-        norm_cfg = {
+        norm_out = {
             'norm_type': norm_type
         }
     elif norm_type=='dynamic': # Dynamically scales using the max of the dataset
@@ -98,6 +98,7 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
         norm_out = {
             'norm_type': norm_type
         }
+    else: raise ValueError(f"Unknown/Unsupported norm_type: {norm_type}")
 
     # Get the abundances
     abundances = df[["gv_fraction","npv_fraction","soil_fraction"]].values.astype("float32")
@@ -105,10 +106,10 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     del abundances
 
     # Get the spectral names
-    names = df['Spectra'].to_list()
+    names = df['Spectra'].astype(str).to_list()
 
     # Get the original indices
-    indices = range(len(names))
+    indices = list(range(len(names)))
 
     return spectra_tensor, abundances_tensor, names, indices, norm_out
 
