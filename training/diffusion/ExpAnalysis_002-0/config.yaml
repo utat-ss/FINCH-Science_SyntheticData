@@ -33,7 +33,7 @@ cfg_export:
   test_save: 'generated_test_samples.parquet' # Rest of the path path for the generated test samples
   locallog_save: 'test_logs.txt' # Rest of the path for the local loggging of alerts prints, etc
   norm_save: 'norm_dict.json'
-  save_to_wandb: False
+  save_to_wandb: True
 
 cfg_diffusion_setup:
   diffusion_type: 'GaussianDiffusion' # The name of the diffusion class

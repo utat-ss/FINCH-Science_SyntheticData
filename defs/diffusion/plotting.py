@@ -96,7 +96,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             ), row=i+1, col=1
         )
 
-    h = 800
+    h = 1600
 
     if epoch is None:      
         fig.update_layout(
