@@ -96,7 +96,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             ), row=i+1, col=1
         )
 
-    h = 1600
+    h = 2000
 
     if epoch is None:      
         fig.update_layout(
@@ -104,7 +104,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             title_text=f"Test Reconstruction",
             hovermode="x unified",
             template="plotly_white",
-            margin=dict(t=10, b=10, l=50, r=50)
+            margin=dict(t=50, b=10, l=50, r=50)
         )
         wandb.log({"test/interactive_plot": wandb.Html(fig.to_html())})
     
@@ -114,7 +114,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
             title_text=f"Epoch {epoch} Reconstruction",
             hovermode="x unified",
             template="plotly_white",
-            margin=dict(t=10, b=10, l=50, r=50)
+            margin=dict(t=50, b=50, l=50, r=50)
         )
 
         wandb.log({"val/interactive_plot": wandb.Html(fig.to_html()), "epoch": epoch})
