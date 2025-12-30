@@ -119,3 +119,4 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
 
         wandb.log({"val/interactive_plot": wandb.Html(fig.to_html()), "epoch": epoch})
 
+    del fig, x_real, x_gen, abundances # Delete everything after done

@@ -21,6 +21,10 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
     n_epoch = cfg_train['n_epoch'] # Number of epochs
     n_tb_epoch = cfg_train['n_tb_epoch'] # Number of training instances/batches per epoch (this means if have B as batch, total train samples will be n_tb * B)
     verbose = cfg_train['verbose']
+    use_autocast = cfg_train.get('use_autocast', False)
+
+    # Enable autocast if asked:
+    scaler = torch.amp.GradScaler(device=device, enabled=use_autocast)
 
     # Setup the save paths
     master_path = cfg_export['master_path']
@@ -77,15 +81,18 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
             # Zero the grads
             optimizer.zero_grad()
 
-            # Add noise, denoise, and get x_0 hat preds after internally augmenting the data (hat means pred)
-            x_0_hat, x_0, x_n_hat, x_n, t = diffusion_model.training_procedure(x_0, abundances)
-            # x_0 is augmented data, x_0_hat is the "fully recovered data", x_n is the added noise, x_n_hat is predicted noise
-            # Calculate the loss
-            train_loss, noise_loss, recons_loss, fft_loss, tv_loss = loss_fn(x_0_hat, x_0, x_n_hat, x_n, unnorm_lambda)
-            
-            train_loss.backward() # Packprop the loss
+            # Apply everything if use_autocast=True with AMP(float16 base), if =False, just defaults to the classic forward and backward passes without AMP
+            with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_autocast): # This uses the autocast (automatic mixed precision, AMP) if enabled 
+                # Add noise, denoise, and get x_0 hat preds after internally augmenting the data (hat means pred)
+                x_0_hat, x_0, x_n_hat, x_n, t = diffusion_model.training_procedure(x_0, abundances)
+                # x_0 is augmented data, x_0_hat is the "fully recovered data", x_n is the added noise, x_n_hat is predicted noise
+                # Calculate the loss
+                train_loss, noise_loss, recons_loss, fft_loss, tv_loss = loss_fn(x_0_hat, x_0, x_n_hat, x_n, unnorm_lambda)
+            scaler.scale(train_loss).backward() # If AMP is enabled, scale the loss first and then backprop it
+            scaler.unscale_(optimizer) # Unscale the grads of optimizer's assigned params, in-place, if AMP is enabled, we have to manually call this because we want to clip grads
             torch.nn.utils.clip_grad_norm_(diffusion_model.epsilon.parameters(), max_norm=1.0) # Clip grads
-            optimizer.step()
+            scaler.step(optimizer) # Takes an optimizer step if inf/NaNs are not present
+            scaler.update() # Updates the scale factor
 
             diffusion_model.update_ema() # Update the EMA parameters after each batch in training
 
@@ -170,6 +177,11 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
                 print_parts[0] = f"Epoch {epoch} Val Losses: " + print_parts[0]
                 logging.info(' | '.join(print_parts))
             plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, epoch)
+
+        # Delete used stuff
+        del x_0, x_0_hat, x_T, abundances, batch
+        gc.collect()
+        torch.cuda.empty_cache()
 
         # Save the diffusion model if it is the best
         if v_total < best_val_loss:
