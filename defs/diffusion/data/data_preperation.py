@@ -209,6 +209,8 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
             n_val (int): How many validation points in total
             n_test (int): How many test samples in total
             n_train_batch (int): Train dataloader batch size
+            num_workers (int): Num workers for the training dataloader
+            prefetch_factor (int): Prefetch factor for the training dataloader; pre-loaded batches = num_workers * prefetch_factor
             seed (int): Seed for random split
         cfg_dataset_save (dict):
             psi1_path (str): Save path for the psi1 dataset (train of simpler_data)
@@ -224,6 +226,8 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     n_val = cfg_loader.get('n_val', 200)
     n_test = cfg_loader.get('n_test', 123)
     n_train_batch = cfg_loader.get('n_train_batch', 5)
+    num_workers_train = cfg_loader.get('num_workers', 4)
+    prefetch_factor_train = cfg_loader.get('prefetch_factor', 2)
 
     # Infer the amount of n_train, ensure completeness
     n_train = int(len(ds) - n_val - n_test)
@@ -240,7 +244,7 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     # Separate the temp dataset into train and test
     ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
 
-    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False, num_workers=4, persistent_workers=True, prefetch_factor=4, pin_memory=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
+    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False, num_workers=num_workers_train, persistent_workers=True, prefetch_factor=prefetch_factor_train, pin_memory=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
 
     return  dataloaders # Make dataloaders into a list and ship them
 
