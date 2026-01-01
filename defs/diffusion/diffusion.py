@@ -157,7 +157,7 @@ class GaussianDiffusion(nn.Module):
 
         x_0_hat, eps_pred = self._recover_signal(x_t, t, ab_masked) # Recover the signal and pred the noise
 
-        return x_0_hat, x_0, eps_pred, noise
+        return x_0_hat, x_0, eps_pred, noise, t
 
     def _sample_step_ddpm(self, x_t, t, ab):
         """
@@ -247,12 +247,9 @@ class GaussianDiffusion(nn.Module):
             t_in = torch.cat([t_tensor, t_tensor])
             ab_in = torch.cat([ab, torch.zeros_like(ab)])
 
-            if self.compressed_sampling:
-                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                    eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
-                    eps = eps.to(x_t.dtype)
-            else:
-                eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
+            with torch.autocast(device_type=str(x_t.device.type), dtype=torch.float16, enabled=self.compressed_sampling): # Using float16, sample
+                eps = self.epsilon(x_in, t_in, ab_in)
+            eps = eps.to(dtype=x_t.dtype)
 
             if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
 
@@ -262,12 +259,9 @@ class GaussianDiffusion(nn.Module):
         
         elif self.guidance_scale == 1.0: # If guidance scale is 1, return the regular, 1 scale guided sampling
 
-            if self.compressed_sampling:
-                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                    eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
-                    eps = eps.to(x_t.dtype)
-            else:
-                eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
+            with torch.autocast(device_type=str(x_t.device.type), dtype=torch.float16, enabled=self.compressed_sampling): # Using float16, sample if compressed sampling is enabled
+                eps = self.epsilon(x_t, t_tensor, ab)
+            eps = eps.to(dtype=x_t.dtype)
 
             if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
 
@@ -287,7 +281,7 @@ class GaussianDiffusion(nn.Module):
 
         # Cast them to float32 because we'll be doing a lot of very critical math cals
         x_t = x_t.to(torch.float32)
-        eps = x_t.to(torch.float32)
+        eps = eps.to(torch.float32)
 
         # infer sqrt(ᾱ) and sqrt(1-ᾱ) 
         sqrt_alpha_bar = self._get_coef_at_t(self.traincoef_div, t_tensor, x_t.ndim).to(torch.float32)
@@ -349,7 +343,7 @@ class GaussianDiffusion(nn.Module):
         elif self.sampling_method == 'ddim':
             step_size = self.scheduler.steps // self.ddim_steps
             seq = list(range(0, self.scheduler.steps + 1, step_size))
-            seq = list(reversed(seq)) + [0] # Ensure we end at 0
+            seq = list(reversed(seq)) # Ensure we end at 0
             # Iterate pairs: (1000, 980), (980, 960)...
             for i in range(len(seq) - 1):
                 t_now = seq[i]

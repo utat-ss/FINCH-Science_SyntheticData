@@ -32,11 +32,13 @@ class SinusoidalPosEmb(nn.Module):
     Args:
         dim (int): The output embedding dim, defaulted at 128, usually don't change this.
         scale (int): Total scaling, keep 1 if using a large T range like [0,1k] or [0,5k]
+        neighborhood (int): The effective range of embedding, wavelength
     """
-    def __init__(self, dim:(int)=128, scale:(int)=1):
+    def __init__(self, dim:(int)=128, scale:(float)=1, neighborhood:(int)=10000):
         super().__init__()
         self.dim = dim
         self.scale = scale
+        self.neighborhood = neighborhood
         assert self.dim % 2 ==0, 'SinusoidalPosEmb requires "dim" to be even' # Even numbers of sin and cos freqs needed, hence even
 
     def forward(self, t:(torch.Tensor)) -> torch.Tensor:
@@ -51,7 +53,7 @@ class SinusoidalPosEmb(nn.Module):
         """
         t = t.flatten() # Flattenning the usual (B,1) -> (B) input of T
         half_dim = self.dim//2
-        emb = math.log(10000) / (half_dim - 1)
+        emb = math.log(self.neighborhood) / (half_dim - 1)
         emb = torch.exp(torch.arange(half_dim, device=t.device).float() * -emb)
         emb = self.scale * t.unsqueeze(1) * emb.unsqueeze(0) # [Batch, 1] * [1, Half_dim]
         emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
@@ -301,6 +303,8 @@ class Epsilon_Cond1DUnet(nn.Module):
         conv_kernel_size (int): Specifically needed for conformer types, kernel size used during convolutional layers
         conv_expansion_factor (int): Specifically needed for conformer layers, the size of channel expansion that internally happens in the conformer
         time_embed_dim (int): The dimension of time embeddings
+        wavembed_neighborhood (int): The range (neighborhood) of wavelength embedding
+        wavembed_scale (float): The scale/strength of such neighborhood of wavelength embedding
     """
     def __init__(
             self,
@@ -318,7 +322,9 @@ class Epsilon_Cond1DUnet(nn.Module):
             up_type:(str)='conformer',
             conv_kernel_size:(int)=9,
             conv_expansion_factor:(int)=2,
-            time_embed_dim:(int)=128,
+            time_embed_dim:(int)=64,
+            wavembed_neighborhood:(int)=10000,
+            wavembed_scale:(float)=1
     ):
         super().__init__()
 
@@ -351,6 +357,9 @@ class Epsilon_Cond1DUnet(nn.Module):
                                                      # (assuming in_ch = 1). To get  (B, n_endmember + 1, seq_len), we have to keep track of 'n_endmember + 1'
 
         #region Down Loop, (B, 4, seq_len) -> (B, 256, seq_len/4)
+
+        # Needed spatial pos_emb
+        self.spatial_pos_emb = SinusoidalPosEmb(dim=channels[0], scale=wavembed_scale, neighborhood=wavembed_neighborhood)
 
         # The first down channel
         resnet = ResnetBlock1D(
@@ -426,6 +435,10 @@ class Epsilon_Cond1DUnet(nn.Module):
 
         self.final_block = Block1D(channels[0] * 2, channels[0]) # (B, 128, seq_len) *concatted -> (B, 64, seq_len)
         self.final_proj = nn.Conv1d(channels[0], self.target_out_channel, 1) # (B, 64, seq_len) -> (B, target_out_channel, seq_len)
+        
+        nn.init.normal_(self.final_proj.weight, mean=0.0, std=0.01) # Do this init to ensure stability
+        nn.init.zeros_(self.final_proj.bias)
+        
         #endregion
 
         #endregion
@@ -494,8 +507,21 @@ class Epsilon_Cond1DUnet(nn.Module):
         hiddens=[] # Create a list to store all the hiddens
 
         # For the default setup, it does (B, in_ch + n_endmembers, seq_len) -> (B, 256, seq_len/4)
-        for resnet, transformers, downsample in self.down_blocks:
+        for i, (resnet, transformers, downsample) in enumerate(self.down_blocks):
+
             x_t = resnet(x_t, t) # First do the resnet to transform (B, ch, seq_len) -> (B, 2*ch, seq_len)
+
+            if i == 0: # Perform pos embedding at the start:
+                batch, ch, seq_len = x_t.shape
+
+                pos = torch.arange(seq_len, device=x_t.device).float() # Shape (seq_len,)
+
+                pos_emb = self.spatial_pos_emb(pos) # Gets (seq_len, ch)
+
+                pos_emb = pos_emb.permute(1, 0).unsqueeze(0) # (seq_len, ch) -> (ch, seq_len) -> (1, ch, seq_len)
+
+                x_t = x_t + pos_emb # (B, ch, seq_len) + (1, ch, seq_len)*B -> (B, ch, seq_len), broadcast
+
             for block in transformers: x_t = block(x_t) # Do global mixing using transformer n_former_blocks times: (B, 2*ch, seq_len) -> (B, 2*ch, seq_len)
             hiddens.append(x_t) # Append the hidden result
             x_t = downsample(x_t) # Downsample to end up with (B, 2*ch, seq_len/2). Note, this is identity for the first downsample
