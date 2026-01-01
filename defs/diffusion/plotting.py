@@ -71,7 +71,7 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
         rows=n_samples, cols=1,
         shared_xaxes=True, 
         vertical_spacing=0.05,
-        subplot_titles=[f"Sample {i+1}" for i in range(n_samples)]
+        subplot_titles=[plot_titles[i] for i in range(n_samples)]
     )
 
     for i in range(n_samples):
@@ -91,27 +91,32 @@ def plot_to_wandb(x_real:(torch.Tensor), x_gen:(torch.Tensor), abundances, name,
         fig.add_trace(
             go.Scatter(
                 x=x_axis, y=gen_plot, mode='lines', name=f'Reconstruction', 
-                line=dict(color='red', width=2, dash='dash'),
+                line=dict(color='red', width=2),
                 legendgroup='group2', showlegend=(i==0)
             ), row=i+1, col=1
         )
 
+    h = 2000
+
     if epoch is None:      
         fig.update_layout(
-            height=300 * n_samples, 
+            height=h * n_samples, 
             title_text=f"Test Reconstruction",
             hovermode="x unified",
-            template="plotly_white"
+            template="plotly_white",
+            margin=dict(t=50, b=10, l=50, r=50)
         )
         wandb.log({"test/interactive_plot": wandb.Html(fig.to_html())})
     
     else:
         fig.update_layout(
-            height=300 * n_samples, 
+            height=h * n_samples, 
             title_text=f"Epoch {epoch} Reconstruction",
             hovermode="x unified",
-            template="plotly_white"
+            template="plotly_white",
+            margin=dict(t=50, b=50, l=50, r=50)
         )
 
         wandb.log({"val/interactive_plot": wandb.Html(fig.to_html()), "epoch": epoch})
 
+    del fig, x_real, x_gen, abundances # Delete everything after done

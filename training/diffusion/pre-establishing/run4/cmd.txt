@@ -1,0 +1,3 @@
+In the project root:
+
+python -m defs.diffusion.script --config training/diffusion/run4/config.yaml
