@@ -10,11 +10,10 @@ class AbundanceSampler(ABC):
     Args:
         taret_shape (tuple): The tuple of the wanted spectra, usually (Batch, n_endmembers)
         seed (int): Seed for the generator
-        device: The device to export the abundance tensor in
+        device (torch.device): The device to export the abundance tensor in
     """
-    def __init__(self, target_shape:(tuple), seed:(int), device):
+    def __init__(self, target_shape:(tuple), seed:(int), device:(torch.device)):
         
-
         self.target_shape = target_shape
         self.device = device
 
