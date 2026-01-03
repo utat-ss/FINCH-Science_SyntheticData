@@ -26,7 +26,7 @@ def load_model(model_type:(str), model_statedict_path:(str), model_config_dict:(
     The function to load models given some path to the model state dict.
 
     Args:
-        model_type (str): The type of model we are using 
+        model_type (str): The type of model we are using, either 'GaussianDiffusion' or 'AutoEncoder' for now
         model_statedict_path (str): The string of model's saved state dict's path
         model_config_dict (dict): The config dict for model we are using
 
@@ -68,11 +68,11 @@ def load_sampler(model_type:(str), model, ab_sampler):
 
     if model_type == 'GaussianDiffusion':
 
-        spectra_sampler = GaussianDiffusionSampler(model, ab_sampler)
+        spectra_sampler = GaussianDiffusionSampler(model, lean=False, ab_sampler=ab_sampler)
 
     elif model_type == 'AutoEncoder':
         
-        spectra_sampler = AutoEncoderSampler(model, ab_sampler)
+        spectra_sampler = AutoEncoderSampler(model, lean=False, ab_sampler=ab_sampler)
 
     else: 
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
