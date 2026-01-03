@@ -52,18 +52,19 @@ class VDecoder(nn.Module):
     """
     Decoder for VCCAE
     """
-    def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
+    def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details, latent_dim):
         super(VDecoder, self).__init__()
         self.conv_details = conv_details
         self.conv_layers = conv_layers
         self.mlp_layers = mlp_layers
         self.output_layer = out_layer
         self.abundance_mlp_layers = ab_mlp
+        self.latent_dim = latent_dim
 
         decoder_layers = []
         # MLP layers
         decoder_layers.extend([ # First layer will have size of latent vector space of encoder, plus space of conditioning
-                nn.Linear(self.output_layer + self.abundance_mlp_layers[-1], self.mlp_layers[-1]),
+                nn.Linear(self.latent_dim, self.mlp_layers[-1]),
                 nn.ReLU()
             ])
         for i in range(len(self.mlp_layers) - 1, 0, -1):
@@ -164,6 +165,7 @@ class VCCAE(nn.Module):
         self.mlp_layers = mlp_layers
         self.output_layer = out_layer
         self.abundance_mlp_layers = ab_mlp
+        self.latent_dim = self.output_layer + self.abundance_mlp_layers[-1]
 
         for i in c_d:
             self.conv_details[i] = c_d[i] #Any changes to the details of the convolutional layers made here
@@ -173,7 +175,7 @@ class VCCAE(nn.Module):
                                 conv_details=self.conv_details)
         self.decoder = VDecoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
                                 out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
-                                conv_details=self.conv_details)
+                                conv_details=self.conv_details, latent_dim=self.latent_dim)
         self.conditioner = VConditioner(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
                                 out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
                                 conv_details=self.conv_details)
@@ -189,8 +191,8 @@ class VCCAE(nn.Module):
         encoded, variation = self.encoder(spectrum)
         deviation = torch.exp(0.5 * variation) # Exponent applied to half of each element in the variation
         distribution = torch.randn_like(deviation) # Normal distribution with mean 0, variance 1, same size as deviation
-        encoded = encoded + (distribution * deviation) # Variation applied
-        adjusted = self.conditioner(encoded, abundance) # Conditioning applied
+        z = encoded + (distribution * deviation) # Variation applied
+        adjusted = self.conditioner(z, abundance) # Conditioning applied
         decoded = self.decoder(adjusted) # Decoded for final result
         return decoded, encoded, variation
     
