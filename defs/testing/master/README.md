@@ -1,0 +1,1 @@
+This master folder handles the case where both the nearest_neighbor and unmix testing methods used in tangent to get metrics of generated data. 
