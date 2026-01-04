@@ -1,6 +1,10 @@
+import torch
+import pandas as pd
+
+from torch.utils.data import DataLoader, random_split
 from .structure import *
 
-from typing import Union
+from typing import Union, Iterator
 
 """
 
@@ -34,7 +38,7 @@ cfg_data:
     seed
 """
 
-def vals_from_csv(save_path:(str), spec_range:(list[int])):
+def vals_from_csv(save_path:(str), spec_range:(list[int])) -> torch.Tensor | torch.Tensor | list[str] | list[int]:
 
     """
     Gets the vals from a csv file that was exported via dataset creation in the training of synthesizers.
@@ -66,71 +70,40 @@ def vals_from_csv(save_path:(str), spec_range:(list[int])):
 
     return spectra_tensor, abundances_tensor, names, indices
 
-class HyperSpectralDataset(Dataset):
-    """
-    Defining this class so that we can keep track of spectra, abundances, names, and indices.
-
-    Args:
-        spectra (torch.Tensor): Tensor of all the spectra, as a tensor
-        abundances (torch.Tensor): Abundances of all the spectra, as a tensor
-        names (list[str]): Names of the spectra, as a list
-        indices (list[int]): Indices in order, as a list
-    """
-    def __init__(self, spectra:(torch.Tensor), abundances:(torch.Tensor), names:(list[str]), indices:(list[int])):
-
-        self.spectra = spectra
-        self.abundances = abundances
-        self.names = names
-        self.indices = indices
-
-    def __len__(self):
-        return len(self.names)
-        
-    def __getitem__(self, idx):
-
-        return {
-            'spectrum': self.spectra[idx],
-            'abundances': self.abundances[idx],
-            'names': self.names[idx],
-            'orig_index': self.indices[idx]
-        }
-    
-def get_inf_iterators(dataloaders:(Union[list[DataLoader], DataLoader])) -> list[Iterator]:
-    """
-    Gets the infinite iterators, they can be infinitely iterated through. Usually only pass 
-
-    Args:
-        dataloaders (list[DataLoader] or DataLoader): A list of the already prepared dataloaders or only a single one
-    
-    Returns:
-        inf_iterators (list[Iterator]): A list of infinitely callable iterators, they cycle through the data
-    """
-    def cycle(dataloader):
-        while True:
-            for batch in dataloader:
-                yield batch
-
-    if isinstance(dataloaders, DataLoader): # Check if the input is only a single dataloader if so, define it as a list
-        dataloaders = [dataloaders]
-    return [cycle(dl) for dl in dataloaders]
-
-def get_data(cfg_data:(dict)):
+def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
 
     """
     This function takes in the data config, and then creates the dataloaders/returns them
+
+    Args:
+        cfg_import (dict): Import specifics of ksi_train and ksi_val
+        cfg_loader (dict): Loader specifics
+
+    Returns:
+        list(Iterator): A list where [0] is finite loader for train (ksi_train), [1] is infinite loader for val (ksi_val), [2] is finite loader for test (ksi_test)
     """
+    # Unpack necessary stuff
+    path_ksi_train = cfg_import['path_ksi_train']
+    path_psi2 = cfg_import['path_psi2']
+    spec_range = cfg_import['spec_range']
 
-    cfg_normalize = cfg_data['cfg_normalize']
-    spec_range = cfg_data['cfg_import']['spec_range']
+    # Initialize the generator
+    generator = torch.Generator()
+    generator.manual_seed(cfg_loader['seed'])
 
-    
-    path_ksi_train = cfg_data['cfg_import']['path_ksi_train']
-    path_psi2 = cfg_data['cfg_import']['path_psi2']
+    # Create the datasets ds_ksi_train and ds_psi2
+    spectra, abundances, names, indices = vals_from_csv(path_ksi_train, spec_range)
+    ds_ksi_train = HyperSpectralDataset(spectra, abundances, names, indices)
+    spectra, abundances, names, indices = vals_from_csv(path_psi2)
+    ds_psi2 = HyperSpectralDataset(spectra, abundances, names, indices)
+    del spectra, abundances, names, indices
 
+    # Seperate ds_psi2 into ds_ksi_val, ds_ksi_test
+    ds_ksi_val, ds_ksi_test = random_split(ds_psi2, [cfg_loader['n_val'], cfg_loader['n_test']], generator)
 
+    batch_size = cfg_loader['n_train_batch']; num_workers = cfg_loader['num_workers']; prefetch_factor = cfg_loader['prefetch_factor']
+    dl_ksi_train = DataLoader(ds_ksi_train, batch_size=batch_size, generator=generator, shuffle=True, drop_last=False, num_workers=num_workers, persistent_workers=True, prefetch_factor=prefetch_factor, pin_memory=True)
+    dl_ksi_val = DataLoader(ds_ksi_val, batch_size=cfg_loader['n_val'], shuffle=False)
+    dl_ksi_test = DataLoader(ds_ksi_test, batch_size=cfg_loader['n_test'], shuffle=False)
 
-
-
-
-
-    pass
+    return [iter(dl_ksi_train), get_inf_iterator(dl_ksi_val), iter(dl_ksi_test)]

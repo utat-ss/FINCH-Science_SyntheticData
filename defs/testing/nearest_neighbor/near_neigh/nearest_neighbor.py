@@ -67,7 +67,7 @@ def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), 
     
     distance_matrix.fill_diagonal_(float('inf')) # Fill the diagonal with inf, the reason why we do this is obvious
 
-    distance_matrix = replace_with_1(distance_matrix, method, 0) 
+    distance_matrix = replace_with_1(distance_matrix, method, 0) # Replace along rows, the minimum (or maximum) with 1, others with 0
 
     gamma_11 = int(torch.sum(torch.sum(distance_matrix[:g, :g])).item())
     gamma_12 = int(torch.sum(torch.sum(distance_matrix[:g, g:])).item())

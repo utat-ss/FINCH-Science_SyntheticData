@@ -2,13 +2,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from ..data.preprocessing import get_unnormalizer
 from ..auxiliary.auxiliary import get_n_params
 
 import wandb
 import logging
 
-def train(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.Module), optimizer:(optim), lr_scheduler:(optim.lr_scheduler), configured_data):
+def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.Module), optimizer:(optim), lr_scheduler:(optim.lr_scheduler), configured_data):
 
     """
     This is the function which trains the critic model on ksi_train (synthesized from psi_1), then validates and tests on ksi_val and ksi_test (parts of psi_2).
@@ -20,7 +19,7 @@ def train(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.M
         loss_fn (nn.Module): The loss function to be used during training
         optimizer (optim): Optimizer to update the critic during training
         lr_scheduler (optim.lr_scheduler): Learning scheduler to change the learning rate during training
-        configured_data : A list of the configured iterators (ksi_train, ksi_val, ksi_test) and data_norm_dict 
+        configured_data (list[Iterator]): A list of the configured iterators [ksi_train, ksi_val, ksi_test]
 
     Returns:
         ...
