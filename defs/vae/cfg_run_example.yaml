@@ -1,0 +1,87 @@
+cfg_data:
+  cfg_import:
+    data_handle: 'FINCH-Science_SyntheticData/data/simpler_data_rwc.csv' # Path for the data file
+    spec_range: [900, 1700] # Spectral range, inclusive
+
+  cfg_normalize:
+    norm_type: 'dynamic' # Options are classic, dynamic, log, none. Normalizes data
+
+  cfg_loader:
+    n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_test: 123 # Number of test points at the end of training
+    n_train_batch: 32 # The training batch size
+    seed: 3169 # Seed for the data splitters
+  
+  cfg_dataset_save:
+    psi1_path: ... # Save path for the psi1 dataset do not have .csv after this since it adds the norm methods before .csv
+    psi2_path: ... # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
+
+cfg_train: 
+  n_epoch: 75
+  n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
+  device: 'cuda' # Device to be used
+  dtype: 'float32' # Datatype to be used
+  
+cfg_export:
+  entity: 'UTAT-Science' # The team entity name
+  project: 'VCCAE Synthetic Data Generation'
+  name: 'Training Run'
+  model_save: 'vccae_model.pth' # The save path for the diffusion model that was trained, can have .pth, adds it automatically
+  test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
+  local_log: 'test_logs.txt' # Path for the local logging of alerts prints, etc
+  save_to_wandb: False # Whether to save everything to wandb
+
+cfg_ae_setup:
+  ae_type: 'VCCAE' # The name of the encoder class
+  cfg_ae:
+    compressed_sampling: False
+    dynamicthresh_sampling: True
+    sampling_method: 'ddim'
+    temperature: 0.8
+    guidance_scale: 3.0
+    uncond_prob: 0.1
+    ema_decay: 0.999
+    ddim_steps: 50
+  # The rest of specific configs of the diffusion get built in the script
+
+# cfg_epsilon_setup: 
+#   epsilon_type: 'Epsilon_Cond1DUnet'
+#   cfg_epsilon:
+#     ... # The specific configs for the epsilon
+
+# cfg_augmenter_setup:
+#   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
+#   cfg_augmenter:
+#     seed: 3169
+#     jitter_scale: 1.0e-4
+#     amp_scale: 1.0e-2
+
+cfg_scheduler_setup:
+  scheduler_type: 'CosSchedule' # Name of the noise scheduler class
+  cfg_scheduler:
+    steps: 3000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
+    offset: 8.0e-3
+    exp: 2
+
+# cfg_tsampler_setup:
+#   tsampler_type: 'NormalSampling'
+#   cfg_tsampler: 
+#     t_max: 3000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
+#     t_min: 0  
+
+cfg_optim_setup:
+  optim_type: 'AdamW'
+  cfg_optim:
+    lr: 1.0e-5
+    weight_decay: 1.0e-2
+    cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
+      lrscheduler_type: 'CosineAnealingLR'
+      cfg_lrscheduler:
+        ...
+
+cfg_loss_setup:
+  loss_type: 'LossDDPM' 
+  cfg_loss:
+    noise_loss_type: 'huber'
+    use_recons_loss: 'observe'
+  
