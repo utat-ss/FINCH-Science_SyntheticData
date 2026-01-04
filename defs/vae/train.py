@@ -106,9 +106,9 @@ def train_vccae(cfg_train:(dict),
                 estimated, mu, variation = vccae_model(xb, yb)
                 tot_val += loss_fn(estimated, xb, mu, variation) * xb.size(0)
             
-            wandb.log({
-                "general/validation_average_loss": tot_val
-            })
+            # wandb.log({
+            #     "general/validation_average_loss": tot_val
+            # })
             logging.info(f"Epoch {epoch}, Average Val Loss: {tot_val}")
             # Dunno this yet
             # plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, epoch)
@@ -118,7 +118,7 @@ def train_vccae(cfg_train:(dict),
             best_val_loss = tot_val
             torch.save(vccae_model.state_dict(), model_save)
             # Optional: Log best metric to summary
-            wandb.run.summary["val/loss_best"] = best_val_loss
+            # wandb.run.summary["val/loss_best"] = best_val_loss
 
     logging.info(f"Finished {n_epoch} Epochs, Testing Step")
 
@@ -132,9 +132,9 @@ def train_vccae(cfg_train:(dict),
                 estimated, mu, variation = vccae_model(xb, yb)
                 test_loss += loss_fn(estimated, xb, mu, variation) * xb.size(0)
 
-        wandb.log({
-            "general/test_average_loss": test_loss.item()
-        })
+        # wandb.log({
+        #     "general/test_average_loss": test_loss.item()
+        # })
 
         # plot_to_wandb(x_0, x_0_hat, abundances, name, orig_index, unnorm_lambda, 20, None) # Plot the testing results
 
