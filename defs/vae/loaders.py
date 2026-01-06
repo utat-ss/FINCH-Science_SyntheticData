@@ -18,12 +18,12 @@ def load_vccae(cfg_ae_setup):
     cfg_ae = cfg_ae_setup['cfg_ae']
 
     if hasattr(ae, ae_type):
-        diffusion_cls = getattr(ae, ae_type)
+        ae_cls = getattr(ae, ae_type)
     else:
         raise ValueError(f"Unknown/Unsupported autoencoder type: {ae_type}")
     
-    diffusion_model = diffusion_cls(**cfg_ae)
-    return diffusion_model
+    ae_model = ae_cls(**cfg_ae)
+    return ae_model
 
 # def load_epsilon(cfg_epsilon_setup):
 
@@ -40,7 +40,7 @@ def load_vccae(cfg_ae_setup):
 #     epsilon = epsilon_cls(**cfg_epsilon)
 #     return epsilon
 
-def load_optim(cfg_optim_setup, epsilon):
+def load_optim(model, cfg_optim_setup): #epsilon excluded
 
     optim_type = cfg_optim_setup['optim_type']
     cfg_optim = cfg_optim_setup.get('cfg_optim', {})
@@ -52,7 +52,7 @@ def load_optim(cfg_optim_setup, epsilon):
                          f"Check spelling (e.g., 'Adam' vs 'adam').")
     
     cfg_optim_temp = cfg_optim; cfg_optim_temp.pop('cfg_lrscheduler_setup', None)
-    optimizer = opt_cls(epsilon.parameters(), **cfg_optim_temp)
+    optimizer = opt_cls(model.parameters(), **cfg_optim_temp) #epsilon.parameters(), 
 
     lr_scheduler = None
 
