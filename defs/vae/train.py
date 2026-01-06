@@ -60,7 +60,7 @@ def train_vccae(cfg_train:(dict),
     })
     """
     logging.info(f'Training start. {n_epoch} epochs.')
-    for epoch in n_epoch:
+    for epoch in range(n_epoch):
 
         # Training
         vccae_model.train()

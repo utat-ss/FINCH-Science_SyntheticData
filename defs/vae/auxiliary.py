@@ -32,7 +32,7 @@ def setup_logging(cfg_export):
     import sys
 
     master_path = cfg_export['master_path']
-    locallog_save = cfg_export['locallog_save']
+    locallog_save = cfg_export['local_log'] #locallog_save
     if not locallog_save.endswith('.txt'): locallog_save += '.txt'
     locallog_path = master_path + locallog_save
 

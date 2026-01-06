@@ -117,13 +117,13 @@ if __name__ == "__main__":
     cfg_ae_addon = {
         # 'epsilon': load_epsilon(cfg_epsilon_setup),
         # 'augmenter': load_augmenter(cfg_augmenter_setup),
-        'scheduler': load_scheduler(cfg_scheduler_setup),
+        # 'scheduler': load_scheduler(cfg_scheduler_setup),
         # 't_sampler': load_tsampler(cfg_tsampler_setup)
     }
     cfg_ae_setup['cfg_ae'].update(cfg_ae_addon)
     vccae_model = load_vccae(cfg_ae_setup)
 
-    optimizer, lr_scheduler = load_optim(cfg_optim_setup, vccae_model.epsilon)
+    optimizer, lr_scheduler = load_optim(vccae_model, cfg_optim_setup) #model.epsilon excluded
     loss_fn = load_loss(cfg_loss_setup)
     logging.info("The diffusion model, optimizer, loss function etc. has been configured")
 
