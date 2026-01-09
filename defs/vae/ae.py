@@ -93,7 +93,7 @@ class VDecoder(nn.Module):
                                 stride=self.conv_details['pool_stride'],
                                 padding=self.conv_details['pad'],
                                 output_padding=self.conv_details['out_pad']),
-            nn.Sigmoid(),
+            # nn.Sigmoid(),
             nn.Flatten(start_dim=0)
         ])
         self.decoder = nn.Sequential(*decoder_layers)
