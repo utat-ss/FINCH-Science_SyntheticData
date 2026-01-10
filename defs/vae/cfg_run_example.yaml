@@ -23,7 +23,7 @@ cfg_data:
 cfg_train: 
   n_epoch: 75
   n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
-  device: 'cpu' # Device to be used
+  device: 'cuda' # Device to be used
   dtype: 'float32' # Datatype to be used
   
 cfg_export:
