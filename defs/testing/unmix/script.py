@@ -84,7 +84,7 @@ def unmix_script(cfg_export_master:(dict), cfg_unmix:(dict)):
 
     Args:
         cfg_export_master (dict): Export configs obtained from the master cfg, this is different than the one in cfg_unmix
-        cfg_unmix (dict): Cfgs to run this specific metric, for details, check example_cfg.yaml in testing/
+        cfg_unmix (dict): Cfgs to run this specific metric, for details, check example_cfg.yaml in testing/master/
 
     Returns:
         Logs the training metrics

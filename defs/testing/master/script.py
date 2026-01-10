@@ -128,7 +128,7 @@ if __name__ == "__main__":
             raise ValueError("Neighter Nearest-Neigh nor Unmix is enabled as a test mode, enable at least one")
 
         if cfg_nearneigh is not None:
-            from .nearest_neighbor.script import *
+            from ..nearest_neighbor.script import *
             logging.info("Nearest metric neighborhood calculations are enabled, proceeding")
             nearneigh_script(cfg_export, cfg_nearneigh)
             logging.info("Nearest metric neighborhood calculations succesfully completed")
@@ -136,7 +136,7 @@ if __name__ == "__main__":
             logging.info("CAUTION: Nearest neighborhood metric is disabled")
 
         if cfg_unmix is not None:
-            from .unmix.script import *
+            from ..unmix.script import *
             logging.info("Unmix metric calculations are enabled, proceeding")
             unmix_script(cfg_export, cfg_unmix)
             logging.info("Unmix metric calculations succesfully completed")

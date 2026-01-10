@@ -1,7 +1,7 @@
 import torch
 
 """
-For details of the interpretations of gamma, zeta, eta, and gammas; check the README.md in this directory
+For details of the interpretations of delta, epsilon, zeta, and gammas; check the README.md in this directory
 """
 
 def replace_with_1(tensor:(torch.Tensor), method:(str)='min', dim:(int)=0):
@@ -19,15 +19,13 @@ def replace_with_1(tensor:(torch.Tensor), method:(str)='min', dim:(int)=0):
         _, idx = tensor.min(dim=dim)
     elif method == 'max':
         _, idx = tensor.max(dim=dim)
-    else:
-        raise ValueError(f"Unknown/Unsupported method: {method}")
 
     out = torch.zeros_like(tensor)
     out.scatter_(dim, idx.unsqueeze(dim), 1.0)
 
     return out
 
-def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), type:(str)='euc', method:(str)='min', p:(float)=2, spec_idx:(list[int])=None) -> float | int | int | list[int]:
+def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), type:(str)='sam', method:(str)='min', spec_idx:(list[int])=None, p:(float)=2) -> float | int | int | int | int | int | int:
     """
     Gets the similarity metric using euclidian distance.
 
@@ -36,14 +34,14 @@ def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), 
         synth_data (torch.Tensor): Synthesized data, using abundances
         type (str): Type of distance, euclidian ('euc') or spectral angle mapper ('sam')
         method (str): Method to prioritize minimum ('min') or maximum ('max')
-        p (float): Power of the euclidian distance
         spec_idx (list[int]): The indices of the tensors, if limiting the wavelengths
+        p (float): Power of the euclidian distance
 
     Returns:
-        gamma (float): (gamma_11 + gamma_22) / (gamma_12 + gamma_21)
-        zeta (int): (gamma_11 - gamma_22)
-        eta (int): (gamma_12 - gamma_21)
-        gammas (list[int]): [gamma_11, gamma_12, gamma_21, gamma_22]
+        delta (float): (gamma_11 + gamma_22) / (gamma_12 + gamma_21)
+        epsilon (int): (gamma_11 - gamma_22)
+        zeta (int): (gamma_12 - gamma_21)
+        gammas (int): gamma_11, gamma_12, gamma_21, gamma_22
     """
     if spec_idx is not None:
         ground_data = ground_data[:, spec_idx[0]:spec_idx[1]]
@@ -65,7 +63,12 @@ def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), 
     else:
         raise ValueError(f"Unknown/Unsupported distance type: {type}")
     
-    distance_matrix.fill_diagonal_(float('inf')) # Fill the diagonal with inf, the reason why we do this is obvious
+    if method == 'min':
+        distance_matrix.fill_diagonal_(float('inf')) # Fill the diagonal with inf, the reason why we do this is obvious, so that it does not appear as min
+    elif method == 'max':
+        distance_matrix.fill_diagonal_(float('-inf')) # Fill the diagonal with -inf, the reason why we do this is obvious, so that it does not appear as max
+    else:
+        raise ValueError(f"Unknown/Unsupported method: {method}")
 
     distance_matrix = replace_with_1(distance_matrix, method, 0) # Replace along rows, the minimum (or maximum) with 1, others with 0
 
@@ -78,11 +81,11 @@ def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), 
     gamma_different = gamma_12 + gamma_21 # Sum along inverse diag, this means they are mixed among each other
 
     if gamma_different.item() != 0: # As long as we have some different points, use regular
-        gamma = (gamma_similar / gamma_different).item()
+        delta = (gamma_similar / gamma_different).item()
     else:
-        gamma = float('inf') # Otherwise return infinity
+        delta = float('inf') # Otherwise return infinity
 
-    zeta = gamma_11 - gamma_22 # The clustering 'measure'
-    eta = gamma_12 - gamma_21 # Density 'measure'
+    epsilon = gamma_11 - gamma_22 # The clustering 'measure'
+    zeta = gamma_12 - gamma_21 # Density 'measure'
 
-    return gamma, zeta, eta, [gamma_11, gamma_12, gamma_21, gamma_22]
+    return delta, epsilon, zeta, gamma_11, gamma_12, gamma_21, gamma_22

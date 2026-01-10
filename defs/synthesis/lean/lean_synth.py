@@ -26,28 +26,30 @@ model_type (str): The type of model we are using, either 'GaussianDiffusion' or 
 max_batch_size (int): The maximum batch size used in sampling, this is to limit the load on gpu/cpu
 """
 
-def get_lean_synthesis(cfg_lean_synthesis, model:(nn.Module)) -> SpectralSampler:
+def get_lean_synthesis(model_type:(str), model:(nn.Module)) -> SpectralSampler:
 
     """
     This function gets the lean synthesizer, it assumes the cfg_lean_synthesis has the keys states as above.
 
     Args:
-        cfg_lean_synthesis (dict): The dict to get the lean synthesizer
+        model_type (str): Type of model to be used in synthesizer/sampler
     """
 
-    if cfg_lean_synthesis['model_type'] == 'GaussianDiffusion':
+    if model_type == 'GaussianDiffusion':
         lean_sampler = GaussianDiffusionSampler(model=model, lean=True)
-    elif cfg_lean_synthesis['model_type'] == 'AutoEncoder':
+    elif model_type == 'AutoEncoder':
         lean_sampler = AutoEncoderSampler(model=model, lean=True)
     else:
-        raise ValueError(f"Unknown/Unsupported model_type: {cfg_lean_synthesis['model_type']}")
+        raise ValueError(f"Unknown/Unsupported model_type: {model_type}")
 
     return lean_sampler
 
 def synthesize(cfg_lean_synthesis, sampler:(SpectralSampler), ab_tensor:(torch.Tensor)) -> torch.Tensor:
 
     max_batch_size = cfg_lean_synthesis['max_batch_size']
-    assert max_batch_size <= ab_tensor.shape[0], f"max_batch_size ({max_batch_size}) must be <= than batch of ab_tensor ({ab_tensor.shape[0]})" 
+    unnormalizer = cfg_lean_synthesis['unnormalizer']
+    if max_batch_size > ab_tensor.shape[0]:
+        max_batch_size = ab_tensor.shape[0]
     
     if ab_tensor.device != next(sampler.model.parameters()).device: # Ensure the ab_tensor is in the same device as the sampler's model
         ab_tensor.to(next(sampler.model.parameters()).device)
@@ -59,7 +61,8 @@ def synthesize(cfg_lean_synthesis, sampler:(SpectralSampler), ab_tensor:(torch.T
     sampled_spectra = []
     for i in range(len(split_ab_tensors)):
         inter_tensor = split_ab_tensors.pop(0)
-        sampled_spectra.append(sampler.predefined_ab_sample(inter_tensor))
+        inter_sampled = unnormalizer(sampler.predefined_ab_sample(inter_tensor))
+        sampled_spectra.append(inter_sampled)
     sampled_spectra = torch.tensor(sampled_spectra)
 
     return sampled_spectra
