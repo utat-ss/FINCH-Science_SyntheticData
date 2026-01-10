@@ -90,7 +90,9 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
                 train_loss, noise_loss, recons_loss, fft_loss, tv_loss = loss_fn(x_0_hat, x_0, x_n_hat, x_n, unnorm_lambda)
             scaler.scale(train_loss).backward() # If AMP is enabled, scale the loss first and then backprop it
             scaler.unscale_(optimizer) # Unscale the grads of optimizer's assigned params, in-place, if AMP is enabled, we have to manually call this because we want to clip grads
-            torch.nn.utils.clip_grad_norm_(diffusion_model.epsilon.parameters(), max_norm=1.0) # Clip grads
+            # Use configurable grad clip norm from cfg_train (default 1.0)
+            max_norm = cfg_train.get('grad_clip_norm', 1.0)
+            torch.nn.utils.clip_grad_norm_(diffusion_model.epsilon.parameters(), max_norm=max_norm) # Clip grads
             scaler.step(optimizer) # Takes an optimizer step if inf/NaNs are not present
             scaler.update() # Updates the scale factor
 
