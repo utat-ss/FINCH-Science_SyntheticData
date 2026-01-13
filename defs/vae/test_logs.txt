@@ -1,22 +1,14 @@
-[2026-01-09 13:20:51] Cfgs taken in, parsed. WandB and logging configured
-[2026-01-09 13:20:51] Data has been parsed and configured
-[2026-01-09 13:20:52] The diffusion model, optimizer, loss function etc. has been configured
-[2026-01-09 13:20:52] Training function started
-[2026-01-09 13:20:52] Training start. 75 epochs.
-[2026-01-09 13:20:52] Epoch 1, Training step
-[2026-01-09 13:22:26] Epoch 1, Average Train Loss: 3266.721845149994
-[2026-01-09 13:22:26] Epoch 1, Validation Step
-[2026-01-09 13:22:27] Epoch 1, Average Val Loss: 666.4578247070312
-[2026-01-09 13:22:27] Epoch 2, Training step
-[2026-01-09 13:24:00] Epoch 2, Average Train Loss: 2715.9399059414864
-[2026-01-09 13:24:00] Epoch 2, Validation Step
-[2026-01-09 13:24:02] Epoch 2, Average Val Loss: 666.040771484375
-[2026-01-09 13:24:02] Epoch 3, Training step
-[2026-01-09 13:25:35] Epoch 3, Average Train Loss: 2715.077435553074
-[2026-01-09 13:25:35] Epoch 3, Validation Step
-[2026-01-09 13:25:37] Epoch 3, Average Val Loss: 665.877197265625
-[2026-01-09 13:25:37] Epoch 4, Training step
-[2026-01-09 13:27:16] Epoch 4, Average Train Loss: 2714.436520755291
-[2026-01-09 13:27:16] Epoch 4, Validation Step
-[2026-01-09 13:27:17] Epoch 4, Average Val Loss: 665.7509155273438
-[2026-01-09 13:27:17] Epoch 5, Training step
+[2026-01-13 14:15:22] Cfgs taken in, parsed. WandB and logging configured
+[2026-01-13 14:15:22] Data has been parsed and configured
+[2026-01-13 14:15:23] The diffusion model, optimizer, loss function etc. has been configured
+[2026-01-13 14:15:23] Training function started
+[2026-01-13 14:15:23] Training start. 75 epochs.
+[2026-01-13 14:15:23] Epoch 1, Training step
+[2026-01-13 14:16:58] Epoch 1, Average Train Loss: 167.76235786173493
+[2026-01-13 14:16:58] Epoch 1, Validation Step
+[2026-01-13 14:16:59] Epoch 1, Average Val Loss: 30.496967315673828
+[2026-01-13 14:17:00] Epoch 2, Training step
+[2026-01-13 14:18:34] Epoch 2, Average Train Loss: 129.30313876178116
+[2026-01-13 14:18:34] Epoch 2, Validation Step
+[2026-01-13 14:18:35] Epoch 2, Average Val Loss: 29.90575408935547
+[2026-01-13 14:18:36] Epoch 3, Training step
