@@ -1,6 +1,10 @@
-[2026-01-11 06:23:50] Cfgs taken in, parsed. WandB and logging configured
-[2026-01-11 06:23:50] Data has been parsed and configured
-[2026-01-11 06:23:52] The diffusion model, optimizer, loss function etc. has been configured
-[2026-01-11 06:23:52] Training function started
-[2026-01-11 06:23:52] Training start. 75 epochs.
-[2026-01-11 06:23:52] Epoch 1, Training step
+[2026-01-15 06:35:04] Cfgs taken in, parsed. WandB and logging configured
+[2026-01-15 06:35:04] Data has been parsed and configured
+[2026-01-15 06:35:06] The diffusion model, optimizer, loss function etc. has been configured
+[2026-01-15 06:35:06] Training function started
+[2026-01-15 06:35:06] Training start. 75 epochs.
+[2026-01-15 06:35:06] Epoch 1, Training step
+[2026-01-15 06:37:27] Epoch 1, Average Train Loss: 9.51371881365776
+[2026-01-15 06:37:27] Epoch 1, Validation Step
+[2026-01-15 06:37:31] Epoch 1, Average Val Loss: 0.021942883729934692
+[2026-01-15 06:37:31] Epoch 2, Training step

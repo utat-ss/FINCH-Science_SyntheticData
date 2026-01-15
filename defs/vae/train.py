@@ -60,12 +60,12 @@ def train_vccae(cfg_train:(dict),
     })
     """
     logging.info(f'Training start. {n_epoch} epochs.')
-    for epoch in range(n_epoch):
+    for epoch in range(1, n_epoch + 1):
 
         # Training
         vccae_model.train()
         tot_train_loss = 0
-        logging.info(f'Epoch {epoch + 1}, Training step')
+        logging.info(f'Epoch {epoch}, Training step')
 
         for xb, yb in train_loader:
             xb = xb.to(device)
@@ -79,7 +79,7 @@ def train_vccae(cfg_train:(dict),
             tot_train_loss += float(train_loss)
             log_payload = {
                 'train_loss': float(train_loss),
-                'epoch': epoch + 1
+                'epoch': epoch
             }
             # wandb.log(log_payload)
         
@@ -99,6 +99,7 @@ def train_vccae(cfg_train:(dict),
         vccae_model.eval()
 
         logging.info(f"Epoch {epoch}, Validation Step")
+        tot_val = 0
         with torch.no_grad():
             for xb, yb in val_loader:
                 xb = xb.to(device) # spectrum
@@ -124,6 +125,7 @@ def train_vccae(cfg_train:(dict),
 
     ### TESTING STEP
     vccae_model.eval()
+    test_loss = 0
 
     with torch.no_grad():
         for xb, yb in val_loader:

@@ -4,13 +4,13 @@ cfg_data:
     spec_range: [400, 2490] # Spectral range, inclusive
 
   cfg_normalize:
-    norm_type: 'dynamic' # Options are classic, dynamic, log, none. Normalizes data
+    norm_type: 'none' # Options are classic, dynamic, log, none. Normalizes data
 
   cfg_loader:
     n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
     n_test: 123 # Number of test points at the end of training
     n_train_batch: 32 # The training batch size
-    seed: 3169 # Seed for the data splitters
+    seed: 1001 # Seed for the data splitters
 
   cfg_split: # Train/val split data
     split_ratio: 0.8
@@ -21,9 +21,9 @@ cfg_data:
     psi2_path: ... # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
-  n_epoch: 75
+  n_epoch: 75 # Number of training epochs
   n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
-  device: 'cuda' # Device to be used
+  device: 'cpu' # Device to be used
   dtype: 'float32' # Datatype to be used
   
 cfg_export:
