@@ -92,7 +92,7 @@ def parse_cfg_dict(cfg_run:(dict)):
 from loaders import *
 from data.data_preparation import *
 from train import train_vccae
-from auxiliary import setup_logging, save_diffusion_inits #, setup_wandb
+from auxiliary import setup_logging, save_vccae_inits, setup_wandb
 
 import traceback
 import logging
@@ -104,9 +104,9 @@ if __name__ == "__main__":
     cfg_data, cfg_train, cfg_ae_setup, cfg_scheduler_setup, cfg_optim_setup, cfg_loss_setup, cfg_export = parse_cfg_dict(cfg_run)
 
     # Setup wandb and logging
-    # run = setup_wandb(cfg_run, cfg_export)
+    run = setup_wandb(cfg_run, cfg_export)
     setup_logging(cfg_export)
-    # save_diffusion_inits(cfg_export, cfg_ae_setup, cfg_epsilon_setup, cfg_augmenter_setup, cfg_scheduler_setup, cfg_tsampler_setup)
+    save_vccae_inits(cfg_export, cfg_ae_setup, cfg_scheduler_setup)
     logging.info("Cfgs taken in, parsed. WandB and logging configured")
 
     # Figure out data
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     try:
         logging.info("Training function started")
         train_vccae(cfg_train, cfg_export, vccae_model, loss_fn, optimizer, lr_scheduler, configured_data)
-        # logging.info("Training finished, everything logged to wandb.")
+        logging.info("Training finished, everything logged to wandb.")
 
     except Exception as e:
         # run.alert(title= "Training crashed", text=str(e))

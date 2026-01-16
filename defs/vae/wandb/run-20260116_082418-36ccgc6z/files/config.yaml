@@ -1,0 +1,137 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            hrvnam4kfemr17vjflek1vxoopqeciwn:
+                args:
+                    - --config
+                    - cfg_run_example.yaml
+                codePath: defs\vae\script.py
+                codePathLocal: script.py
+                cpu_count: 28
+                cpu_count_logical: 56
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "392990552064"
+                        used: "287872749568"
+                email: cshuo777@gmail.com
+                executable: C:\Users\gearm\AppData\Local\Python\pythoncore-3.14-64\python.exe
+                git:
+                    commit: 5885518a91c5ab33661fb875952043f8889c5654
+                    remote: https://github.com/utat-ss/FINCH-Science_SyntheticData.git
+                gpu: NVIDIA GeForce GTX 1070
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Pascal
+                      cudaCores: 1920
+                      memoryTotal: "8589934592"
+                      name: NVIDIA GeForce GTX 1070
+                      uuid: GPU-ea0e162b-13cb-1c22-2f0b-3fcd52a8b39a
+                host: DESKTOP-TPR0S1K
+                memory:
+                    total: "68593303552"
+                os: Windows-10-10.0.19045-SP0
+                program: D:\stuff\utat_synthetic\defs\vae\script.py
+                python: CPython 3.14.2
+                root: D:\stuff\utat_synthetic\defs\vae
+                startedAt: "2026-01-16T00:24:18.098024Z"
+                writerId: hrvnam4kfemr17vjflek1vxoopqeciwn
+        m: []
+        python_version: 3.14.2
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 13
+                - 16
+            "4": 3.14.2
+            "5": 0.23.1
+            "8":
+                - 3
+            "12": 0.23.1
+            "13": windows-amd64
+cfg_ae_setup:
+    value:
+        ae_type: VCCAE
+        cfg_ae:
+            ab_mlp:
+                - 3
+                - 128
+                - 128
+                - 128
+            c_d:
+                pad: 1
+            conv_layers:
+                - 1
+                - 256
+                - 256
+                - 256
+                - 256
+            mlp_layers:
+                - 256
+                - 256
+                - 256
+                - 256
+            num_spectra: 210
+            out_layer: 64
+cfg_data:
+    value:
+        cfg_dataset_save:
+            psi1_path: psi_1
+            psi2_path: psi_2
+        cfg_import:
+            data_handle: /data/simpler_data_rwc.csv
+            spec_range:
+                - 400
+                - 2490
+        cfg_loader:
+            n_test: 123
+            n_train_batch: 1
+            n_val: 200
+            seed: 1001
+        cfg_normalize:
+            norm_type: none
+        cfg_split:
+            batch_size: 1
+            split_ratio: 0.8
+cfg_export:
+    value:
+        entity: cshuo777-university-of-toronto
+        local_log: test_logs.txt
+        locallog_save: test_logs.txt
+        master_path: ""
+        model_save: vccae_model.pth
+        modelinits_save: vccae_model_inits.json
+        name: train_001
+        norm_save: norm_dict.json
+        project: VCCAE Synthetic Data Generation
+        save_to_wandb: true
+        test_save: generated_test_samples.parquet
+cfg_loss_setup:
+    value:
+        loss_type: LossKLSAM
+cfg_optim_setup:
+    value:
+        cfg_optim:
+            cfg_lrscheduler_setup:
+                cfg_lrscheduler: '...'
+                lrscheduler_type: CosineAnealingLR
+            lr: 1e-05
+            weight_decay: 0.01
+        optim_type: Adam
+cfg_scheduler_setup:
+    value:
+        cfg_scheduler:
+            exp: 2
+            offset: 0.008
+            steps: 3000
+        scheduler_type: CosSchedule
+cfg_train:
+    value:
+        device: cpu
+        dtype: torch.float32
+        n_epoch: 75
+        n_tb_epoch: 150

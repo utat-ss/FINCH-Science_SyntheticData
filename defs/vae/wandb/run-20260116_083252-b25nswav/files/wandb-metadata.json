@@ -1,0 +1,44 @@
+{
+  "os":  "Windows-10-10.0.19045-SP0",
+  "python":  "CPython 3.14.2",
+  "startedAt":  "2026-01-16T00:32:52.747655Z",
+  "args":  [
+    "--config",
+    "cfg_run_example.yaml"
+  ],
+  "program":  "D:\\stuff\\utat_synthetic\\defs\\vae\\script.py",
+  "codePath":  "defs\\vae\\script.py",
+  "codePathLocal":  "script.py",
+  "git":  {
+    "remote":  "https://github.com/utat-ss/FINCH-Science_SyntheticData.git",
+    "commit":  "5885518a91c5ab33661fb875952043f8889c5654"
+  },
+  "email":  "cshuo777@gmail.com",
+  "root":  "D:\\stuff\\utat_synthetic\\defs\\vae",
+  "host":  "DESKTOP-TPR0S1K",
+  "executable":  "C:\\Users\\gearm\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+  "cpu_count":  28,
+  "cpu_count_logical":  56,
+  "gpu":  "NVIDIA GeForce GTX 1070",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "392990552064",
+      "used":  "287881469952"
+    }
+  },
+  "memory":  {
+    "total":  "68593303552"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce GTX 1070",
+      "memoryTotal":  "8589934592",
+      "cudaCores":  1920,
+      "architecture":  "Pascal",
+      "uuid":  "GPU-ea0e162b-13cb-1c22-2f0b-3fcd52a8b39a"
+    }
+  ],
+  "cudaVersion":  "13.0",
+  "writerId":  "iw9x51f92ipi1sleqn4yrlo79vo854wj"
+}
