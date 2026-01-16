@@ -114,9 +114,9 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     names = df['Spectra'].to_list()
 
     # Get the original indices
-    # indices = range(len(names))
+    indices = range(len(names))
 
-    return spectra_tensor, abundances_tensor, names #, indices, norm_out]
+    return spectra_tensor, abundances_tensor, names , indices, norm_out
 
 class HyperSpectralDataset(Dataset):
     """
@@ -243,7 +243,7 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     save_split_wrapper(ds_temp, cfg_dataset_save['psi2_path'], cfg_dataset_save['spec_range'])
 
     # Separate the temp dataset into train and test
-    ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
+    ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator) 
 
     dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False, num_workers=4, persistent_workers=True, prefetch_factor=4, pin_memory=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
 
@@ -306,33 +306,37 @@ def get_data(cfg_data:(dict)):
     cfg_normalize = cfg_data['cfg_normalize']
     cfg_split = cfg_data['cfg_split']
 
-    spectra_tensor, abundances_tensor, names = get_vals(cfg_import, cfg_normalize) # Get the vals
+    spectra_tensor, abundances_tensor, names, indices, norm_out = get_vals(cfg_import, cfg_normalize) # Get the vals
 
-    # ds = HyperSpectralDataset(spectra_tensor, abundances_tensor, names) # Create a ds using the vals
+    ds = HyperSpectralDataset(spectra_tensor, abundances_tensor, names, indices) # Create a ds using the vals
 
-    # cfg_loader = cfg_data['cfg_loader'] # Get the dict to input to get_dataloaders
-    # cfg_dataset_save = cfg_data['cfg_dataset_save']; cfg_dataset_save['spec_range'] = cfg_import['spec_range']; cfg_dataset_save['norm_type'] = norm_out['norm_type']
-    # dataloaders = get_dataloaders(ds, cfg_loader, cfg_dataset_save) # Get the dataloaders as a list
+    cfg_loader = cfg_data['cfg_loader'] # Get the dict to input to get_dataloaders
+    cfg_dataset_save = cfg_data['cfg_dataset_save']; cfg_dataset_save['spec_range'] = cfg_import['spec_range']; cfg_dataset_save['norm_type'] = norm_out['norm_type']
+    dataloaders = get_dataloaders(ds, cfg_loader, cfg_dataset_save) # Get the dataloaders as a list
 
-    # iterators = [
-    #     *get_inf_iterators(dataloaders[0]),
-    #     *get_inf_iterators(dataloaders[1]),
-    #     iter(dataloaders[2])
-    # ]
-    split_ratio = cfg_split['split_ratio']
-    batch_size = cfg_split['batch_size']
-    X_t = spectra_tensor
-    y_t = abundances_tensor
-    ds = TensorDataset(X_t, y_t)
-    n_train = int(len(ds) * split_ratio)
-    n_val = len(ds) - n_train
-    train_ds, val_ds = random_split(ds, [n_train, n_val])
+    iterators = [
+        *get_inf_iterators(dataloaders[0]),
+        *get_inf_iterators(dataloaders[1]),
+        iter(dataloaders[2])
+    ]
 
-    output = (
-      DataLoader(train_ds, batch_size=batch_size, shuffle=True),
-      DataLoader(val_ds, batch_size=batch_size),
-    )
-    return output
+    # split_ratio = cfg_split['split_ratio']
+    # batch_size = cfg_split['batch_size']
+    # X_t = spectra_tensor
+    # y_t = abundances_tensor
+    # ds = TensorDataset(X_t, y_t)
+    # n_train = int(len(ds) * split_ratio)
+    # n_val = len(ds) - n_train
+    # train_ds, val_ds = random_split(ds, [n_train, n_val])
+
+    # output = (
+    #   DataLoader(train_ds, batch_size=batch_size, shuffle=True),
+    #   DataLoader(val_ds, batch_size=batch_size),
+    # )
+
+    del dataloaders, spectra_tensor, abundances_tensor, names, indices
+
+    return [iterators, norm_out]
 
 def get_unnormalizer(data_norm_dict:(dict)):
     """

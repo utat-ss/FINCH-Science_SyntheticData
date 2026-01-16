@@ -7,9 +7,9 @@ cfg_data:
     norm_type: 'none' # Options are classic, dynamic, log, none. Normalizes data
 
   cfg_loader:
-    n_val: 200 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
-    n_test: 123 # Number of test points at the end of training
-    n_train_batch: 32 # The training batch size
+    n_val: 1 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_test: 1 # Number of test points at the end of training
+    n_train_batch: 1 # The training batch size
     seed: 1001 # Seed for the data splitters
 
   cfg_split: # Train/val split data
@@ -17,26 +17,29 @@ cfg_data:
     batch_size: 1
   
   cfg_dataset_save:
-    psi1_path: ... # Save path for the psi1 dataset do not have .csv after this since it adds the norm methods before .csv
-    psi2_path: ... # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
+    psi1_path: "defs/vae/psi_1" # Save path for the psi1 dataset do not have .csv after this since it adds the norm methods before .csv
+    psi2_path: "defs/vae/psi_2" # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
-  n_epoch: 75 # Number of training epochs
-  n_tb_epoch: 150 # Number of training instances/batches, will have this many batches in training
+  n_epoch: 50 # Number of training epochs
+  n_tb_epoch: 100 # Number of training instances/batches, will have this many batches in training
   device: 'cpu' # Device to be used
   dtype: 'float32' # Datatype to be used
   
 cfg_export:
-  entity: 'UTAT-Science' # The team entity name
+  entity: 'cshuo777-university-of-toronto' # The team entity name
   project: 'VCCAE Synthetic Data Generation'
-  name: 'Training Run'
-  model_save: 'vccae_model.pth' # The save path for the diffusion model that was trained, can have .pth, adds it automatically
+  name: 'train_001'
+  model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
   master_path: ''
+  modelinits_save: 'vccae_model_inits.json' # Path to save the model initial config
   local_log: 'test_logs.txt' # Path for the local logging of alerts prints, etc
   locallog_save: 'test_logs.txt' # Path for the local logging of alerts prints, etc (bruh)
-  save_to_wandb: False # Whether to save everything to wandb
+  psi1_path: "psi_1"
+  psi2_path: "psi_2"
+  save_to_wandb: True # Whether to save everything to wandb
 
 cfg_ae_setup:
   ae_type: 'VCCAE' # The name of the encoder class

@@ -151,7 +151,7 @@ class VCCAE(nn.Module):
         - ab_mlp: Size and number of conditioner MLP layers.
     """
     def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
-                 c_d:dict = {}, ab_mlp = [3, 64, 10]):
+                 c_d:dict = {}, ab_mlp = [3, 64, 10], scheduler=None):
         super(VCCAE, self).__init__()
         self.conv_details = {
             'k_size': 3,        #kernel size
