@@ -25,7 +25,7 @@ cfg_data:
     psi2_path: 'C:\GitHub\FINCH-Science_SyntheticData\training\diffusion\andrew-run\psi2.csv' # Save path for the psi2 dataset 
 
 cfg_train: 
-  n_epoch: 50     # set to 50 for quicker testing
+  n_epoch: 200
   n_tb_epoch: 400 # Number of training instances/batches, will have this many batches in training
   device: 'cpu' # Device to be used
   dtype: 'float32' # Datatype to be used
@@ -47,6 +47,9 @@ cfg_export:
   norm_save: 'norm_dict.json'
   save_to_wandb: True
 
+# keep temp at 0, can change others, maybe not ddim steps
+
+# play around with these``
 cfg_diffusion_setup:
   diffusion_type: 'GaussianDiffusion' # The name of the diffusion class
   cfg_diffusion:
@@ -60,6 +63,7 @@ cfg_diffusion_setup:
     ddim_steps: 100
   # The rest of specific configs of the diffusion get built in the script
 
+# keep these constant
 cfg_epsilon_setup: 
   epsilon_type: 'Epsilon_Cond1DUnet'
   cfg_epsilon: # The specific configs for the epsilon
@@ -81,6 +85,7 @@ cfg_epsilon_setup:
     wavembed_neighborhood: 1000
     wavembed_scale: 1
 
+# ege will try to get these
 cfg_augmenter_setup:
   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
   cfg_augmenter:
@@ -95,12 +100,15 @@ cfg_scheduler_setup:
     offset: 8.0e-3
     exp: 2
 
+# it's harder to remove noise from low than to high temperatures
+# keep this
 cfg_tsampler_setup:
   tsampler_type: 'UniformSampling'
   cfg_tsampler: 
     t_max: 1000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
     t_min: 0  
 
+# the lr scales linear, so changing lr will require a lot more runs
 cfg_optim_setup:
   optim_type: 'AdamW'
   cfg_optim:
@@ -111,6 +119,7 @@ cfg_optim_setup:
       cfg_lrscheduler:
         T_max: 50     # match epoch count
 
+# use the -4 run values for this
 cfg_loss_setup:
   loss_type: 'LossGaussianDiffusion' 
   cfg_loss:
