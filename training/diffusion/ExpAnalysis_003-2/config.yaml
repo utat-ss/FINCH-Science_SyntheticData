@@ -1,0 +1,113 @@
+cfg_data:
+  cfg_import:
+    data_handle: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv'
+    spec_range: [400, 2490]
+
+  cfg_normalize:
+    norm_type: 'statistical'
+
+  cfg_loader:
+    n_val: 100
+    n_test: 123
+    n_train_batch: 8
+    num_workers: 6
+    prefetch_factor: 24
+    seed: 3169
+  
+  cfg_dataset_save:
+    psi1_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_003-2\psi1.csv'
+    psi2_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_003-2\psi2.csv'
+
+cfg_train:
+  n_epoch: 200
+  n_tb_epoch: 400
+  device: 'cuda'
+  dtype: 'float32'
+  verbose: True
+  use_autocast: True
+  
+cfg_export:
+  entity: 'UTAT-Science'
+  project: 'Conditional U-Net Synthetic Data Generation'
+  name: 'ExpAnalysis_003-2'
+  master_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_003-2\'
+  model_save: 'diffusion_model.pth'
+  modelinits_save: 'cfg_diffusion_setup.json'
+  test_save: 'generated_test_samples.parquet'
+  locallog_save: 'test_logs.txt'
+  norm_save: 'norm_dict.json'
+  save_to_wandb: True
+
+cfg_diffusion_setup:
+  diffusion_type: 'GaussianDiffusion'
+  cfg_diffusion:
+    compressed_sampling: False
+    dynamicthresh_sampling: True
+    sampling_method: 'ddim'
+    temperature: 0.0
+    guidance_scale: 3.0
+    uncond_prob: 0.1
+    ema_decay: 0.999
+    ddim_steps: 250
+
+cfg_epsilon_setup:
+  epsilon_type: 'Epsilon_Cond1DUnet'
+  cfg_epsilon:
+    n_bands: 210
+    in_channel: 1
+    out_channel: 1
+    n_endmembers: 3
+    channels: [128,256,512]
+    n_former_blocks: 3
+    n_mid_blocks: 2
+    dropout: 0.05
+    dim_head: 64
+    up_type: 'conformer'
+    mid_type: 'conformer'
+    down_type: 'conformer'
+    conv_kernel_size: 3
+    conv_expansion_factor: 2
+    time_embed_dim: 64
+    wavembed_neighborhood: 1000
+    wavembed_scale: 1
+
+cfg_augmenter_setup:
+  augmenter_type: 'SpectralAugmentation'
+  cfg_augmenter:
+    seed: 3169
+    jitter_scale: 0.0016
+    amp_scale: 0.075
+
+cfg_scheduler_setup:
+  scheduler_type: 'CosSchedule'
+  cfg_scheduler:
+    steps: 1000
+    offset: 8.0e-3
+    exp: 2
+
+cfg_tsampler_setup:
+  tsampler_type: 'UniformSampling'
+  cfg_tsampler:
+    t_max: 1000
+    t_min: 0
+
+cfg_optim_setup:
+  optim_type: 'AdamW'
+  cfg_optim:
+    lr: 3.0e-4
+    weight_decay: 1.0e-4
+    cfg_lrscheduler_setup:
+      lrscheduler_type: 'CosineAnnealingLR'
+      cfg_lrscheduler:
+        T_max: 200
+
+cfg_loss_setup:
+  loss_type: 'LossGaussianDiffusion'
+  cfg_loss:
+    noise_loss_type: 'l2'
+    use_recons_loss: 'add_loss'
+    use_fft_loss: 'observe'
+    use_tv_loss: 'add_loss'
+    ratio_recons_loss: 0.5
+    ratio_fft_loss: 0
+    ratio_tv_loss: 0.2
