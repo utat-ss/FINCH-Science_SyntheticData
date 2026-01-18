@@ -45,7 +45,7 @@ cfg_diffusion_setup:
     dynamicthresh_sampling: True
     sampling_method: 'ddim'
     temperature: 0.0
-    guidance_scale: 4.0
+    guidance_scale: 3.0
     uncond_prob: 0.1
     ema_decay: 0.999
     ddim_steps: 100
@@ -75,8 +75,8 @@ cfg_augmenter_setup:
   augmenter_type: 'SpectralAugmentation'
   cfg_augmenter:
     seed: 3169
-    jitter_scale: 0.0016
-    amp_scale: 0.075
+    jitter_scale: 0.05
+    amp_scale: 0.2
 
 cfg_scheduler_setup:
   scheduler_type: 'CosSchedule'
