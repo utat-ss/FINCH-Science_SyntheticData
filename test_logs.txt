@@ -1,17 +1,17 @@
-[2026-01-18 10:50:44] Nearest metric neighborhood calculations are enabled, proceeding
-[2026-01-18 10:50:44] Cfgs taken in, parsed
-[2026-01-18 10:50:48] Synthesizing batch 1/3 with size 50
-[2026-01-18 10:52:33] Synthesis Progress: 50/112 (44.6%) finished.
-[2026-01-18 10:52:33] Synthesizing batch 2/3 with size 50
-[2026-01-18 10:54:18] Synthesis Progress: 100/112 (89.3%) finished.
-[2026-01-18 10:54:18] Synthesizing batch 3/3 with size 12
-[2026-01-18 10:54:46] Synthesis Progress: 112/112 (100.0%) finished.
-[2026-01-18 10:54:46] Combined data acquired
-[2026-01-18 10:54:46] omega_1 metrics: [3.9555555555555557, 32, 33, 105, 39, 6, 73]
-[2026-01-18 10:54:46] omega_2 metrics: [5.027027027027027, 26, 27, 106, 32, 5, 80]
-[2026-01-18 10:54:46] omega_3 metrics: [1.3978494623655915, 34, 35, 82, 64, 29, 48]
-[2026-01-18 10:54:46] omega_4 metrics: [0.9910714285714286, 111, 112, 111, 112, 0, 0]
-[2026-01-18 10:54:46] Calculated the nearest neighborhood metrics
-[2026-01-18 10:54:46] Metrics have been exported to: C:\SenkDosya\Projects\FINCH-Science_SyntheticData\testing\diffusion\pipeline_test\metric_save.csv
-[2026-01-18 10:54:46] Nearest metric neighborhood calculations succesfully completed
-[2026-01-18 10:54:46] CAUTION: Unmix metric is disabled
+[2026-01-18 11:05:33] Nearest metric neighborhood calculations are enabled, proceeding
+[2026-01-18 11:05:33] Cfgs taken in, parsed
+[2026-01-18 11:05:37] Synthesizing batch 1/3 with size 50
+[2026-01-18 11:07:22] Synthesis Progress: 50/112 (44.6%) finished.
+[2026-01-18 11:07:22] Synthesizing batch 2/3 with size 50
+[2026-01-18 11:09:07] Synthesis Progress: 100/112 (89.3%) finished.
+[2026-01-18 11:09:07] Synthesizing batch 3/3 with size 12
+[2026-01-18 11:09:35] Synthesis Progress: 112/112 (100.0%) finished.
+[2026-01-18 11:09:35] Combined data acquired
+[2026-01-18 11:09:35] omega_1 metrics: [4.868421052631579, 25, 26, 105, 32, 6, 80]
+[2026-01-18 11:09:35] omega_2 metrics: [4.186046511627907, 38, 39, 109, 41, 2, 71]
+[2026-01-18 11:09:35] omega_3 metrics: [0.9910714285714286, 111, 112, 111, 112, 0, 0]
+[2026-01-18 11:09:35] omega_4 metrics: [0.9734513274336283, 110, 111, 110, 112, 1, 0]
+[2026-01-18 11:09:35] Calculated the nearest neighborhood metrics
+[2026-01-18 11:09:35] Metrics have been exported to: C:\SenkDosya\Projects\FINCH-Science_SyntheticData\testing\diffusion\pipeline_test_2\metric_save.csv
+[2026-01-18 11:09:35] Nearest metric neighborhood calculations succesfully completed
+[2026-01-18 11:09:35] CAUTION: Unmix metric is disabled
