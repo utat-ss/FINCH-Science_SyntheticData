@@ -39,7 +39,7 @@ def parse_cfg_dict(cfg_run:(dict)):
 
     with open(cfg_synthesis['norm_dict_path']) as f:
         norm_dict = json.load(f)
-    cfg_synthesis['normalizer'] = get_unnormalizer(norm_dict)
+    cfg_synthesis['unnormalizer'] = get_unnormalizer(norm_dict)
     cfg_synthesis.pop('norm_dict_path', None)
 
     with open(cfg_synthesis['cfg_model_setup_path']) as f:
@@ -76,7 +76,7 @@ def nearneigh_script(cfg_export_master, cfg_nearneigh):
 
     # Export the metrics into a csv
     export_metrics(metric_dict, cfg_export)
-    logging.info(f"Metrics have been exported to: {cfg_export['metric_save']}")
+    logging.info(f"Metrics have been exported to: {cfg_export['metrics_save']}")
 
     # If blobs are enabled, get the blobs
     if cfg_blobs is not None:
