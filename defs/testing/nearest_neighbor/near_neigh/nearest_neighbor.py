@@ -25,7 +25,7 @@ def replace_with_1(tensor:(torch.Tensor), method:(str)='min', dim:(int)=0):
 
     return out
 
-def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), type:(str)='sam', method:(str)='min', spec_idx:(list[int])=None, p:(float)=2) -> float | int | int | int | int | int | int:
+def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), spec_idx:(list[int]), type:(str)='sam', method:(str)='min', p:(float)=2) -> float | int | int | int | int | int | int:
     """
     Gets the similarity metric using euclidian distance.
 
@@ -80,8 +80,8 @@ def get_metrics_distance(ground_data:(torch.Tensor), synth_data:(torch.Tensor), 
     gamma_similar = gamma_11 + gamma_22 # Sum along the diagonal quartiles, within these, the datapoints are closest to ground (if itself is ground) and the conjugate
     gamma_different = gamma_12 + gamma_21 # Sum along inverse diag, this means they are mixed among each other
 
-    if gamma_different.item() != 0: # As long as we have some different points, use regular
-        delta = (gamma_similar / gamma_different).item()
+    if gamma_different != 0: # As long as we have some different points, use regular
+        delta = (gamma_similar / gamma_different)
     else:
         delta = float('inf') # Otherwise return infinity
 

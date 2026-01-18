@@ -56,11 +56,10 @@ def separate_data(spectra_tensor:(torch.Tensor), abundances_tensor:(torch.Tensor
 
     separation_len = floor(separation_ratio * len(names))
 
-    spectra_real = spectra_tensor[:, :separation_len]
-    abundances_real = abundances_tensor[:, :separation_len]
-
-    spectra_synth = spectra_tensor[:, separation_len:]
-    abundances_synth = abundances_tensor[:, separation_len:]
+    spectra_real = spectra_tensor[:separation_len, :]
+    abundances_real = abundances_tensor[:separation_len, :]
+    spectra_synth = spectra_tensor[separation_len:, :]
+    abundances_synth = abundances_tensor[separation_len:, :]
 
     if verbose:
         names_real = names[:separation_len]

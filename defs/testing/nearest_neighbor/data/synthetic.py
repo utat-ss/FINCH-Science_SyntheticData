@@ -18,9 +18,9 @@ def synthesize_from_abundances(cfg_synthesis:(dict), ab_tensor:(torch.Tensor)) -
         ab_tensor (torch.Tensor): The input abundance tensor, shape [n_synth_spectra, n_abundances]
     """
 
-    model = load_model(cfg_synthesis['model_type'], cfg_synthesis['model_statedidct_path'], cfg_synthesis['model_config_dict']).to(cfg_synthesis['device']) # Gets the model
+    model = load_model(cfg_synthesis['model_type'], cfg_synthesis['model_statedict_path'], cfg_synthesis['model_config_dict']).to(cfg_synthesis['device']) # Gets the model
     lean_sampler = get_lean_synthesis(cfg_synthesis['model_type'], model) # Gets the lean synthesizer
 
-    synthesized_spectra = synthesize(cfg_synthesis, lean_sampler, ab_tensor.to(cfg_synthesis['device'])) # Synthesizes the spectra using lean synthesizer
+    synthesized_spectra = synthesize(cfg_synthesis, lean_sampler, ab_tensor) # Synthesizes the spectra using lean synthesizer
 
     return synthesized_spectra, ab_tensor

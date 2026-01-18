@@ -24,7 +24,7 @@ def export_metrics(metric_dict:(dict), cfg_export:(dict)) -> None:
         payload.update(metric_dict[omega])
         rows_list.append(payload)
 
-    df = pd.DataFrame(rows_list, ignore_index=True)
+    df = pd.DataFrame(rows_list)
     df = df.reindex(columns=column_order)
     df.to_csv(metrics_save, index=False)
 

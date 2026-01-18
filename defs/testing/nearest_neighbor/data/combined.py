@@ -22,6 +22,7 @@ def get_combined_data(cfg_import:(dict), cfg_synthesis:(dict)) -> torch.Tensor |
         combined_indices (list[int]): The list of combined true indices
         separation_len (int): How much of the data has been taken in as real data, to not be touched, rest are synthesized
     """
+    unnormalizer = cfg_synthesis['unnormalizer']
 
     # Gets the actual tensors
     spectra_tensor, abundances_tensor, names, indices = vals_from_csv(cfg_import['psi2_path'], cfg_import['spec_range'])
@@ -31,6 +32,9 @@ def get_combined_data(cfg_import:(dict), cfg_synthesis:(dict)) -> torch.Tensor |
 
     # Synthesizes some data using the abundances allocated for synthesis
     spectra_synth, _ = synthesize_from_abundances(cfg_synthesis, abundances_synth)
+
+    spectra_real = unnormalizer(spectra_real)
+    spectra_synth = unnormalizer(spectra_synth)
 
     # Combines all of the results
     data_real = [spectra_real, abundances_real, names_real, indices_real]

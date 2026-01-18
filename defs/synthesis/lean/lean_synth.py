@@ -9,13 +9,10 @@ Then call:
     synthesize; given some abundance tensor, the synthesize all the spectra given abundances
 """
 
-import os
-import yaml
-import argparse
-import json
-
 import torch
 import torch.nn as nn
+
+import logging
 
 from ..synth_func import *
 
@@ -46,8 +43,11 @@ def get_lean_synthesis(model_type:(str), model:(nn.Module)) -> SpectralSampler:
 
 def synthesize(cfg_lean_synthesis, sampler:(SpectralSampler), ab_tensor:(torch.Tensor)) -> torch.Tensor:
 
-    max_batch_size = cfg_lean_synthesis['max_batch_size']
-    unnormalizer = cfg_lean_synthesis['unnormalizer']
+    max_batch_size = min(cfg_lean_synthesis['max_batch_size'], float('inf'))
+
+    total_samples = ab_tensor.shape[0]
+    processed_count = 0
+
     if max_batch_size > ab_tensor.shape[0]:
         max_batch_size = ab_tensor.shape[0]
     
@@ -56,14 +56,27 @@ def synthesize(cfg_lean_synthesis, sampler:(SpectralSampler), ab_tensor:(torch.T
 
     # We must parse the given ab_tensor into smaller parts, to ensure we don't have vram/ram space problems;
     split_ab_tensors = list(torch.split(ab_tensor, max_batch_size, dim=0))
+    true_len = len(split_ab_tensors)
 
     # Build the list of sampled spectra, turn it into a tensor at the end
     sampled_spectra = []
     for i in range(len(split_ab_tensors)):
+
         inter_tensor = split_ab_tensors.pop(0)
-        inter_sampled = unnormalizer(sampler.predefined_ab_sample(inter_tensor))
-        sampled_spectra.append(inter_sampled)
-    sampled_spectra = torch.tensor(sampled_spectra)
+        inter_tensor = inter_tensor.to(cfg_lean_synthesis['device'])
+
+        logging.info(f"Synthesizing batch {i+1}/{true_len} with size {inter_tensor.shape[0]}")
+
+        inter_sampled, _ = sampler.predefined_ab_sample(inter_tensor)
+        sampled_spectra.append(inter_sampled.detach().cpu())
+
+        processed_count += inter_tensor.shape[0]
+        logging.info(f"Synthesis Progress: {processed_count}/{total_samples} ({processed_count/total_samples:.1%}) finished.")
+
+        del inter_tensor, inter_sampled
+        torch.cuda.empty_cache()
+
+    sampled_spectra = torch.cat(sampled_spectra)
 
     return sampled_spectra
     

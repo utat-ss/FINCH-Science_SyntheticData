@@ -60,7 +60,7 @@ def _load_diffusion_model(cfg_diffusion_setup, cfg_diffusion_statedict_path):
     diffusion_model = load_diffusion(cfg_diffusion_setup)
 
     # Loads the learned parameters to the diffusion model
-    diffusion_model.load_state_dict(torch.load(cfg_diffusion_statedict_path))
+    diffusion_model.load_state_dict(torch.load(cfg_diffusion_statedict_path, weights_only=True))
 
     return diffusion_model
 

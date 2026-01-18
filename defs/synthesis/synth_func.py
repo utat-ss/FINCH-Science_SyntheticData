@@ -46,15 +46,17 @@ class GaussianDiffusionSampler(SpectralSampler):
         ab_tensor = self.abundance_sampler()
 
         # Samples the data from the random abundance tensor
-        with self.model.use_ema():
-            sampled_data, _ = self.model.sample(ab_tensor) # Throw away the actual noise patters, not needed
+        with torch.no_grad():
+            with self.model.use_ema():
+                sampled_data, _ = self.model.sample(ab_tensor) # Throw away the actual noise patters, not needed
 
         return sampled_data.detach().cpu(), ab_tensor.detach().cpu() # Returns it 
 
     def predefined_ab_sample(self, ab_tensor):
         
-        with self.model.use_ema():
-            sampled_data, _ = self.model.sample(ab_tensor)
+        with torch.no_grad():
+            with self.model.use_ema():
+                sampled_data, _ = self.model.sample(ab_tensor)
 
         return sampled_data.detach().cpu(), ab_tensor.detach().cpu()
     
