@@ -1,0 +1,119 @@
+cfg_data:
+  cfg_import:
+    # data_handle: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv' # Path for the data file
+    data_handle: 'C:\work\project\git-repo\FINCH-Science_SyntheticData\data\simpler_data_rwc.csv' # Path for the data file
+    spec_range: [400, 2490] # Spectral range, inclusive
+
+  cfg_normalize:
+    norm_type: 'statistical' # Options are classic, dynamic, log, statistical, none. Normalizes data
+
+  cfg_loader:
+    n_val: 100 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_test: 123 # Number of test points at the end of training
+    n_train_batch: 8 # The training batch size
+    num_workers: 6 # Num of workers for the training dataloader
+    prefetch_factor: 24 # Prefetch factor for the training dataloader. pre-loaded batches = num_workers * prefetch_factor
+    seed: 3169 # Seed for the data splitters
+  
+  cfg_dataset_save:
+    # psi1_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\andrew-2\psi1.csv' # Save path for the psi1 dataset
+    # psi2_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\andrew-2\psi2.csv' # Save path for the psi2 dataset 
+    psi1_path: 'C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\andrew-2\psi1.csv' # Save path for the psi1 dataset
+    psi2_path: 'C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\andrew-2\psi2.csv' # Save path for the psi2 dataset 
+
+cfg_train: 
+  n_epoch: 50     # set to 50 for quicker testing
+  n_tb_epoch: 400 # Number of training instances/batches, will have this many batches in training
+  device: 'cuda' # Device to be used
+  dtype: 'float32' # Datatype to be used
+  verbose: True # Whether to output time, losses, variance during training
+  use_autocast: True # Whether to use autocast during training, usually speeds up computation with minimal accuracy loss
+  grad_clip_norm: 1.0  # gradient clipping norm (moved from optimizer section)
+  
+cfg_export:
+  entity: 'UTAT-Science' # The team entity name
+  project: 'Conditional U-Net Synthetic Data Generation'
+  name: 'andrew-2' 
+  # master_path: 'C:\SenkDosya\Projects\UTAT\FINCH-Science_SyntheticData\training\diffusion\andrew-2\' # The master save path both model, test, logs, and unnorm dict will be saved to
+  master_path: 'C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\andrew-2\' # The master save path both model, test, logs, and unnorm dict will be saved to
+  model_save: 'diffusion_model.pth' # Rest of the path path for the diffusion model that was trained, can have .pth, adds it automatically
+  modelinits_save: 'cfg_diffusion_setup.json' # Rest of the path for the diffusion model inits, this will be used to build the model again during mass-sampling
+  test_save: 'generated_test_samples.parquet' # Rest of the path path for the generated test samples
+  locallog_save: 'test_logs.txt' # Rest of the path for the local loggging of alerts prints, etc
+  norm_save: 'norm_dict.json'
+  save_to_wandb: True
+
+cfg_diffusion_setup:
+  diffusion_type: 'GaussianDiffusion' # The name of the diffusion class
+  cfg_diffusion:
+    compressed_sampling: False
+    dynamicthresh_sampling: True
+    sampling_method: 'ddim'
+    temperature: 0.0
+    guidance_scale: 3.5   # stronger conditioning
+    uncond_prob: 0.05     # fewer unconditional draws -> stronger guidance signal
+    ema_decay: 0.9999     # stronger EMA for stable eval samples
+    ddim_steps: 100
+  # The rest of specific configs of the diffusion get built in the script
+
+cfg_epsilon_setup: 
+  epsilon_type: 'Epsilon_Cond1DUnet'
+  cfg_epsilon: # The specific configs for the epsilon
+    n_bands: 210
+    in_channel: 1
+    out_channel: 1
+    n_endmembers: 3
+    channels: [128,256,512]
+    n_former_blocks: 3
+    n_mid_blocks: 2
+    dropout: 0.15
+    dim_head: 64
+    up_type: 'conformer'
+    mid_type: 'conformer'
+    down_type: 'conformer'
+    conv_kernel_size: 3
+    conv_expansion_factor: 2
+    time_embed_dim: 64
+    wavembed_neighborhood: 1000
+    wavembed_scale: 1
+
+cfg_augmenter_setup:
+  augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
+  cfg_augmenter:
+    seed: 3169
+    jitter_scale: 0.02
+    amp_scale: 0.10
+
+cfg_scheduler_setup:
+  scheduler_type: 'CosSchedule' # Name of the noise scheduler class
+  cfg_scheduler:
+    steps: 1000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
+    offset: 8.0e-3
+    exp: 2
+
+cfg_tsampler_setup:
+  tsampler_type: 'UniformSampling'
+  cfg_tsampler: 
+    t_max: 1000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
+    t_min: 0  
+
+cfg_optim_setup:
+  optim_type: 'AdamW'
+  cfg_optim:
+    lr: 1.0e-4    # lower LR for steadier convergence
+    weight_decay: 1.0e-3
+    cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
+      lrscheduler_type: 'CosineAnnealingLR'
+      cfg_lrscheduler:
+        T_max: 50     # match epoch count
+
+cfg_loss_setup:
+  loss_type: 'LossGaussianDiffusion' 
+  cfg_loss:
+    noise_loss_type: 'l2'
+    use_recons_loss: 'add_loss'
+    use_fft_loss: 'observe'
+    use_tv_loss: 'add_loss'
+    ratio_recons_loss: 0.6    # increase reconstruction weight
+    ratio_fft_loss: 0.25      # enable FFT weight for spectral fidelity
+    ratio_tv_loss: 0.2
