@@ -18,7 +18,7 @@ class AbundanceSampler(ABC):
         self.device = device
 
         self.generator = torch.Generator(device=device)
-        self.generator.manual_seed(seed=seed)
+        self.generator.manual_seed(seed)
 
         self.eps = 1e-8
 
@@ -33,17 +33,12 @@ class UniAbSamp(AbundanceSampler):
     def __init__(self, target_shape, seed, device):
         super().__init__(target_shape, seed, device)
 
-        def math_logic(tensor, eps):
-            return F.normalize(tensor, p=1, dim=1, eps=eps)
+    def math_logic(self, tensor):
+        return F.normalize(tensor, p=1, dim=1, eps=self.eps)
         
-        if device.type == 'cuda':
-            self.compiled_op = torch.compile(math_logic, mode="reduce-overhead") # If cuda, be more aggressive
-        else:
-            self.compiled_op = torch.compile(math_logic) # If cpu, use default (better)
-
     def __call__(self):
         ab = torch.rand(size=self.target_shape, generator=self.generator, device=self.device) # Generate the abundances 
-        return self.compiled_op(ab, self.eps)
+        return self.math_logic(ab)
     
 class NormAbSamp(AbundanceSampler):
     """
@@ -52,18 +47,13 @@ class NormAbSamp(AbundanceSampler):
     def __init__(self, target_shape, seed, device):
         super().__init__(target_shape, seed, device)
 
-        def math_logic(tensor, eps):
-            tensor.abs_()
-            return F.normalize(tensor, p=1, dim=1, eps=eps)
-        
-        if device.type == 'cuda':
-            self.compiled_op = torch.compile(math_logic, mode="reduce-overhead") # If cuda, be more aggressive
-        else:
-            self.compiled_op = torch.compile(math_logic) # If cpu, use default (better)
+    def math_logic(self, tensor):
+        tensor.abs_()
+        return F.normalize(tensor, p=1, dim=1, eps=self.eps)
 
     def __call__(self):
         ab = torch.randn(size=self.target_shape, generator=self.generator, device=self.device) # Generate the abundances 
-        return self.compiled_op(ab, self.eps)
+        return self.math_logic(ab)
     
 class DirAbSamp(AbundanceSampler):
     """
@@ -74,14 +64,6 @@ class DirAbSamp(AbundanceSampler):
 
         n_endmembers = target_shape[1]
 
-        def math_logic(tensor, eps):
-            return F.normalize(tensor, p=1, dim=1, eps=eps)
-
-        if device.type == 'cuda':
-            self.compiled_op = torch.compile(math_logic, mode="reduce-overhead") # If cuda, be more aggressive
-        else:
-            self.compiled_op = torch.compile(math_logic) # If cpu, use default (better)
-
         if isinstance(alpha, (float, int)):
             self.alphas = (float(alpha),) * n_endmembers
         elif isinstance(alpha, (list, tuple)):
@@ -90,8 +72,11 @@ class DirAbSamp(AbundanceSampler):
         else:
             raise ValueError(f"Unknown/Unsupported alpha input type: {type(alpha)}")
         
+    def math_logic(self, tensor):
+        return F.normalize(tensor, p=1, dim=1, eps=self.eps)
+        
     def __call__(self):
         ab = torch.empty(size=self.target_shape, device=self.device)
         for i, alpha in enumerate(self.alphas): ab[:,i].gamma_(concentration=alpha, concentration_1=1.0, generator=self.generator)
-        return self.compiled_op(ab, self.eps)
+        return self.math_logic(ab)
 

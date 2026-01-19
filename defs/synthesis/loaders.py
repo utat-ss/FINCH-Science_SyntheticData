@@ -68,11 +68,11 @@ def load_sampler(model_type:(str), model, ab_sampler):
 
     if model_type == 'GaussianDiffusion':
 
-        spectra_sampler = GaussianDiffusionSampler(model, lean=False, ab_sampler=ab_sampler)
+        spectra_sampler = GaussianDiffusionSampler(model, lean=False, abundance_sampler=ab_sampler)
 
     elif model_type == 'AutoEncoder':
         
-        spectra_sampler = AutoEncoderSampler(model, lean=False, ab_sampler=ab_sampler)
+        spectra_sampler = AutoEncoderSampler(model, lean=False, abundance_sampler=ab_sampler)
 
     else: 
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
