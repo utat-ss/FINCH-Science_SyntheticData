@@ -1,0 +1,53 @@
+[2026-01-19 11:24:33] Cfgs taken in, parsed. WandB and logging configured
+[2026-01-19 11:24:40] Unnormalizer and synthesizer model initialized
+[2026-01-19 11:24:40] Synthesis started
+[2026-01-19 11:24:40] Synthesizing batch 1 out of 47
+[2026-01-19 11:25:49] Synthesizing batch 2 out of 47
+[2026-01-19 11:26:58] Synthesizing batch 3 out of 47
+[2026-01-19 11:28:07] Synthesizing batch 4 out of 47
+[2026-01-19 11:29:16] Synthesizing batch 5 out of 47
+[2026-01-19 11:30:25] Synthesizing batch 6 out of 47
+[2026-01-19 11:31:34] Synthesizing batch 7 out of 47
+[2026-01-19 11:32:42] Synthesizing batch 8 out of 47
+[2026-01-19 11:33:52] Synthesizing batch 9 out of 47
+[2026-01-19 11:35:01] Synthesizing batch 10 out of 47
+[2026-01-19 11:36:17] Synthesizing batch 11 out of 47
+[2026-01-19 11:37:34] Synthesizing batch 12 out of 47
+[2026-01-19 11:38:54] Synthesizing batch 13 out of 47
+[2026-01-19 11:40:15] Synthesizing batch 14 out of 47
+[2026-01-19 11:41:36] Synthesizing batch 15 out of 47
+[2026-01-19 11:42:48] Synthesizing batch 16 out of 47
+[2026-01-19 11:44:07] Synthesizing batch 17 out of 47
+[2026-01-19 11:45:16] Synthesizing batch 18 out of 47
+[2026-01-19 11:46:25] Synthesizing batch 19 out of 47
+[2026-01-19 11:47:34] Synthesizing batch 20 out of 47
+[2026-01-19 11:48:43] Synthesizing batch 21 out of 47
+[2026-01-19 11:49:52] Synthesizing batch 22 out of 47
+[2026-01-19 11:51:01] Synthesizing batch 23 out of 47
+[2026-01-19 11:52:09] Synthesizing batch 24 out of 47
+[2026-01-19 11:53:16] Synthesizing batch 25 out of 47
+[2026-01-19 11:54:25] Synthesizing batch 26 out of 47
+[2026-01-19 11:55:34] Synthesizing batch 27 out of 47
+[2026-01-19 11:56:40] Synthesizing batch 28 out of 47
+[2026-01-19 11:57:49] Synthesizing batch 29 out of 47
+[2026-01-19 11:58:58] Synthesizing batch 30 out of 47
+[2026-01-19 12:00:07] Synthesizing batch 31 out of 47
+[2026-01-19 12:01:15] Synthesizing batch 32 out of 47
+[2026-01-19 12:02:24] Synthesizing batch 33 out of 47
+[2026-01-19 12:03:33] Synthesizing batch 34 out of 47
+[2026-01-19 12:04:43] Synthesizing batch 35 out of 47
+[2026-01-19 12:05:53] Synthesizing batch 36 out of 47
+[2026-01-19 12:07:02] Synthesizing batch 37 out of 47
+[2026-01-19 12:08:12] Synthesizing batch 38 out of 47
+[2026-01-19 12:09:22] Synthesizing batch 39 out of 47
+[2026-01-19 12:10:31] Synthesizing batch 40 out of 47
+[2026-01-19 12:11:40] Synthesizing batch 41 out of 47
+[2026-01-19 12:12:53] Synthesizing batch 42 out of 47
+[2026-01-19 12:14:09] Synthesizing batch 43 out of 47
+[2026-01-19 12:15:29] Synthesizing batch 44 out of 47
+[2026-01-19 12:16:42] Synthesizing batch 45 out of 47
+[2026-01-19 12:17:47] Synthesizing batch 46 out of 47
+[2026-01-19 12:18:54] Synthesizing batch 47 out of 47
+[2026-01-19 12:19:59] Saving synthesized data to C:\SenkDosya\Projects\FINCH-Science_SyntheticData\synthesis\diffusion\test_pipeline_test\ksi_train.csv
+[2026-01-19 12:20:00] Data successfully saved.
+[2026-01-19 12:20:00] Synthesis successfully finished

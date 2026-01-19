@@ -68,7 +68,7 @@ class AutoEncoderSampler(SpectralSampler):
 
         self.device = next(model.parameters()).device # Infer the device
         self.generator = torch.Generator(device=self.device)
-        self.generator.manual_seed(seed=seed) # Get the generator
+        self.generator.manual_seed(seed) # Get the generator
 
     def __call__(self):
         if self.lean: # If lean is enabled, prevent user from using __call__
