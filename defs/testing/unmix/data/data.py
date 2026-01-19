@@ -86,6 +86,7 @@ def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
     path_ksi_train = cfg_import['path_ksi_train']
     path_psi2 = cfg_import['path_psi2']
     spec_range = cfg_import['spec_range']
+    unnormalizer = cfg_import.get('unnormalizer')
 
     # Initialize the generator
     generator = torch.Generator()
@@ -95,6 +96,7 @@ def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
     spectra, abundances, names, indices = vals_from_csv(path_ksi_train, spec_range)
     ds_ksi_train = HyperSpectralDataset(spectra, abundances, names, indices)
     spectra, abundances, names, indices = vals_from_csv(path_psi2)
+    spectra = unnormalizer(spectra)
     ds_psi2 = HyperSpectralDataset(spectra, abundances, names, indices)
     del spectra, abundances, names, indices
 

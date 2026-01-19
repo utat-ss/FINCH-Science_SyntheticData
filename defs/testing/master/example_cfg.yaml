@@ -9,6 +9,7 @@ cfg_unmix:
   cfg_import:
     ksi_train_path: ... # The exact path of the .csv for the generated dataset, that will be used to train the critic
     psi2_path: ... # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
+    norm_dict_path: ... # The path (...json) that has the dict storing how normalization was conducted
     spec_range: [400, 2490] # Spectral range, inclusive
 
   cfg_loader:

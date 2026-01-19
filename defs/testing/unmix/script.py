@@ -3,12 +3,14 @@
 import os
 import argparse
 import yaml
+import json
 
 import torch
 
 from .loaders.loaders import *
 from .critic_train.train import train_critic
 from .data.data import get_data
+from ...diffusion.data.data_preperation import get_unnormalizer
 
 import traceback
 import logging
@@ -74,6 +76,11 @@ def parse_cfg_dict(cfg_run:(dict)):
     elif device_str != 'cpu':
         raise ValueError(f"Unknown/Unsupported device: {device_str}. Choose one of: 'cuda', 'cpu'")
     cfg_train['device'] = torch.device(device_str)
+
+    with open(cfg_import['norm_dict_path']) as f:
+        norm_dict = json.load(f)
+    cfg_import['unnormalizer'] = get_unnormalizer(norm_dict)
+    cfg_import.pop('norm_dict_path', None)
 
     return cfg_import, cfg_loader, cfg_train, cfg_export, cfg_critic_setup, cfg_critictrain_setup
 

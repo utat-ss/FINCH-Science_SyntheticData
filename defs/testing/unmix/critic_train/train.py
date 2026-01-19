@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from ..auxiliary.auxiliary import get_n_params
+from .auxiliary import get_r2, plot_abundances
 
 import wandb
 import logging
@@ -110,7 +111,9 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             wandb.log({
                 "general/validation_average_loss": val_loss.item()
             })
-            ### PLOT HERE!!!!!!
+            logging.info(f"Epoch {epoch}, Validation Loss: {val_loss.item()}")
+            r2_payload = get_r2(ab_true=abundances, ab_pred=pred_abundances, mode='val')
+            wandb.log(r2_payload)
 
         # Save the critic if it is the best
         if val_loss < best_val_loss:
@@ -135,8 +138,9 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
         wandb.log({
             "general/test_average_loss": test_loss.item()
         })
-        ### PLOT HERE!!!!!!
-
+        r2_payload = get_r2(ab_true=abundances, ab_pred=pred_abundances, mode='test')
+        wandb.log(r2_payload)
+        plot_abundances(ab_true=abundances, ab_pred=pred_abundances, mode='test')
 
     logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'")
 

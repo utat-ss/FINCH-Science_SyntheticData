@@ -21,3 +21,4 @@ cfg_export:
   locallog_save:  'logs.txt' # Save path of the local log
   naming_base: 'CUNet_v01_' # Some base naming convention that'll be used to name all the spectra
   spectral_range: [400, 2490] # The spectral range of the data to be synthesized, used for CSV header generation
+
