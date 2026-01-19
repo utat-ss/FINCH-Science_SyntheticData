@@ -157,7 +157,7 @@ class GaussianDiffusion(nn.Module):
 
         x_0_hat, eps_pred = self._recover_signal(x_t, t, ab_masked) # Recover the signal and pred the noise
 
-        return x_0_hat, x_0, eps_pred, noise
+        return x_0_hat, x_0, eps_pred, noise, t
 
     def _sample_step_ddpm(self, x_t, t, ab):
         """
@@ -244,15 +244,12 @@ class GaussianDiffusion(nn.Module):
         if self.guidance_scale > 1.0: # If guidance scale is more than one, return somewhat unquided epsilon
 
             x_in = torch.cat([x_t, x_t])
-            t_in = torch.cat([t_tensor, t_tensor]).to(x_t.dtype)
+            t_in = torch.cat([t_tensor, t_tensor])
             ab_in = torch.cat([ab, torch.zeros_like(ab)])
 
-            if self.compressed_sampling:
-                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                    eps = self.epsilon(x_in, t_in, ab_in)
-                    eps = eps.to(x_t.dtype)
-            else:
-                eps = self.epsilon(x_in, t_in.to(x_t.dtype), ab_in)
+            with torch.autocast(device_type=str(x_t.device.type), dtype=torch.float16, enabled=self.compressed_sampling): # Using float16, sample
+                eps = self.epsilon(x_in, t_in, ab_in)
+            eps = eps.to(dtype=x_t.dtype)
 
             if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
 
@@ -262,12 +259,9 @@ class GaussianDiffusion(nn.Module):
         
         elif self.guidance_scale == 1.0: # If guidance scale is 1, return the regular, 1 scale guided sampling
 
-            if self.compressed_sampling:
-                with torch.autocast(device_type=str(x_t.device), dtype=torch.float16): # Using float16, sample
-                    eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
-                    eps = eps.to(x_t.dtype)
-            else:
-                eps = self.epsilon(x_t, t_tensor.to(x_t.dtype), ab)
+            with torch.autocast(device_type=str(x_t.device.type), dtype=torch.float16, enabled=self.compressed_sampling): # Using float16, sample if compressed sampling is enabled
+                eps = self.epsilon(x_t, t_tensor, ab)
+            eps = eps.to(dtype=x_t.dtype)
 
             if eps.ndim==3: eps=eps.squeeze(1) # Squeeze the channel dim of our eps, if we are getting (B, ch, n_bands) as out from it
 

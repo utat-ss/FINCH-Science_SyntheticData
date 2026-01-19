@@ -57,7 +57,7 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     norm_type = cfg_normalize['norm_type']
     if norm_type=='classic': # Classic, very blunt normalization
         spectra_tensor = (2 * spectra_tensor) - 1 # Bluntly normalize it
-        norm_cfg = {
+        norm_out = {
             'norm_type': norm_type
         }
     elif norm_type=='dynamic': # Dynamically scales using the max of the dataset
@@ -98,6 +98,7 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
         norm_out = {
             'norm_type': norm_type
         }
+    else: raise ValueError(f"Unknown/Unsupported norm_type: {norm_type}")
 
     # Get the abundances
     abundances = df[["gv_fraction","npv_fraction","soil_fraction"]].values.astype("float32")
@@ -105,10 +106,10 @@ def get_vals(cfg_import:(dict), cfg_normalize:(dict)):
     del abundances
 
     # Get the spectral names
-    names = df['Spectra'].to_list()
+    names = df['Spectra'].astype(str).to_list()
 
     # Get the original indices
-    indices = range(len(names))
+    indices = list(range(len(names)))
 
     return spectra_tensor, abundances_tensor, names, indices, norm_out
 
@@ -208,6 +209,8 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
             n_val (int): How many validation points in total
             n_test (int): How many test samples in total
             n_train_batch (int): Train dataloader batch size
+            num_workers (int): Num workers for the training dataloader
+            prefetch_factor (int): Prefetch factor for the training dataloader; pre-loaded batches = num_workers * prefetch_factor
             seed (int): Seed for random split
         cfg_dataset_save (dict):
             psi1_path (str): Save path for the psi1 dataset (train of simpler_data)
@@ -223,6 +226,8 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     n_val = cfg_loader.get('n_val', 200)
     n_test = cfg_loader.get('n_test', 123)
     n_train_batch = cfg_loader.get('n_train_batch', 5)
+    num_workers_train = cfg_loader.get('num_workers', 4)
+    prefetch_factor_train = cfg_loader.get('prefetch_factor', 2)
 
     # Infer the amount of n_train, ensure completeness
     n_train = int(len(ds) - n_val - n_test)
@@ -239,7 +244,7 @@ def get_dataloaders(ds:(HyperSpectralDataset), cfg_loader:(dict), cfg_dataset_sa
     # Separate the temp dataset into train and test
     ds_test, ds_validate = random_split(ds_temp, [n_test, n_val], generator)
 
-    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False, num_workers=4, persistent_workers=True, prefetch_factor=4, pin_memory=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
+    dataloaders = [DataLoader(ds_train, batch_size=n_train_batch, generator=generator, shuffle=True, drop_last=False, num_workers=num_workers_train, persistent_workers=True, prefetch_factor=prefetch_factor_train, pin_memory=True), DataLoader(ds_validate, batch_size=n_val, shuffle=False), DataLoader(ds_test, batch_size=n_test, shuffle=False)]
 
     return  dataloaders # Make dataloaders into a list and ship them
 
@@ -294,22 +299,45 @@ def get_unnormalizer(data_norm_dict:(dict)):
     The function to get the unnormalizer function of a given data normalizer.
     """
 
-    if data_norm_dict['norm_type']=='classic':
+    if data_norm_dict['norm_type'] == 'classic':
+
         return lambda normed_data: (normed_data+1)/2
-    elif data_norm_dict['norm_type']=='dynamic':
+    
+    elif data_norm_dict['norm_type'] == 'dynamic':
+
         max_vals, min_vals = data_norm_dict['max_vals'], data_norm_dict['min_vals']
-        return lambda normed_data: ((normed_data + 1)*(max_vals - min_vals))/2 + min_vals
-    elif data_norm_dict['norm_type']=='log':
+
+        # Ensure they are tensors (if they are floats, this does nothing which is fine)
+        if not torch.is_tensor(max_vals): max_vals = torch.tensor(max_vals)
+        if not torch.is_tensor(min_vals): min_vals = torch.tensor(min_vals)
+
+        return lambda normed_data: ((normed_data + 1) * (max_vals.to(normed_data.device) - min_vals.to(normed_data.device))) / 2 + min_vals.to(normed_data.device)
+    
+    elif data_norm_dict['norm_type'] == 'log':
+
         max_vals, min_vals, eps = data_norm_dict['max_vals'], data_norm_dict['min_vals'], data_norm_dict['eps']
-        return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals - min_vals))/2 + min_vals) + eps
+
+        if not torch.is_tensor(max_vals): max_vals = torch.tensor(max_vals)
+        if not torch.is_tensor(min_vals): min_vals = torch.tensor(min_vals)
+        if not torch.is_tensor(eps): eps = torch.tensor(eps)
+
+        return lambda normed_data: torch.exp(((normed_data + 1)*(max_vals.to(normed_data.device) - min_vals.to(normed_data.device)))/2 + min_vals) + eps.to(normed_data.device)
+    
     if data_norm_dict['norm_type'] == 'statistical':
+
         mean_vals = data_norm_dict['mean_vals']
-        std_vals =data_norm_dict['std_vals']
-        return lambda normed_data: (normed_data * std_vals) + mean_vals
+        std_vals = data_norm_dict['std_vals']
+        
+        if not torch.is_tensor(mean_vals): mean_vals = torch.tensor(mean_vals)
+        if not torch.is_tensor(std_vals): std_vals = torch.tensor(std_vals)
+
+        return lambda normed_data: (normed_data * std_vals.to(normed_data.device)) + mean_vals.to(normed_data.device)
+    
     elif data_norm_dict['norm_type']=='none':
+
         return lambda normed_data: normed_data
-    else:
-        raise ValueError(f"Unknown/Unsupported normalization type {data_norm_dict['norm_type']}.")
+    
+    else: raise ValueError(f"Unknown/Unsupported normalization type {data_norm_dict['norm_type']}.")
 
 
 

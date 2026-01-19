@@ -12,6 +12,8 @@ from .noise import noise_scheduling
 from .noise import noise_sampling
 from .data import data_augmentation
 
+import logging
+
 def load_diffusion (cfg_diffusion_setup):
 
     diffusion_type = cfg_diffusion_setup['diffusion_type']
@@ -51,12 +53,12 @@ def load_optim(cfg_optim_setup, epsilon):
         raise ValueError(f"Optimizer '{optim_type}' is not a valid optimizer in torch.optim. "
                          f"Check spelling (e.g., 'Adam' vs 'adam').")
     
-    cfg_optim_temp = cfg_optim; cfg_optim_temp.pop('cfg_lrscheduler_setup', None)
+    cfg_optim_temp = cfg_optim.copy(); cfg_optim_temp.pop('cfg_lrscheduler_setup', None)
     optimizer = opt_cls(epsilon.parameters(), **cfg_optim_temp)
 
     lr_scheduler = None
 
-    if 'cfg_lrscheduler_setup' in cfg_optim and cfg_optim['cfg_lrscheduler_setup']:
+    if 'cfg_lrscheduler_setup' in list(cfg_optim.keys()) and cfg_optim['cfg_lrscheduler_setup']:
 
         lrscheduler_setup = cfg_optim['cfg_lrscheduler_setup']
         lrscheduler_type = lrscheduler_setup['lrscheduler_type']
@@ -68,7 +70,9 @@ def load_optim(cfg_optim_setup, epsilon):
             raise ValueError(f"Scheduler: {lrscheduler_type} does not exist in torch.optim.lr_scheduler")
         
         lr_scheduler = scheduler_cls(optimizer, **cfg_lrscheduler)
-
+    else:
+        logging.info("Not using an LR scheduler")
+        
     return optimizer, lr_scheduler
 
 def load_loss(cfg_loss_setup):
