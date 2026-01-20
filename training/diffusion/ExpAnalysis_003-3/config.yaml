@@ -46,7 +46,7 @@ cfg_diffusion_setup:
     sampling_method: 'ddim'
     temperature: 0.0
     guidance_scale: 4.0
-    uncond_prob: 0.1
+    uncond_prob: 0.2
     ema_decay: 0.999
     ddim_steps: 100
 
