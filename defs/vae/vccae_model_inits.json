@@ -2,7 +2,7 @@
     "ae_type": "VCCAE",
     "cfg_ae": {
         "conv_layers": [
-            1,
+            2,
             256,
             256,
             256,
