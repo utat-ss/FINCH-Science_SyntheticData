@@ -7,8 +7,8 @@ cfg_data:
     norm_type: 'none' # Options are classic, dynamic, log, none. Normalizes data
 
   cfg_loader:
-    n_val: 1 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
-    n_test: 1 # Number of test points at the end of training
+    n_val: 100 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
+    n_test: 123 # Number of test points at the end of training
     n_train_batch: 1 # The training batch size
     seed: 1001 # Seed for the data splitters
 
