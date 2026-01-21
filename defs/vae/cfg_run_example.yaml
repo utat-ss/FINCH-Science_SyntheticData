@@ -29,7 +29,7 @@ cfg_train:
 cfg_export:
   entity: 'cshuo777-university-of-toronto' # The team entity name
   project: 'VCCAE Synthetic Data Generation'
-  name: 'train_001'
+  name: 'train_001-3'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
