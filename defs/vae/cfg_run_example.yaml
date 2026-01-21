@@ -37,8 +37,8 @@ cfg_export:
   modelinits_save: 'vccae_model_inits.json' # Path to save the model initial config
   local_log: 'test_logs.txt' # Path for the local logging of alerts prints, etc
   locallog_save: 'test_logs.txt' # Path for the local logging of alerts prints, etc (bruh)
-  psi1_path: "psi_1"
-  psi2_path: "psi_2"
+  psi1_path: "psi1.pth"
+  psi2_path: "psi2.pth"
   save_to_wandb: True # Whether to save everything to wandb
 
 cfg_ae_setup:
