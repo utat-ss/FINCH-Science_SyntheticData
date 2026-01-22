@@ -87,9 +87,9 @@ def setup_wandb(cfg_test, cfg_export):
     run = wandb.init(
         entity= cfg_export.get('entity', None),
         project= cfg_export['project'],
-        name= cfg_export.get('run_name', 'default'),
+        name= cfg_export.get('name', 'default'),
         config= cfg_test,
-        job_type= 'training',
+        job_type= 'testing',
         settings=settings
     )
 

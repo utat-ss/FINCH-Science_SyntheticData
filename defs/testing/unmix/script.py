@@ -52,9 +52,10 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_loader = cfg_run['cfg_loader']
     cfg_train = cfg_run['cfg_train']
     cfg_export = cfg_run['cfg_export']
+    cfg_optim_setup = cfg_run['cfg_optim_setup']
 
     cfg_critic_setup = cfg_run['cfg_critic_setup']
-    cfg_critictrain_setup = cfg_run['cfg_critictrain_setup']
+    cfg_train = cfg_run['cfg_train']
 
     # Dtype config
     dtype_str = cfg_train['dtype']
@@ -82,7 +83,7 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_import['unnormalizer'] = get_unnormalizer(norm_dict)
     cfg_import.pop('norm_dict_path', None)
 
-    return cfg_import, cfg_loader, cfg_train, cfg_export, cfg_critic_setup, cfg_critictrain_setup
+    return cfg_import, cfg_loader, cfg_train, cfg_export, cfg_optim_setup, cfg_critic_setup, cfg_train
 
 def unmix_script(cfg_export_master:(dict), cfg_unmix:(dict)):
 
@@ -98,7 +99,7 @@ def unmix_script(cfg_export_master:(dict), cfg_unmix:(dict)):
     """
 
     # Parse the cfg_unmix dict
-    cfg_import, cfg_loader, cfg_train, cfg_export, cfg_critic_setup, cfg_critictrain_setup = parse_cfg_dict(cfg_unmix)
+    cfg_import, cfg_loader, cfg_train, cfg_export, cfg_optim_setup, cfg_critic_setup, cfg_train = parse_cfg_dict(cfg_unmix)
     logging.info("Cfgs taken in, parsed")
 
     # Sort out the data
@@ -107,7 +108,7 @@ def unmix_script(cfg_export_master:(dict), cfg_unmix:(dict)):
 
     # Load the critic, optimizer, lr_scheduler, loss_fn
     critic = load_critic(cfg_critic_setup)
-    optimizer, lr_scheduler, loss_fn = load_critictrain(cfg_critictrain_setup, critic)
+    optimizer, lr_scheduler, loss_fn = load_critictrain(cfg_optim_setup, critic)
     logging.info("Critic, optimizer, lr_scheduler, loss_fn configured")
 
     logging.info("Training function called")

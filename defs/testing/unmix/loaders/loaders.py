@@ -23,7 +23,7 @@ def load_critic(cfg_critic_setup:(dict)):
     cfg_critic = cfg_critic_setup['cfg_critic']
 
     if hasattr(mlp, critic_type):
-        critic_cls = getattr(mlp, cfg_critic)
+        critic_cls = getattr(mlp, critic_type)
     elif hasattr(fno, critic_type):
         critic_cls = getattr(fno, critic_type)
     else:
@@ -33,14 +33,13 @@ def load_critic(cfg_critic_setup:(dict)):
 
     return critic
 
-def load_critictrain(cfg_critictrain_setup:(dict), critic:(nn.Module)):
+def load_critictrain(cfg_optim_setup:(dict), critic:(nn.Module)):
 
     """
     Returns:
         optimizer (torch.optim): The optimizer
         lrscheduler (torch.optim.lrscheduler): The learning rate scheduler
         loss (torch.nn): The loss function
-
 
     cfg_critictrain:
 
@@ -56,21 +55,27 @@ def load_critictrain(cfg_critictrain_setup:(dict), critic:(nn.Module)):
                 cfg_lrscheduler: cfg of the lr scheduler
     """
 
-    cfg_optim_setup = cfg_critictrain_setup['cfg_optim_setup']
-    cfg_loss_setup = cfg_critictrain_setup['cfg_loss_setup']
-
     cfg_optim = cfg_optim_setup.get('cfg_optim', {})
-    optim_type = cfg_optim_setup['optim_type']
+    optim_type =  cfg_optim_setup['optim_type']
+
+    cfg_loss = cfg_optim_setup.get('cfg_loss', {})
+    loss_type = cfg_optim_setup['loss_type']
+
     try:
         opt_cls = getattr(optim, optim_type)
     except:
         raise ValueError(f"Optimizer '{optim_type}' is not a valid optimizer in torch.optim. "
                          f"Check spelling (e.g., 'Adam' vs 'adam').")
-    optimizer = opt_cls(critic.parameters(), **cfg_optim)
+    
+    # Handles the case if lrscheduler exists
+    temp_cfg_optim = cfg_optim.copy()
+    if 'cfg_lrscheduler_setup' in cfg_optim:
+        temp_cfg_optim.pop('cfg_lrscheduler_setup', None)
+    optimizer = opt_cls(critic.parameters(), **temp_cfg_optim)
 
     lr_scheduler = None
-    if 'cfg_lrscheduler_setup' in cfg_optim_setup and cfg_optim_setup['cfg_lrscheduler_setup']:
-        lrscheduler_setup = cfg_optim_setup['cfg_lrscheduler_setup']
+    if 'cfg_lrscheduler_setup' in cfg_optim and cfg_optim['cfg_lrscheduler_setup']:
+        lrscheduler_setup = cfg_optim['cfg_lrscheduler_setup']
         lrscheduler_type = lrscheduler_setup['lrscheduler_type']
         cfg_lrscheduler = lrscheduler_setup.get('cfg_lrscheduler', {})
         try:
@@ -79,14 +84,12 @@ def load_critictrain(cfg_critictrain_setup:(dict), critic:(nn.Module)):
             raise ValueError(f"Scheduler: {lrscheduler_type} does not exist in torch.optim.lr_scheduler")
         lr_scheduler = scheduler_cls(optimizer, **cfg_lrscheduler)
 
-    cfg_loss = cfg_loss_setup['cfg_loss']
-    loss_type = cfg_loss_setup['loss_type']
     if hasattr(custom_loss, loss_type):
         loss_cls = getattr(custom_loss, loss_type)
     elif hasattr(nn, loss_type):
         loss_cls = getattr(nn, loss_type)
     else:
         raise ValueError(f"Unknown/Unsupported loss type: {loss_type}")
-    loss = loss_cls(**cfg_loss)
+    loss = loss_cls(**(cfg_loss or {}))
 
     return optimizer, lr_scheduler, loss

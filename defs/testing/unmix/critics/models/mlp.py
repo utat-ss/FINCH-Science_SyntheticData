@@ -5,6 +5,7 @@ from diffusers.models.activations import get_activation
 
 class MLP(nn.Module):
     def __init__(self, i_dim:(int), hidden_dim:list[int], o_dim:(int), act_fn:(str)):
+        super().__init__()
 
         self.i_dim = i_dim
         self.hidden_dim = hidden_dim
