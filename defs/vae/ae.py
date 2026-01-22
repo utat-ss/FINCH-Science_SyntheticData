@@ -6,7 +6,7 @@ class VEncoder(nn.Module):
     """
     Encoder for VCCAE
     """
-    def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details):
+    def __init__(self, conv_layers, mlp_layers, num_spectra, out_layer, ab_mlp, conv_details, batch_size=1):
         super(VEncoder, self).__init__()
         self.conv_details = conv_details
         self.conv_layers = conv_layers
@@ -14,10 +14,22 @@ class VEncoder(nn.Module):
         self.output_layer = out_layer
         self.abundance_mlp_layers = ab_mlp
 
-        encoder_layers = []
+        # encoder_layers = []
+
+        conv_layers = []
+        mlp_layers = []
         # Convolutional layers
+        # conv_layers.extend([
+        #     nn.Conv1d(in_channels=1,
+        #               out_channels=self.conv_layers[0],
+        #               kernel_size=self.conv_details['k_size'], 
+        #               stride=self.conv_details['stride'], 
+        #               padding=self.conv_details['pad'])
+        # ])
+
         for i in range(0, len(self.conv_layers) - 1):
-            encoder_layers.extend([
+            # encoder_layers.extend([
+            conv_layers.extend([
                 nn.Conv1d(in_channels=self.conv_layers[i], 
                           out_channels=self.conv_layers[i+1], 
                       kernel_size=self.conv_details['k_size'], 
@@ -27,24 +39,31 @@ class VEncoder(nn.Module):
                 nn.MaxPool1d(kernel_size=self.conv_details['pool_k'], stride=self.conv_details['pool_stride']),
             ])
         # MLP layers
-        encoder_layers.extend([
-            nn.Flatten(start_dim=0), # Flatten convolution to 1 dimension for MLP
+        # encoder_layers.extend([
+        mlp_layers.extend([
+            # nn.Flatten(start_dim=0), # Flatten convolution to 1 dimension for MLP
             nn.Linear((self.conv_layers[-1] * num_spectra), self.mlp_layers[0]),
             nn.ReLU(),
         ])
         for i in range(0, len(self.mlp_layers) - 1):
-            encoder_layers.extend([
+            mlp_layers.extend([
                 nn.Linear(self.mlp_layers[i], self.mlp_layers[i+1]),
                 nn.ReLU(),
             ])
-        self.encoder_0 = nn.Sequential(*encoder_layers)
+        self.conv = nn.Sequential(*conv_layers)
+        self.mlp = nn.Sequential(*mlp_layers)
         self.encoder_var = nn.Linear(self.mlp_layers[-1], self.output_layer) # Encodes variation vector
         self.encoder_1 = nn.Linear(self.mlp_layers[-1], self.output_layer) # Last layer of encoder
 
     def forward(self, x):
-        k = self.encoder_0(x)
+        x = x.unsqueeze(1)
+        k = self.conv(x)
+        print(k.shape)
+        k = self.mlp(k)
+        print(k.shape)
         variation = self.encoder_var(k) # Produce some variation with respect to the inputted spectrum
         encoded = self.encoder_1(k)
+        print(encoded.shape)
         return encoded, variation
     
 
@@ -61,25 +80,28 @@ class VDecoder(nn.Module):
         self.abundance_mlp_layers = ab_mlp
         self.latent_dim = latent_dim
 
-        decoder_layers = []
+        # decoder_layers = []
+        mlp_layers = []
+        c_layers = []
+
         # MLP layers
-        decoder_layers.extend([ # First layer will have size of latent vector space of encoder, plus space of conditioning
+        mlp_layers.extend([ # First layer will have size of latent vector space of encoder, plus space of conditioning
                 nn.Linear(self.latent_dim, self.mlp_layers[-1]),
                 nn.ReLU()
             ])
         for i in range(len(self.mlp_layers) - 1, 0, -1):
-            decoder_layers.extend([
+            mlp_layers.extend([
                 nn.Linear(self.mlp_layers[i], self.mlp_layers[i-1]),
                 nn.ReLU()
             ])
-        decoder_layers.extend([
+        mlp_layers.extend([
             nn.Linear(self.mlp_layers[0], (self.conv_layers[-1] * num_spectra)),
             nn.ReLU(),
             nn.Unflatten(0, unflattened_size=(conv_layers[-1], num_spectra)) # Unflatten layer for convolution
         ])
         # Convolutional layers
         for i in range(len(self.conv_layers) - 1, 1, -1):
-            decoder_layers.extend([
+            c_layers.extend([
                 nn.ConvTranspose1d(self.conv_layers[i], self.conv_layers[i-1],
                                    kernel_size=self.conv_details['k_size'],
                                    stride=self.conv_details['pool_stride'],
@@ -87,19 +109,25 @@ class VDecoder(nn.Module):
                                    output_padding=self.conv_details['out_pad']),
                 nn.ReLU()
             ])
-        decoder_layers.extend([
+        c_layers.extend([
             nn.ConvTranspose1d(self.conv_layers[1], self.conv_layers[0],
                                 kernel_size=self.conv_details['k_size'],
                                 stride=self.conv_details['pool_stride'],
                                 padding=self.conv_details['pad'],
                                 output_padding=self.conv_details['out_pad']),
             # nn.Sigmoid(),
-            nn.Flatten(start_dim=0)
+            # nn.Flatten(start_dim=0)
         ])
-        self.decoder = nn.Sequential(*decoder_layers)
+        self.mlp = nn.Sequential(*mlp_layers)
+        self.conv = nn.Sequential(*c_layers)
+        # self.decoder = nn.Sequential(*decoder_layers)
 
     def forward(self, x):
-        decoded = self.decoder(x)
+        print(x.shape)
+        k = self.mlp(x)
+        decoded = self.conv(k)
+        # decoded = self.decoder(x)
+        # print(decoded.shape)
         return decoded
 
 
@@ -135,7 +163,9 @@ class VConditioner(nn.Module):
         Applies an MLP on inputted abundances, and concatenates the vector onto the encoded latent vector to produce
         a conditioned vector.
         """
-        return torch.cat((encoded, self.abundance_adjust(abundance))) 
+        k = self.abundance_adjust(abundance)
+        k = torch.cat((encoded, k))
+        return k
 
 
 class VCCAE(nn.Module):
@@ -151,11 +181,11 @@ class VCCAE(nn.Module):
         - ab_mlp: Size and number of conditioner MLP layers.
     """
     def __init__(self, conv_layers:list[int], mlp_layers:list[int], num_spectra=210, out_layer:int = 3,
-                 c_d:dict = {}, ab_mlp = [3, 64, 10], scheduler=None):
+                 c_d:dict = {}, ab_mlp = [3, 64, 10], scheduler=None, batch_size = 1):
         super(VCCAE, self).__init__()
         self.conv_details = {
             'k_size': 3,        #kernel size
-            'stride': 1,        #
+            'stride': 2,        #
             'pad': 1,           #padding
             'pool_k': 1,        #pool kernel size
             'pool_stride': 1,   #
@@ -172,7 +202,7 @@ class VCCAE(nn.Module):
 
         self.encoder = VEncoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
                                 out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
-                                conv_details=self.conv_details)
+                                conv_details=self.conv_details, batch_size=batch_size)
         self.decoder = VDecoder(conv_layers=self.conv_layers, mlp_layers=self.mlp_layers, num_spectra=num_spectra,
                                 out_layer=self.output_layer, ab_mlp=self.abundance_mlp_layers, 
                                 conv_details=self.conv_details, latent_dim=self.latent_dim)

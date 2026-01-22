@@ -113,7 +113,7 @@ def train_vccae(cfg_train:(dict),
             batch = next(iter_val)
 
             xb, yb, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
-            # for xb, yb in val_loader:
+            print(xb.shape)
             xb = xb.to(device) # spectrum
             yb = yb.to(device) # abundance
             estimated, mu, variation = vccae_model(xb, yb)
