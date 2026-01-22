@@ -10,19 +10,19 @@ cfg_unmix:
     ksi_train_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\synthesis\diffusion\test_pipeline_test\ksi_train.csv' # The exact path of the .csv for the generated dataset, that will be used to train the critic
     psi2_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-0\psi2.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
     norm_dict_path: 'training/diffusion/ExpAnalysis_002-0/norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted
-    spec_range: [400, 2490] # Spectral range, inclusive
+    spec_range: [900, 1700] # Spectral range, inclusive
 
   cfg_loader:
     n_val: 100 # Number of val datapoints in ksi_val
     n_test: 123 # Number of test datapoints in ksi_val
-    n_train_batch: 16 # Size of training batches in ksi_train
+    n_train_batch: 4 # Size of training batches in ksi_train
     num_workers: 4 # Number of workers in train loader
     prefetch_factor: 12 # How many batches each worker will prefetch
     seed: 3169 # Seed to seperate val and test in ksi_val
 
   cfg_train:  
     n_epoch: 3 # Total number of epochs
-    n_tb_epoch: 94 # Total number of training batches per epoch
+    n_tb_epoch: 100 # Total number of training batches per epoch
     device: 'cuda' # Device used
     dtype: 'float32' # Dtype used
     verbose: True # If want to output all the losses
@@ -35,19 +35,19 @@ cfg_unmix:
   cfg_critic_setup:
     critic_type: 'MLP' # The type of critic to be trained
     cfg_critic: # Specific configs of the critic
-      input_size: 210 # The input size of the critic, should match the spectral length of the data
-      hidden_sizes: [128,256,128] # The hidden layer sizes of the MLP critic
-      output_size: 3 # The output size of the critic, usually 1 for a regression task
-      activation: 'silu' # The activation function to be used between layers 
+      i_dim: 81 # The input size of the critic, should match the spectral length of the data
+      hidden_dim: [128,256,128] # The hidden layer sizes of the MLP critic
+      o_dim: 3 # The output size of the critic, usually 1 for a regression task
+      act_fn: 'relu' # The activation function to be used between layers 
 
   cfg_optim_setup:
-    loss_type: 'MSE' # The name of loss function to train critic
-    cfg_loss: # Configs to initialize the loss function
-    cfg_optim_type: 'AdamW'
+    loss_type: 'MSELoss' # The name of loss function to train critic
+    cfg_loss: 
+    optim_type: 'AdamW'
     cfg_optim:
-      lr: 1e-3
-      weight_decay: 1e-2
+      lr: 1.0e-3
+      weight_decay: 1.0e-2
       cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
         lrscheduler_type: 'CosineAnnealingLR'
         cfg_lrscheduler:
-          T_max: 10
+          T_max: 3

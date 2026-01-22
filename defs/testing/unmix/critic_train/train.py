@@ -8,7 +8,7 @@ from .auxiliary import get_r2, plot_abundances
 import wandb
 import logging
 
-def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.Module), optimizer:(optim), lr_scheduler:(optim.lr_scheduler), configured_data):
+def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.Module), optimizer:(optim), lr_scheduler:(optim.lr_scheduler), configured_data:(list)):
 
     """
     This is the function which trains the critic model on ksi_train (synthesized from psi_1), then validates and tests on ksi_val and ksi_test (parts of psi_2).
@@ -33,7 +33,7 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
     n_tb_epoch = cfg_train['n_tb_epoch']
 
     # Unpack the configured data list, get iterators and unnorming function
-    iterators, data_norm_dict = configured_data # We do not unnormalize the input data, so we do not generate the unnorm lambda for that
+    iterators= configured_data # We do not unnormalize the input data, so we do not generate the unnorm lambda for that
     iter_train, iter_val, iter_test = iterators
 
     # Throw the critic to device
@@ -64,6 +64,7 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             # Get the batch and unpack it
             batch = next(iter_train)
             spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
+            spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
 
             # Zero the grads
             optimizer.zero_grad()
@@ -104,6 +105,7 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             # Get the batch and unpack it
             batch = next(iter_val)
             spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
+            spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
 
             pred_abundances = critic(spectrum)
             val_loss = loss_fn(pred_abundances, abundances)
@@ -131,6 +133,7 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
         # Get the batch and unpack it
         batch = next(iter_test)
         spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
+        spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
 
         pred_abundances = critic(spectrum)
         test_loss = loss_fn(pred_abundances, abundances)

@@ -38,12 +38,13 @@ cfg_data:
     seed
 """
 
-def vals_from_csv(save_path:(str), spec_range:(list[int])) -> torch.Tensor | torch.Tensor | list[str] | list[int]:
+def vals_from_csv(dataset_type:(str), save_path:(str), spec_range:(list[int])) -> torch.Tensor | torch.Tensor | list[str] | list[int]:
 
     """
     Gets the vals from a csv file that was exported via dataset creation in the training of synthesizers.
 
     Args:
+        dataset_type (str): Type of csv being loaded, either 'ksi_train' or 'psi2'
         save_path (str): The path csv was saved to
         spec_range (list[int]): An inclusive double entry list of spec range ints
     
@@ -66,7 +67,12 @@ def vals_from_csv(save_path:(str), spec_range:(list[int])) -> torch.Tensor | tor
     names = df['Spectra'].to_list()
 
     # Get the original indices
-    indices = df['orig_index'].to_list()
+    if dataset_type == 'ksi_train':
+        indices = list(range(len(df)))
+    elif dataset_type == 'psi2':
+        indices = df['orig_index'].to_list()
+    else:
+        raise ValueError(f"Unknown dataset_type: {dataset_type}. Choose one of: 'ksi_train', 'psi2'")
 
     return spectra_tensor, abundances_tensor, names, indices
 
@@ -83,8 +89,8 @@ def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
         list(Iterator): A list where [0] is finite loader for train (ksi_train), [1] is infinite loader for val (ksi_val), [2] is finite loader for test (ksi_test)
     """
     # Unpack necessary stuff
-    path_ksi_train = cfg_import['path_ksi_train']
-    path_psi2 = cfg_import['path_psi2']
+    ksi_train_path = cfg_import['ksi_train_path']
+    psi2_path = cfg_import['psi2_path']
     spec_range = cfg_import['spec_range']
     unnormalizer = cfg_import.get('unnormalizer')
 
@@ -93,9 +99,9 @@ def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
     generator.manual_seed(cfg_loader['seed'])
 
     # Create the datasets ds_ksi_train and ds_psi2
-    spectra, abundances, names, indices = vals_from_csv(path_ksi_train, spec_range)
+    spectra, abundances, names, indices = vals_from_csv('ksi_train', ksi_train_path, spec_range)
     ds_ksi_train = HyperSpectralDataset(spectra, abundances, names, indices)
-    spectra, abundances, names, indices = vals_from_csv(path_psi2)
+    spectra, abundances, names, indices = vals_from_csv('psi2', psi2_path, spec_range)
     spectra = unnormalizer(spectra)
     ds_psi2 = HyperSpectralDataset(spectra, abundances, names, indices)
     del spectra, abundances, names, indices

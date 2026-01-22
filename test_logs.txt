@@ -1,1 +1,26 @@
-[2026-01-19 12:20:56] CAUTION: Nearest neighborhood metric is disabled
+[2026-01-22 08:46:51] CAUTION: Nearest neighborhood metric is disabled
+[2026-01-22 08:46:59] Unmix metric calculations are enabled, proceeding
+[2026-01-22 08:46:59] Cfgs taken in, parsed
+[2026-01-22 08:47:00] Data configured
+[2026-01-22 08:47:00] Critic, optimizer, lr_scheduler, loss_fn configured
+[2026-01-22 08:47:00] Training function called
+[2026-01-22 08:47:00] Training has started, will train for 3 epochs
+[2026-01-22 08:47:00] Epoch 1, Training Step
+[2026-01-22 08:47:04] Epoch 1, Average Train Loss: 0.03558859527111054
+[2026-01-22 08:47:04] LR Scheduler updated
+[2026-01-22 08:47:04] Epoch 1, Validation Step
+[2026-01-22 08:47:04] Epoch 1, Validation Loss: 0.0859568864107132
+[2026-01-22 08:47:04] Epoch 2, Training Step
+[2026-01-22 08:47:05] Epoch 2, Average Train Loss: 0.02226312577724457
+[2026-01-22 08:47:05] LR Scheduler updated
+[2026-01-22 08:47:05] Epoch 2, Validation Step
+[2026-01-22 08:47:05] Epoch 2, Validation Loss: 0.08023198693990707
+[2026-01-22 08:47:05] Epoch 3, Training Step
+[2026-01-22 08:47:05] Epoch 3, Average Train Loss: 0.019239763212390244
+[2026-01-22 08:47:05] LR Scheduler updated
+[2026-01-22 08:47:05] Epoch 3, Validation Step
+[2026-01-22 08:47:05] Epoch 3, Validation Loss: 0.07715127617120743
+[2026-01-22 08:47:05] Finished 3 Epochs, Testing Step
+[2026-01-22 08:47:07] Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at 'mlp.pth'
+[2026-01-22 08:47:07] Training finished, synthesized data tested
+[2026-01-22 08:47:08] Unmix metric calculations succesfully completed
