@@ -88,7 +88,8 @@ class LossKLSAM(nn.Module):
 
         self.loss_criterion = nn.MSELoss()
     
-    def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), mu:(torch.Tensor), variation:(torch.Tensor), SAM_coefficient=0.1, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.05):
+    def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), mu:(torch.Tensor), variation:(torch.Tensor), 
+                SAM_coefficient=1, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.05):
         """
         Gets the loss given some x_0 reconstruction, encoded mu and accounts for variation done by the algorithm
 
