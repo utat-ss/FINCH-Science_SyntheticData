@@ -2,8 +2,11 @@
     "ae_type": "VCCAE",
     "cfg_ae": {
         "conv_layers": [
-            5,
-            64
+            1,
+            256,
+            256,
+            256,
+            256
         ],
         "mlp_layers": [
             256,
@@ -20,8 +23,9 @@
             3,
             128,
             128,
-            128
+            64
         ],
+        "batch_size": 8,
         "scheduler": {
             "scheduler_type": "CosSchedule",
             "cfg_scheduler": {
