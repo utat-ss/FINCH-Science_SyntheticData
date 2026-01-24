@@ -199,13 +199,15 @@ class VariationalDecoder(nn.Module):
                 self.act_fn
             ])
 
+        self.seq_len_final = (self.n_bands // self.seq_len_final) * self.seq_len_final # Adjusts the final seq len to be multiple of initial seq_len_final, to ensure proper upsampling later on
+
+
         # Final projection before conv
         mlp_list.extend([
             nn.Linear(in_features=self.mlp_layers[-1], out_features=self.seq_len_final*self.conv_layers[0]),
             self.act_fn,
             nn.Unflatten(1, (self.conv_layers[0], self.seq_len_final)) # Unflatten here to do (B, conv_layers[0]*seq_len_final) -> (B, conv_layers[0], seq_len_final)
         ])
-
         # Compound everything
         self.mlp = nn.Sequential(*mlp_list)
 
@@ -352,7 +354,8 @@ class VariationalCCAE(nn.Module):
             pool_kernel_size:(int)=1,
             pool_stride:(int)=1,
             output_padding:(int)=0,
-            act_fn:(str)='relu'
+            act_fn:(str)='relu',
+            scheduler=None,
     ):
         super().__init__()
 

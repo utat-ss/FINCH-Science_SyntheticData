@@ -9,7 +9,7 @@ cfg_data:
   cfg_loader:
     n_val: 100 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
     n_test: 123 # Number of test points at the end of training
-    n_train_batch: 8 # The training batch size
+    n_train_batch: 16 # The training batch size
     seed: 1001 # Seed for the data splitters
 
   cfg_split: # Train/val split data
@@ -29,7 +29,7 @@ cfg_train:
 cfg_export:
   entity: 'cshuo777-university-of-toronto' # The team entity name
   project: 'VCCAE Synthetic Data Generation'
-  name: 'train_002-1'
+  name: 'train_002-4'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
@@ -42,23 +42,17 @@ cfg_export:
   save_to_wandb: True # Whether to save everything to wandb
 
 cfg_ae_setup:
-  ae_type: 'VCCAE' # The name of the encoder class
+  ae_type: 'VariationalCCAE' # The name of the encoder class
   cfg_ae:
-    conv_layers: [5, 64] # [5, 256, 256, 256, 256]
-    mlp_layers: [256, 256, 256, 256]
-    num_spectra: 210
-    out_layer: 64
-    c_d: {'pad': 1} # Convolution details
-    ab_mlp: [3, 128, 128, 64]
-    batch_size: 8
-    # compressed_sampling: False
-    # dynamicthresh_sampling: True
-    # sampling_method: 'ddim'
-    # temperature: 0.8
-    # guidance_scale: 3.0
-    # uncond_prob: 0.1
-    # ema_decay: 0.999
-    # ddim_steps: 50
+    conv_layers: [1024, 1024, 1024, 1024, 1024]
+    mlp_layers: [1024, 1024, 1024, 1024]
+    # num_spectra: 210
+    latent_dim: 512
+    embedding_dim: 64
+    # out_layer: 64
+    # c_d: {'pad': 1} # Convolution details
+    embedding_layers: [3, 128, 128]
+    # batch_size: 8
   # The rest of specific configs of the diffusion get built in the script
 
 # cfg_epsilon_setup: 

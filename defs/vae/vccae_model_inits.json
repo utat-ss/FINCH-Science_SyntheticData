@@ -1,31 +1,26 @@
 {
-    "ae_type": "VCCAE",
+    "ae_type": "VariationalCCAE",
     "cfg_ae": {
         "conv_layers": [
-            1,
-            256,
-            256,
-            256,
-            256
+            1024,
+            1024,
+            1024,
+            1024,
+            1024
         ],
         "mlp_layers": [
-            256,
-            256,
-            256,
-            256
+            1024,
+            1024,
+            1024,
+            1024
         ],
-        "num_spectra": 210,
-        "out_layer": 64,
-        "c_d": {
-            "pad": 1
-        },
-        "ab_mlp": [
+        "latent_dim": 512,
+        "embedding_dim": 64,
+        "embedding_layers": [
             3,
             128,
-            128,
-            64
+            128
         ],
-        "batch_size": 8,
         "scheduler": {
             "scheduler_type": "CosSchedule",
             "cfg_scheduler": {
