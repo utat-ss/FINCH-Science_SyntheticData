@@ -14,7 +14,7 @@ class VEncoder(nn.Module):
         self.output_layer = out_layer
         self.abundance_mlp_layers = ab_mlp
 
-        encoder_layers = []
+        encoder_layers = [] 
         # Convolutional layers
         for i in range(0, len(self.conv_layers) - 1):
             encoder_layers.extend([
