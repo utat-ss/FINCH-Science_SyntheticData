@@ -1,0 +1,137 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            od6t8b4e61h4gkyd2dxmf40olmo6d1w9:
+                apple:
+                    ecpuCores: 4
+                    gpuCores: 8
+                    memoryGb: 8
+                    name: Apple M2
+                    pcpuCores: 4
+                    ramTotalBytes: "8589934592"
+                    swapTotalBytes: "6442450944"
+                args:
+                    - --config
+                    - cfg_run_example.yaml
+                codePath: defs/vae/script.py
+                codePathLocal: script.py
+                cpu_count: 8
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "245107195904"
+                        used: "236219678720"
+                email: cshuo777@gmail.com
+                executable: /Library/Frameworks/Python.framework/Versions/3.13/bin/python3
+                git:
+                    commit: 8713ef1cdd55563484a5210b270da4f4b2aa51e5
+                    remote: https://github.com/utat-ss/FINCH-Science_SyntheticData
+                host: MacBook-Air-976.local
+                memory:
+                    total: "8589934592"
+                os: macOS-15.7.1-arm64-arm-64bit-Mach-O
+                program: /Users/galacticmilk/Desktop/Michael's folder/[UNI]/[UTAT]/[science]/FINCH-Science_SyntheticData/defs/vae/script.py
+                python: CPython 3.13.3
+                root: /Users/galacticmilk/Desktop/Michael's folder/[UNI]/[UTAT]/[science]/FINCH-Science_SyntheticData/defs/vae
+                startedAt: "2026-01-22T20:22:11.579192Z"
+                writerId: od6t8b4e61h4gkyd2dxmf40olmo6d1w9
+        m: []
+        python_version: 3.13.3
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 13
+                - 16
+            "4": 3.13.3
+            "5": 0.23.1
+            "12": 0.23.1
+            "13": darwin-arm64
+cfg_ae_setup:
+    value:
+        ae_type: VCCAE
+        cfg_ae:
+            ab_mlp:
+                - 3
+                - 128
+                - 128
+                - 128
+            batch_size: 5
+            c_d:
+                pad: 1
+            conv_layers:
+                - 5
+                - 256
+                - 256
+                - 256
+                - 256
+            mlp_layers:
+                - 256
+                - 256
+                - 256
+                - 256
+            num_spectra: 210
+            out_layer: 64
+cfg_data:
+    value:
+        cfg_dataset_save:
+            psi1_path: defs/vae/psi_1
+            psi2_path: defs/vae/psi_2
+        cfg_import:
+            data_handle: /data/simpler_data_rwc.csv
+            spec_range:
+                - 400
+                - 2490
+        cfg_loader:
+            n_test: 123
+            n_train_batch: 5
+            n_val: 100
+            seed: 1001
+        cfg_normalize:
+            norm_type: none
+        cfg_split:
+            batch_size: 1
+            split_ratio: 0.8
+cfg_export:
+    value:
+        entity: cshuo777-university-of-toronto
+        local_log: test_logs.txt
+        locallog_save: test_logs.txt
+        master_path: ""
+        model_save: vccae_model.pth
+        modelinits_save: vccae_model_inits.json
+        name: train_002-0
+        norm_save: norm_dict.json
+        project: VCCAE Synthetic Data Generation
+        psi1_path: psi1.pth
+        psi2_path: psi2.pth
+        save_to_wandb: true
+        test_save: generated_test_samples.parquet
+cfg_loss_setup:
+    value:
+        loss_type: LossKLSAM
+cfg_optim_setup:
+    value:
+        cfg_optim:
+            cfg_lrscheduler_setup:
+                cfg_lrscheduler: '...'
+                lrscheduler_type: CosineAnealingLR
+            lr: 1e-05
+            weight_decay: 0.01
+        optim_type: Adam
+cfg_scheduler_setup:
+    value:
+        cfg_scheduler:
+            exp: 2
+            offset: 0.008
+            steps: 3000
+        scheduler_type: CosSchedule
+cfg_train:
+    value:
+        device: cpu
+        dtype: torch.float32
+        n_epoch: 50
+        n_tb_epoch: 100

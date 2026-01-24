@@ -1,0 +1,41 @@
+{
+  "os": "macOS-15.7.1-arm64-arm-64bit-Mach-O",
+  "python": "CPython 3.13.3",
+  "startedAt": "2026-01-22T20:42:26.092007Z",
+  "args": [
+    "--config",
+    "cfg_run_example.yaml"
+  ],
+  "program": "/Users/galacticmilk/Desktop/Michael's folder/[UNI]/[UTAT]/[science]/FINCH-Science_SyntheticData/defs/vae/script.py",
+  "codePath": "defs/vae/script.py",
+  "codePathLocal": "script.py",
+  "git": {
+    "remote": "https://github.com/utat-ss/FINCH-Science_SyntheticData",
+    "commit": "8713ef1cdd55563484a5210b270da4f4b2aa51e5"
+  },
+  "email": "cshuo777@gmail.com",
+  "root": "/Users/galacticmilk/Desktop/Michael's folder/[UNI]/[UTAT]/[science]/FINCH-Science_SyntheticData/defs/vae",
+  "host": "MacBook-Air-976.local",
+  "executable": "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+  "cpu_count": 8,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "245107195904",
+      "used": "237335597056"
+    }
+  },
+  "memory": {
+    "total": "8589934592"
+  },
+  "apple": {
+    "name": "Apple M2",
+    "ecpuCores": 4,
+    "pcpuCores": 4,
+    "gpuCores": 8,
+    "memoryGb": 8,
+    "swapTotalBytes": "7516192768",
+    "ramTotalBytes": "8589934592"
+  },
+  "writerId": "gcx88rfpbzqwb1uz51ly5at4oz0id6y1"
+}
