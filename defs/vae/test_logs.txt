@@ -1,66 +1,407 @@
-[2026-01-25 06:03:49] Cfgs taken in, parsed. WandB and logging configured
-[2026-01-25 06:03:50] Data has been parsed and configured
-[2026-01-25 06:03:52] The diffusion model, optimizer, loss function etc. has been configured
-[2026-01-25 06:03:52] Training function started
-[2026-01-25 06:03:52] Training start. 50 epochs.
-[2026-01-25 06:03:52] Epoch 1, Training step
-[2026-01-25 06:05:57] Epoch 1, Average Train Loss: 119.84236462414265
-[2026-01-25 06:05:57] Epoch 1, Validation Step
-[2026-01-25 06:05:57] Epoch 1, Average Val Loss: 73.8845443725586
-[2026-01-25 06:06:01] Epoch 2, Training step
-[2026-01-25 06:07:54] Epoch 2, Average Train Loss: 7.122290659695864
-[2026-01-25 06:07:54] Epoch 2, Validation Step
-[2026-01-25 06:07:55] Epoch 2, Average Val Loss: 6.720495223999023
-[2026-01-25 06:08:08] Epoch 3, Training step
-[2026-01-25 06:10:03] Epoch 3, Average Train Loss: 5.634055636823177
-[2026-01-25 06:10:03] Epoch 3, Validation Step
-[2026-01-25 06:10:04] Epoch 3, Average Val Loss: 6.53917932510376
-[2026-01-25 06:10:07] Epoch 4, Training step
-[2026-01-25 06:12:02] Epoch 4, Average Train Loss: 5.606925256550312
-[2026-01-25 06:12:02] Epoch 4, Validation Step
-[2026-01-25 06:12:03] Epoch 4, Average Val Loss: 6.466207504272461
-[2026-01-25 06:12:07] Epoch 5, Training step
-[2026-01-25 06:14:04] Epoch 5, Average Train Loss: 5.62570284307003
-[2026-01-25 06:14:04] Epoch 5, Validation Step
-[2026-01-25 06:14:05] Epoch 5, Average Val Loss: 6.395521640777588
-[2026-01-25 06:14:08] Epoch 6, Training step
-[2026-01-25 06:16:02] Epoch 6, Average Train Loss: 5.381360936909914
-[2026-01-25 06:16:02] Epoch 6, Validation Step
-[2026-01-25 06:16:03] Epoch 6, Average Val Loss: 6.2661452293396
-[2026-01-25 06:16:06] Epoch 7, Training step
-[2026-01-25 06:17:53] Epoch 7, Average Train Loss: 5.337099518626928
-[2026-01-25 06:17:53] Epoch 7, Validation Step
-[2026-01-25 06:17:53] Epoch 7, Average Val Loss: 5.590935230255127
-[2026-01-25 06:17:57] Epoch 8, Training step
-[2026-01-25 06:19:49] Epoch 8, Average Train Loss: 4.354005770757794
-[2026-01-25 06:19:49] Epoch 8, Validation Step
-[2026-01-25 06:19:50] Epoch 8, Average Val Loss: 4.408888339996338
-[2026-01-25 06:19:53] Epoch 9, Training step
-[2026-01-25 06:21:48] Epoch 9, Average Train Loss: 3.8518503177911043
-[2026-01-25 06:21:48] Epoch 9, Validation Step
-[2026-01-25 06:21:49] Epoch 9, Average Val Loss: 4.755185127258301
-[2026-01-25 06:21:50] Epoch 10, Training step
-[2026-01-25 06:23:46] Epoch 10, Average Train Loss: 3.9176490548998117
-[2026-01-25 06:23:46] Epoch 10, Validation Step
-[2026-01-25 06:23:46] Epoch 10, Average Val Loss: 3.81368350982666
-[2026-01-25 06:23:50] Epoch 11, Training step
-[2026-01-25 06:25:45] Epoch 11, Average Train Loss: 3.8394998367875814
-[2026-01-25 06:25:45] Epoch 11, Validation Step
-[2026-01-25 06:25:46] Epoch 11, Average Val Loss: 3.8810861110687256
-[2026-01-25 06:25:47] Epoch 12, Training step
-[2026-01-25 06:27:42] Epoch 12, Average Train Loss: 3.5954896360635757
-[2026-01-25 06:27:42] Epoch 12, Validation Step
-[2026-01-25 06:27:43] Epoch 12, Average Val Loss: 3.901735305786133
-[2026-01-25 06:27:44] Epoch 13, Training step
-[2026-01-25 06:29:40] Epoch 13, Average Train Loss: 3.873065249994397
-[2026-01-25 06:29:40] Epoch 13, Validation Step
-[2026-01-25 06:29:40] Epoch 13, Average Val Loss: 3.67344069480896
-[2026-01-25 06:29:44] Epoch 14, Training step
-[2026-01-25 06:31:42] Epoch 14, Average Train Loss: 3.764503236860037
-[2026-01-25 06:31:42] Epoch 14, Validation Step
-[2026-01-25 06:31:43] Epoch 14, Average Val Loss: 3.718277931213379
-[2026-01-25 06:31:44] Epoch 15, Training step
-[2026-01-25 06:33:48] Epoch 15, Average Train Loss: 3.6555015966296196
-[2026-01-25 06:33:48] Epoch 15, Validation Step
-[2026-01-25 06:33:50] Epoch 15, Average Val Loss: 3.683535099029541
-[2026-01-25 06:33:51] Epoch 16, Training step
+[2026-01-27 05:44:53] Cfgs taken in, parsed. WandB and logging configured
+[2026-01-27 05:44:53] Data has been parsed and configured
+[2026-01-27 05:44:53] The diffusion model, optimizer, loss function etc. has been configured
+[2026-01-27 05:44:53] Training function started
+[2026-01-27 05:44:53] Training start. 100 epochs.
+[2026-01-27 05:44:53] Epoch 1, Training step
+[2026-01-27 05:45:11] Epoch 1, Average Train Loss: 122.19917398691177
+[2026-01-27 05:45:11] Epoch 1, Validation Step
+[2026-01-27 05:45:11] Epoch 1, Average Val Loss: 486.6649169921875
+[2026-01-27 05:45:13] Epoch 2, Training step
+[2026-01-27 05:45:23] Epoch 2, Average Train Loss: 60.07646760344505
+[2026-01-27 05:45:23] Epoch 2, Validation Step
+[2026-01-27 05:45:23] Epoch 2, Average Val Loss: 119.69367218017578
+[2026-01-27 05:45:24] Epoch 3, Training step
+[2026-01-27 05:45:34] Epoch 3, Average Train Loss: 18.81021360307932
+[2026-01-27 05:45:34] Epoch 3, Validation Step
+[2026-01-27 05:45:34] Epoch 3, Average Val Loss: 18.90847396850586
+[2026-01-27 05:45:36] Epoch 4, Training step
+[2026-01-27 05:45:46] Epoch 4, Average Train Loss: 12.315840281546116
+[2026-01-27 05:45:46] Epoch 4, Validation Step
+[2026-01-27 05:45:46] Epoch 4, Average Val Loss: 12.453437805175781
+[2026-01-27 05:45:47] Epoch 5, Training step
+[2026-01-27 05:45:57] Epoch 5, Average Train Loss: 11.682000257074833
+[2026-01-27 05:45:57] Epoch 5, Validation Step
+[2026-01-27 05:45:57] Epoch 5, Average Val Loss: 11.771930694580078
+[2026-01-27 05:45:58] Epoch 6, Training step
+[2026-01-27 05:46:09] Epoch 6, Average Train Loss: 11.204522989690304
+[2026-01-27 05:46:09] Epoch 6, Validation Step
+[2026-01-27 05:46:09] Epoch 6, Average Val Loss: 10.97461986541748
+[2026-01-27 05:46:10] Epoch 7, Training step
+[2026-01-27 05:46:20] Epoch 7, Average Train Loss: 10.119032897055149
+[2026-01-27 05:46:20] Epoch 7, Validation Step
+[2026-01-27 05:46:20] Epoch 7, Average Val Loss: 9.972620964050293
+[2026-01-27 05:46:21] Epoch 8, Training step
+[2026-01-27 05:46:31] Epoch 8, Average Train Loss: 9.255894318223
+[2026-01-27 05:46:31] Epoch 8, Validation Step
+[2026-01-27 05:46:31] Epoch 8, Average Val Loss: 9.072423934936523
+[2026-01-27 05:46:33] Epoch 9, Training step
+[2026-01-27 05:46:42] Epoch 9, Average Train Loss: 8.754104375839233
+[2026-01-27 05:46:42] Epoch 9, Validation Step
+[2026-01-27 05:46:43] Epoch 9, Average Val Loss: 8.679671287536621
+[2026-01-27 05:46:44] Epoch 10, Training step
+[2026-01-27 05:46:54] Epoch 10, Average Train Loss: 8.369822040200233
+[2026-01-27 05:46:54] Epoch 10, Validation Step
+[2026-01-27 05:46:54] Epoch 10, Average Val Loss: 8.553772926330566
+[2026-01-27 05:46:55] Epoch 11, Training step
+[2026-01-27 05:47:05] Epoch 11, Average Train Loss: 8.465576205402613
+[2026-01-27 05:47:05] Epoch 11, Validation Step
+[2026-01-27 05:47:05] Epoch 11, Average Val Loss: 8.490401268005371
+[2026-01-27 05:47:07] Epoch 12, Training step
+[2026-01-27 05:47:16] Epoch 12, Average Train Loss: 8.270797088742256
+[2026-01-27 05:47:16] Epoch 12, Validation Step
+[2026-01-27 05:47:16] Epoch 12, Average Val Loss: 8.46456527709961
+[2026-01-27 05:47:18] Epoch 13, Training step
+[2026-01-27 05:47:28] Epoch 13, Average Train Loss: 8.354624915868044
+[2026-01-27 05:47:28] Epoch 13, Validation Step
+[2026-01-27 05:47:28] Epoch 13, Average Val Loss: 8.400705337524414
+[2026-01-27 05:47:29] Epoch 14, Training step
+[2026-01-27 05:47:39] Epoch 14, Average Train Loss: 8.274536699056625
+[2026-01-27 05:47:39] Epoch 14, Validation Step
+[2026-01-27 05:47:39] Epoch 14, Average Val Loss: 8.345983505249023
+[2026-01-27 05:47:41] Epoch 15, Training step
+[2026-01-27 05:47:50] Epoch 15, Average Train Loss: 8.274383716285229
+[2026-01-27 05:47:50] Epoch 15, Validation Step
+[2026-01-27 05:47:50] Epoch 15, Average Val Loss: 8.38337230682373
+[2026-01-27 05:47:52] Epoch 16, Training step
+[2026-01-27 05:48:04] Epoch 16, Average Train Loss: 8.199319295585155
+[2026-01-27 05:48:04] Epoch 16, Validation Step
+[2026-01-27 05:48:04] Epoch 16, Average Val Loss: 8.335204124450684
+[2026-01-27 05:48:05] Epoch 17, Training step
+[2026-01-27 05:48:18] Epoch 17, Average Train Loss: 8.234779343008995
+[2026-01-27 05:48:18] Epoch 17, Validation Step
+[2026-01-27 05:48:18] Epoch 17, Average Val Loss: 8.312825202941895
+[2026-01-27 05:48:20] Epoch 18, Training step
+[2026-01-27 05:48:34] Epoch 18, Average Train Loss: 8.247875213623047
+[2026-01-27 05:48:34] Epoch 18, Validation Step
+[2026-01-27 05:48:34] Epoch 18, Average Val Loss: 8.281938552856445
+[2026-01-27 05:48:35] Epoch 19, Training step
+[2026-01-27 05:48:51] Epoch 19, Average Train Loss: 8.222675047814846
+[2026-01-27 05:48:51] Epoch 19, Validation Step
+[2026-01-27 05:48:51] Epoch 19, Average Val Loss: 8.271018028259277
+[2026-01-27 05:48:52] Epoch 20, Training step
+[2026-01-27 05:49:09] Epoch 20, Average Train Loss: 8.235506039112806
+[2026-01-27 05:49:09] Epoch 20, Validation Step
+[2026-01-27 05:49:09] Epoch 20, Average Val Loss: 8.282041549682617
+[2026-01-27 05:49:10] Epoch 21, Training step
+[2026-01-27 05:49:28] Epoch 21, Average Train Loss: 8.1615060120821
+[2026-01-27 05:49:28] Epoch 21, Validation Step
+[2026-01-27 05:49:28] Epoch 21, Average Val Loss: 8.285257339477539
+[2026-01-27 05:49:29] Epoch 22, Training step
+[2026-01-27 05:49:47] Epoch 22, Average Train Loss: 8.222261063754559
+[2026-01-27 05:49:47] Epoch 22, Validation Step
+[2026-01-27 05:49:47] Epoch 22, Average Val Loss: 8.27839469909668
+[2026-01-27 05:49:49] Epoch 23, Training step
+[2026-01-27 05:50:06] Epoch 23, Average Train Loss: 8.087539598345757
+[2026-01-27 05:50:06] Epoch 23, Validation Step
+[2026-01-27 05:50:07] Epoch 23, Average Val Loss: 8.323545455932617
+[2026-01-27 05:50:08] Epoch 24, Training step
+[2026-01-27 05:50:27] Epoch 24, Average Train Loss: 8.29712799936533
+[2026-01-27 05:50:27] Epoch 24, Validation Step
+[2026-01-27 05:50:27] Epoch 24, Average Val Loss: 8.242240905761719
+[2026-01-27 05:50:29] Epoch 25, Training step
+[2026-01-27 05:50:48] Epoch 25, Average Train Loss: 8.164102301001549
+[2026-01-27 05:50:48] Epoch 25, Validation Step
+[2026-01-27 05:50:48] Epoch 25, Average Val Loss: 8.323047637939453
+[2026-01-27 05:50:49] Epoch 26, Training step
+[2026-01-27 05:51:09] Epoch 26, Average Train Loss: 8.14292349666357
+[2026-01-27 05:51:09] Epoch 26, Validation Step
+[2026-01-27 05:51:09] Epoch 26, Average Val Loss: 8.372318267822266
+[2026-01-27 05:51:11] Epoch 27, Training step
+[2026-01-27 05:51:31] Epoch 27, Average Train Loss: 8.1734224781394
+[2026-01-27 05:51:31] Epoch 27, Validation Step
+[2026-01-27 05:51:31] Epoch 27, Average Val Loss: 8.201448440551758
+[2026-01-27 05:51:33] Epoch 28, Training step
+[2026-01-27 05:51:54] Epoch 28, Average Train Loss: 8.195436470210552
+[2026-01-27 05:51:54] Epoch 28, Validation Step
+[2026-01-27 05:51:55] Epoch 28, Average Val Loss: 8.274932861328125
+[2026-01-27 05:51:56] Epoch 29, Training step
+[2026-01-27 05:52:18] Epoch 29, Average Train Loss: 8.228196419775486
+[2026-01-27 05:52:18] Epoch 29, Validation Step
+[2026-01-27 05:52:18] Epoch 29, Average Val Loss: 8.210776329040527
+[2026-01-27 05:52:20] Epoch 30, Training step
+[2026-01-27 05:52:43] Epoch 30, Average Train Loss: 8.118736244738102
+[2026-01-27 05:52:43] Epoch 30, Validation Step
+[2026-01-27 05:52:43] Epoch 30, Average Val Loss: 8.216055870056152
+[2026-01-27 05:52:45] Epoch 31, Training step
+[2026-01-27 05:53:07] Epoch 31, Average Train Loss: 8.166335836052895
+[2026-01-27 05:53:07] Epoch 31, Validation Step
+[2026-01-27 05:53:08] Epoch 31, Average Val Loss: 8.230978965759277
+[2026-01-27 05:53:09] Epoch 32, Training step
+[2026-01-27 05:53:33] Epoch 32, Average Train Loss: 8.147638283669949
+[2026-01-27 05:53:33] Epoch 32, Validation Step
+[2026-01-27 05:53:34] Epoch 32, Average Val Loss: 8.189652442932129
+[2026-01-27 05:53:35] Epoch 33, Training step
+[2026-01-27 05:54:00] Epoch 33, Average Train Loss: 8.178238831460476
+[2026-01-27 05:54:00] Epoch 33, Validation Step
+[2026-01-27 05:54:00] Epoch 33, Average Val Loss: 8.1939115524292
+[2026-01-27 05:54:02] Epoch 34, Training step
+[2026-01-27 05:54:27] Epoch 34, Average Train Loss: 8.123259752988815
+[2026-01-27 05:54:27] Epoch 34, Validation Step
+[2026-01-27 05:54:27] Epoch 34, Average Val Loss: 8.335577011108398
+[2026-01-27 05:54:29] Epoch 35, Training step
+[2026-01-27 05:54:53] Epoch 35, Average Train Loss: 8.128415808081627
+[2026-01-27 05:54:53] Epoch 35, Validation Step
+[2026-01-27 05:54:54] Epoch 35, Average Val Loss: 8.173484802246094
+[2026-01-27 05:54:55] Epoch 36, Training step
+[2026-01-27 05:55:20] Epoch 36, Average Train Loss: 8.161085672676563
+[2026-01-27 05:55:20] Epoch 36, Validation Step
+[2026-01-27 05:55:21] Epoch 36, Average Val Loss: 8.232622146606445
+[2026-01-27 05:55:22] Epoch 37, Training step
+[2026-01-27 05:55:48] Epoch 37, Average Train Loss: 8.120851092040539
+[2026-01-27 05:55:48] Epoch 37, Validation Step
+[2026-01-27 05:55:48] Epoch 37, Average Val Loss: 8.202895164489746
+[2026-01-27 05:55:50] Epoch 38, Training step
+[2026-01-27 05:56:16] Epoch 38, Average Train Loss: 8.198108822107315
+[2026-01-27 05:56:16] Epoch 38, Validation Step
+[2026-01-27 05:56:17] Epoch 38, Average Val Loss: 8.282172203063965
+[2026-01-27 05:56:18] Epoch 39, Training step
+[2026-01-27 05:56:45] Epoch 39, Average Train Loss: 8.18202769011259
+[2026-01-27 05:56:45] Epoch 39, Validation Step
+[2026-01-27 05:56:45] Epoch 39, Average Val Loss: 8.181328773498535
+[2026-01-27 05:56:47] Epoch 40, Training step
+[2026-01-27 05:57:14] Epoch 40, Average Train Loss: 8.129988305270672
+[2026-01-27 05:57:14] Epoch 40, Validation Step
+[2026-01-27 05:57:15] Epoch 40, Average Val Loss: 8.202056884765625
+[2026-01-27 05:57:16] Epoch 41, Training step
+[2026-01-27 05:57:44] Epoch 41, Average Train Loss: 8.14474493265152
+[2026-01-27 05:57:44] Epoch 41, Validation Step
+[2026-01-27 05:57:45] Epoch 41, Average Val Loss: 8.218406677246094
+[2026-01-27 05:57:46] Epoch 42, Training step
+[2026-01-27 05:58:15] Epoch 42, Average Train Loss: 8.16180656850338
+[2026-01-27 05:58:15] Epoch 42, Validation Step
+[2026-01-27 05:58:15] Epoch 42, Average Val Loss: 8.163047790527344
+[2026-01-27 05:58:17] Epoch 43, Training step
+[2026-01-27 05:58:46] Epoch 43, Average Train Loss: 8.11435990780592
+[2026-01-27 05:58:46] Epoch 43, Validation Step
+[2026-01-27 05:58:47] Epoch 43, Average Val Loss: 8.206684112548828
+[2026-01-27 05:58:48] Epoch 44, Training step
+[2026-01-27 05:59:18] Epoch 44, Average Train Loss: 8.124747216701508
+[2026-01-27 05:59:18] Epoch 44, Validation Step
+[2026-01-27 05:59:19] Epoch 44, Average Val Loss: 8.23697280883789
+[2026-01-27 05:59:20] Epoch 45, Training step
+[2026-01-27 05:59:53] Epoch 45, Average Train Loss: 8.17468236386776
+[2026-01-27 05:59:53] Epoch 45, Validation Step
+[2026-01-27 05:59:54] Epoch 45, Average Val Loss: 8.227745056152344
+[2026-01-27 05:59:56] Epoch 46, Training step
+[2026-01-27 06:00:29] Epoch 46, Average Train Loss: 8.090140998363495
+[2026-01-27 06:00:29] Epoch 46, Validation Step
+[2026-01-27 06:00:30] Epoch 46, Average Val Loss: 8.246504783630371
+[2026-01-27 06:00:31] Epoch 47, Training step
+[2026-01-27 06:01:05] Epoch 47, Average Train Loss: 8.140332963317633
+[2026-01-27 06:01:05] Epoch 47, Validation Step
+[2026-01-27 06:01:06] Epoch 47, Average Val Loss: 8.217158317565918
+[2026-01-27 06:01:07] Epoch 48, Training step
+[2026-01-27 06:01:42] Epoch 48, Average Train Loss: 8.110851690173149
+[2026-01-27 06:01:42] Epoch 48, Validation Step
+[2026-01-27 06:01:43] Epoch 48, Average Val Loss: 8.176285743713379
+[2026-01-27 06:01:45] Epoch 49, Training step
+[2026-01-27 06:02:21] Epoch 49, Average Train Loss: 8.175058618187904
+[2026-01-27 06:02:21] Epoch 49, Validation Step
+[2026-01-27 06:02:21] Epoch 49, Average Val Loss: 8.176065444946289
+[2026-01-27 06:02:23] Epoch 50, Training step
+[2026-01-27 06:02:58] Epoch 50, Average Train Loss: 8.16312624514103
+[2026-01-27 06:02:58] Epoch 50, Validation Step
+[2026-01-27 06:02:59] Epoch 50, Average Val Loss: 8.189614295959473
+[2026-01-27 06:03:01] Epoch 51, Training step
+[2026-01-27 06:03:37] Epoch 51, Average Train Loss: 8.049620725214481
+[2026-01-27 06:03:37] Epoch 51, Validation Step
+[2026-01-27 06:03:38] Epoch 51, Average Val Loss: 8.207995414733887
+[2026-01-27 06:03:40] Epoch 52, Training step
+[2026-01-27 06:04:17] Epoch 52, Average Train Loss: 8.228555660694838
+[2026-01-27 06:04:17] Epoch 52, Validation Step
+[2026-01-27 06:04:18] Epoch 52, Average Val Loss: 8.185749053955078
+[2026-01-27 06:04:20] Epoch 53, Training step
+[2026-01-27 06:04:58] Epoch 53, Average Train Loss: 8.024956375360489
+[2026-01-27 06:04:58] Epoch 53, Validation Step
+[2026-01-27 06:04:59] Epoch 53, Average Val Loss: 8.228716850280762
+[2026-01-27 06:05:01] Epoch 54, Training step
+[2026-01-27 06:05:39] Epoch 54, Average Train Loss: 8.098527260124683
+[2026-01-27 06:05:39] Epoch 54, Validation Step
+[2026-01-27 06:05:40] Epoch 54, Average Val Loss: 8.227564811706543
+[2026-01-27 06:05:42] Epoch 55, Training step
+[2026-01-27 06:06:21] Epoch 55, Average Train Loss: 8.151654295623302
+[2026-01-27 06:06:21] Epoch 55, Validation Step
+[2026-01-27 06:06:22] Epoch 55, Average Val Loss: 8.235077857971191
+[2026-01-27 06:06:23] Epoch 56, Training step
+[2026-01-27 06:07:04] Epoch 56, Average Train Loss: 8.164814107120037
+[2026-01-27 06:07:04] Epoch 56, Validation Step
+[2026-01-27 06:07:05] Epoch 56, Average Val Loss: 8.171028137207031
+[2026-01-27 06:07:06] Epoch 57, Training step
+[2026-01-27 06:07:48] Epoch 57, Average Train Loss: 8.139307670295238
+[2026-01-27 06:07:48] Epoch 57, Validation Step
+[2026-01-27 06:07:49] Epoch 57, Average Val Loss: 8.160660743713379
+[2026-01-27 06:07:50] Epoch 58, Training step
+[2026-01-27 06:08:33] Epoch 58, Average Train Loss: 8.115960076451302
+[2026-01-27 06:08:33] Epoch 58, Validation Step
+[2026-01-27 06:08:34] Epoch 58, Average Val Loss: 8.161457061767578
+[2026-01-27 06:08:35] Epoch 59, Training step
+[2026-01-27 06:09:18] Epoch 59, Average Train Loss: 8.071220681071281
+[2026-01-27 06:09:18] Epoch 59, Validation Step
+[2026-01-27 06:09:19] Epoch 59, Average Val Loss: 8.204975128173828
+[2026-01-27 06:09:21] Epoch 60, Training step
+[2026-01-27 06:10:04] Epoch 60, Average Train Loss: 8.117527887225151
+[2026-01-27 06:10:04] Epoch 60, Validation Step
+[2026-01-27 06:10:05] Epoch 60, Average Val Loss: 8.189451217651367
+[2026-01-27 06:10:07] Epoch 61, Training step
+[2026-01-27 06:10:51] Epoch 61, Average Train Loss: 8.228452522307634
+[2026-01-27 06:10:51] Epoch 61, Validation Step
+[2026-01-27 06:10:52] Epoch 61, Average Val Loss: 8.166495323181152
+[2026-01-27 06:10:54] Epoch 62, Training step
+[2026-01-27 06:11:39] Epoch 62, Average Train Loss: 8.075697477906942
+[2026-01-27 06:11:39] Epoch 62, Validation Step
+[2026-01-27 06:11:40] Epoch 62, Average Val Loss: 8.18771743774414
+[2026-01-27 06:11:42] Epoch 63, Training step
+[2026-01-27 06:12:28] Epoch 63, Average Train Loss: 8.135867934674025
+[2026-01-27 06:12:28] Epoch 63, Validation Step
+[2026-01-27 06:12:29] Epoch 63, Average Val Loss: 8.155264854431152
+[2026-01-27 06:12:30] Epoch 64, Training step
+[2026-01-27 06:13:17] Epoch 64, Average Train Loss: 8.10685545951128
+[2026-01-27 06:13:17] Epoch 64, Validation Step
+[2026-01-27 06:13:18] Epoch 64, Average Val Loss: 8.213017463684082
+[2026-01-27 06:13:20] Epoch 65, Training step
+[2026-01-27 06:14:07] Epoch 65, Average Train Loss: 8.120075814425945
+[2026-01-27 06:14:07] Epoch 65, Validation Step
+[2026-01-27 06:14:08] Epoch 65, Average Val Loss: 8.259771347045898
+[2026-01-27 06:14:10] Epoch 66, Training step
+[2026-01-27 06:14:58] Epoch 66, Average Train Loss: 8.053393013775349
+[2026-01-27 06:14:58] Epoch 66, Validation Step
+[2026-01-27 06:14:59] Epoch 66, Average Val Loss: 8.23099422454834
+[2026-01-27 06:15:01] Epoch 67, Training step
+[2026-01-27 06:15:49] Epoch 67, Average Train Loss: 8.19181315228343
+[2026-01-27 06:15:49] Epoch 67, Validation Step
+[2026-01-27 06:15:50] Epoch 67, Average Val Loss: 8.208709716796875
+[2026-01-27 06:15:51] Epoch 68, Training step
+[2026-01-27 06:16:40] Epoch 68, Average Train Loss: 8.117000550031662
+[2026-01-27 06:16:40] Epoch 68, Validation Step
+[2026-01-27 06:16:41] Epoch 68, Average Val Loss: 8.201318740844727
+[2026-01-27 06:16:43] Epoch 69, Training step
+[2026-01-27 06:17:34] Epoch 69, Average Train Loss: 8.110326603055
+[2026-01-27 06:17:34] Epoch 69, Validation Step
+[2026-01-27 06:17:35] Epoch 69, Average Val Loss: 8.17959213256836
+[2026-01-27 06:17:37] Epoch 70, Training step
+[2026-01-27 06:18:27] Epoch 70, Average Train Loss: 8.179135270416737
+[2026-01-27 06:18:27] Epoch 70, Validation Step
+[2026-01-27 06:18:29] Epoch 70, Average Val Loss: 8.275321960449219
+[2026-01-27 06:18:30] Epoch 71, Training step
+[2026-01-27 06:19:21] Epoch 71, Average Train Loss: 8.079519867897034
+[2026-01-27 06:19:21] Epoch 71, Validation Step
+[2026-01-27 06:19:22] Epoch 71, Average Val Loss: 8.162528038024902
+[2026-01-27 06:19:24] Epoch 72, Training step
+[2026-01-27 06:20:16] Epoch 72, Average Train Loss: 8.100657220929861
+[2026-01-27 06:20:16] Epoch 72, Validation Step
+[2026-01-27 06:20:17] Epoch 72, Average Val Loss: 8.168420791625977
+[2026-01-27 06:20:19] Epoch 73, Training step
+[2026-01-27 06:21:11] Epoch 73, Average Train Loss: 8.114888232201338
+[2026-01-27 06:21:11] Epoch 73, Validation Step
+[2026-01-27 06:21:12] Epoch 73, Average Val Loss: 8.234750747680664
+[2026-01-27 06:21:13] Epoch 74, Training step
+[2026-01-27 06:22:07] Epoch 74, Average Train Loss: 8.058036547154188
+[2026-01-27 06:22:07] Epoch 74, Validation Step
+[2026-01-27 06:22:08] Epoch 74, Average Val Loss: 8.201542854309082
+[2026-01-27 06:22:09] Epoch 75, Training step
+[2026-01-27 06:23:04] Epoch 75, Average Train Loss: 8.187587417662144
+[2026-01-27 06:23:04] Epoch 75, Validation Step
+[2026-01-27 06:23:05] Epoch 75, Average Val Loss: 8.218354225158691
+[2026-01-27 06:23:07] Epoch 76, Training step
+[2026-01-27 06:24:02] Epoch 76, Average Train Loss: 8.10524482280016
+[2026-01-27 06:24:02] Epoch 76, Validation Step
+[2026-01-27 06:24:04] Epoch 76, Average Val Loss: 8.156027793884277
+[2026-01-27 06:24:05] Epoch 77, Training step
+[2026-01-27 06:25:01] Epoch 77, Average Train Loss: 8.118747606873512
+[2026-01-27 06:25:01] Epoch 77, Validation Step
+[2026-01-27 06:25:03] Epoch 77, Average Val Loss: 8.176651954650879
+[2026-01-27 06:25:04] Epoch 78, Training step
+[2026-01-27 06:26:01] Epoch 78, Average Train Loss: 8.116573095321655
+[2026-01-27 06:26:01] Epoch 78, Validation Step
+[2026-01-27 06:26:02] Epoch 78, Average Val Loss: 8.163984298706055
+[2026-01-27 06:26:04] Epoch 79, Training step
+[2026-01-27 06:27:00] Epoch 79, Average Train Loss: 8.119633100926876
+[2026-01-27 06:27:00] Epoch 79, Validation Step
+[2026-01-27 06:27:01] Epoch 79, Average Val Loss: 8.143951416015625
+[2026-01-27 06:27:03] Epoch 80, Training step
+[2026-01-27 06:28:03] Epoch 80, Average Train Loss: 8.114531923085451
+[2026-01-27 06:28:03] Epoch 80, Validation Step
+[2026-01-27 06:28:04] Epoch 80, Average Val Loss: 8.189587593078613
+[2026-01-27 06:28:05] Epoch 81, Training step
+[2026-01-27 06:29:06] Epoch 81, Average Train Loss: 8.172764256596565
+[2026-01-27 06:29:06] Epoch 81, Validation Step
+[2026-01-27 06:29:07] Epoch 81, Average Val Loss: 8.178670883178711
+[2026-01-27 06:29:09] Epoch 82, Training step
+[2026-01-27 06:30:09] Epoch 82, Average Train Loss: 8.063554979860783
+[2026-01-27 06:30:09] Epoch 82, Validation Step
+[2026-01-27 06:30:11] Epoch 82, Average Val Loss: 8.200167655944824
+[2026-01-27 06:30:12] Epoch 83, Training step
+[2026-01-27 06:31:13] Epoch 83, Average Train Loss: 8.117967948317528
+[2026-01-27 06:31:13] Epoch 83, Validation Step
+[2026-01-27 06:31:15] Epoch 83, Average Val Loss: 8.167590141296387
+[2026-01-27 06:31:16] Epoch 84, Training step
+[2026-01-27 06:32:18] Epoch 84, Average Train Loss: 8.033540397882462
+[2026-01-27 06:32:18] Epoch 84, Validation Step
+[2026-01-27 06:32:19] Epoch 84, Average Val Loss: 8.19031810760498
+[2026-01-27 06:32:21] Epoch 85, Training step
+[2026-01-27 06:33:24] Epoch 85, Average Train Loss: 8.144395716488361
+[2026-01-27 06:33:24] Epoch 85, Validation Step
+[2026-01-27 06:33:25] Epoch 85, Average Val Loss: 8.196410179138184
+[2026-01-27 06:33:26] Epoch 86, Training step
+[2026-01-27 06:34:29] Epoch 86, Average Train Loss: 8.160812109708786
+[2026-01-27 06:34:29] Epoch 86, Validation Step
+[2026-01-27 06:34:30] Epoch 86, Average Val Loss: 8.179022789001465
+[2026-01-27 06:34:32] Epoch 87, Training step
+[2026-01-27 06:35:35] Epoch 87, Average Train Loss: 8.120599739253521
+[2026-01-27 06:35:35] Epoch 87, Validation Step
+[2026-01-27 06:35:37] Epoch 87, Average Val Loss: 8.159248352050781
+[2026-01-27 06:35:38] Epoch 88, Training step
+[2026-01-27 06:36:43] Epoch 88, Average Train Loss: 8.012446008622646
+[2026-01-27 06:36:43] Epoch 88, Validation Step
+[2026-01-27 06:36:44] Epoch 88, Average Val Loss: 8.17081356048584
+[2026-01-27 06:36:46] Epoch 89, Training step
+[2026-01-27 06:37:51] Epoch 89, Average Train Loss: 8.179717421531677
+[2026-01-27 06:37:51] Epoch 89, Validation Step
+[2026-01-27 06:37:53] Epoch 89, Average Val Loss: 8.252640724182129
+[2026-01-27 06:37:54] Epoch 90, Training step
+[2026-01-27 06:39:00] Epoch 90, Average Train Loss: 8.131235778331757
+[2026-01-27 06:39:00] Epoch 90, Validation Step
+[2026-01-27 06:39:01] Epoch 90, Average Val Loss: 8.155681610107422
+[2026-01-27 06:39:03] Epoch 91, Training step
+[2026-01-27 06:40:09] Epoch 91, Average Train Loss: 8.1433095484972
+[2026-01-27 06:40:09] Epoch 91, Validation Step
+[2026-01-27 06:40:11] Epoch 91, Average Val Loss: 8.155741691589355
+[2026-01-27 06:40:12] Epoch 92, Training step
+[2026-01-27 06:41:20] Epoch 92, Average Train Loss: 8.050738345831633
+[2026-01-27 06:41:20] Epoch 92, Validation Step
+[2026-01-27 06:41:21] Epoch 92, Average Val Loss: 8.178110122680664
+[2026-01-27 06:41:23] Epoch 93, Training step
+[2026-01-27 06:42:30] Epoch 93, Average Train Loss: 8.124883994460106
+[2026-01-27 06:42:30] Epoch 93, Validation Step
+[2026-01-27 06:42:32] Epoch 93, Average Val Loss: 8.169512748718262
+[2026-01-27 06:42:33] Epoch 94, Training step
+[2026-01-27 06:43:42] Epoch 94, Average Train Loss: 8.109128337353468
+[2026-01-27 06:43:42] Epoch 94, Validation Step
+[2026-01-27 06:43:44] Epoch 94, Average Val Loss: 8.167637825012207
+[2026-01-27 06:43:45] Epoch 95, Training step
+[2026-01-27 06:44:55] Epoch 95, Average Train Loss: 8.094340857118368
+[2026-01-27 06:44:55] Epoch 95, Validation Step
+[2026-01-27 06:44:56] Epoch 95, Average Val Loss: 8.198994636535645
+[2026-01-27 06:44:58] Epoch 96, Training step
+[2026-01-27 06:46:08] Epoch 96, Average Train Loss: 8.136584214866161
+[2026-01-27 06:46:08] Epoch 96, Validation Step
+[2026-01-27 06:46:10] Epoch 96, Average Val Loss: 8.18352222442627
+[2026-01-27 06:46:12] Epoch 97, Training step
+[2026-01-27 06:47:22] Epoch 97, Average Train Loss: 8.143630985170603
+[2026-01-27 06:47:22] Epoch 97, Validation Step
+[2026-01-27 06:47:24] Epoch 97, Average Val Loss: 8.17912483215332
+[2026-01-27 06:47:26] Epoch 98, Training step
+[2026-01-27 06:48:38] Epoch 98, Average Train Loss: 8.087196379899979
+[2026-01-27 06:48:38] Epoch 98, Validation Step
+[2026-01-27 06:48:40] Epoch 98, Average Val Loss: 8.16763973236084
+[2026-01-27 06:48:41] Epoch 99, Training step
+[2026-01-27 06:49:53] Epoch 99, Average Train Loss: 8.066244706511497
+[2026-01-27 06:49:53] Epoch 99, Validation Step
+[2026-01-27 06:49:55] Epoch 99, Average Val Loss: 8.146417617797852
+[2026-01-27 06:49:56] Epoch 100, Training step
+[2026-01-27 06:51:11] Epoch 100, Average Train Loss: 8.14341875910759
+[2026-01-27 06:51:11] Epoch 100, Validation Step
+[2026-01-27 06:51:13] Epoch 100, Average Val Loss: 8.1962308883667
+[2026-01-27 06:51:14] Finished 100 Epochs, Testing Step
+[2026-01-27 06:51:18] Testing finished, Training complete. Model saved at 'vccae_model.pth'.

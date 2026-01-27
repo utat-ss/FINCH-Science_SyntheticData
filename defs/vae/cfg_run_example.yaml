@@ -21,15 +21,15 @@ cfg_data:
     psi2_path: "defs/vae/psi_2" # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
-  n_epoch: 50 # Number of training epochs
+  n_epoch: 100 # Number of training epochs
   n_tb_epoch: 100 # Number of training instances/batches, will have this many batches in training
   device: 'cpu' # Device to be used
   dtype: 'float32' # Datatype to be used
   
 cfg_export:
-  entity: 'cshuo777-university-of-toronto' # The team entity name
-  project: 'VCCAE Synthetic Data Generation'
-  name: 'train_002-4'
+  entity: 'UTAT-Science' # The team entity name
+  project: "Variational-CCAE Data Synthesis"
+  name: 'train_003-2'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
@@ -44,11 +44,11 @@ cfg_export:
 cfg_ae_setup:
   ae_type: 'VariationalCCAE' # The name of the encoder class
   cfg_ae:
-    conv_layers: [1024, 1024, 1024, 1024, 1024]
-    mlp_layers: [1024, 1024, 1024, 1024]
+    conv_layers: [256, 256, 256, 256]
+    mlp_layers: [256, 256, 256, 256]
     # num_spectra: 210
-    latent_dim: 512
-    embedding_dim: 64
+    latent_dim: 128
+    embedding_dim: 16
     # out_layer: 64
     # c_d: {'pad': 1} # Convolution details
     embedding_layers: [3, 128, 128]
