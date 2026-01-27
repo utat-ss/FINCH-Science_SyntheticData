@@ -1,3 +1,4 @@
+import os
 import wandb
 import json
 import torch
@@ -248,3 +249,7 @@ def train_diffusion(cfg_train:(dict), cfg_export:(dict), diffusion_model:(torch.
         meta_art.add_file(locallog_save)
         meta_art.add_file(norm_save)
         wandb.run.log_artifact(meta_art)
+    
+    # auto shutdown for google cloud vm
+    print("Training and artifact logging complete. Shutting down VM...")
+    os.system("sudo shutdown -h now")
