@@ -27,7 +27,3 @@ def export_metrics(metric_dict:(dict), cfg_export:(dict)) -> None:
     df = pd.DataFrame(rows_list)
     df = df.reindex(columns=column_order)
     df.to_csv(metrics_save, index=False)
-
-def export_blobs():
-
-    pass
