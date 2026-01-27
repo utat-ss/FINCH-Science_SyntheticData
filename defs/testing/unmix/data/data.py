@@ -114,4 +114,4 @@ def get_data(cfg_import:(dict), cfg_loader:(dict)) -> list[Iterator]:
     dl_ksi_val = DataLoader(ds_ksi_val, batch_size=cfg_loader['n_val'], shuffle=False)
     dl_ksi_test = DataLoader(ds_ksi_test, batch_size=cfg_loader['n_test'], shuffle=False)
 
-    return [iter(dl_ksi_train), get_inf_iterator(dl_ksi_val), iter(dl_ksi_test)]
+    return [get_inf_iterator(dl_ksi_train), get_inf_iterator(dl_ksi_val), iter(dl_ksi_test)]
