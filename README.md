@@ -40,6 +40,11 @@ We cannot use widely available testing algorithms and methods that are widely av
     python -m venv env
     source env/bin/activate  # On Windows: env\Scripts\activate
 3. Install requirements:
+    - Specific pytorch version first:
+    ```bash
+    pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/<your_cuda_version_or_cpu>
+    ```
+    - Then, rest of the requirements:
     ```bash
     pip install -r requirements.txt
 ### Usage
