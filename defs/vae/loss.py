@@ -89,7 +89,7 @@ class LossKLSAM(nn.Module):
         self.loss_criterion = nn.MSELoss()
     
     def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), mu:(torch.Tensor), variation:(torch.Tensor), 
-                SAM_coefficient=1, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.05):
+                SAM_coefficient=1, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.5):
         """
         Gets the loss given some x_0 reconstruction, encoded mu and accounts for variation done by the algorithm
 
@@ -106,7 +106,7 @@ class LossKLSAM(nn.Module):
         c = MSE_coefficient
 
         # Loss
-        pred_loss = nn.functional.mse_loss(estimated, actual[0])
+        pred_loss = nn.functional.mse_loss(estimated, actual)
         divergence = -0.5 * torch.sum(1 + variation - mu.pow(2) - variation.exp()) # Kullback-Leibler
         sam_loss = sam_criterion.calc(estimated, actual)
         return (a * sam_loss) + (b * divergence) + (c * pred_loss)

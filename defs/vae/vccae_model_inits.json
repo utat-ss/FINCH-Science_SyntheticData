@@ -2,20 +2,19 @@
     "ae_type": "VariationalCCAE",
     "cfg_ae": {
         "conv_layers": [
-            1024,
-            1024,
-            1024,
-            1024,
-            1024
+            256,
+            256,
+            256,
+            256
         ],
         "mlp_layers": [
-            1024,
-            1024,
-            1024,
-            1024
+            256,
+            256,
+            256,
+            256
         ],
-        "latent_dim": 512,
-        "embedding_dim": 64,
+        "latent_dim": 64,
+        "embedding_dim": 16,
         "embedding_layers": [
             3,
             128,
