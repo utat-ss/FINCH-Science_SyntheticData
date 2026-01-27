@@ -36,9 +36,11 @@ We cannot use widely available testing algorithms and methods that are widely av
    git clone [https://github.com/utat-space/FINCH-Science_SyntheticData.git](https://github.com/utat-space/FINCH-Science_SyntheticData.git)
    cd FINCH-Science_SyntheticData
 2. Create a virtual environment (recommended):
+    ```bash
     python -m venv env
     source env/bin/activate  # On Windows: env\Scripts\activate
 3. Install requirements:
+    ```bash
     pip install -r requirements.txt
 ### Usage
 1. Open your terminal
@@ -53,9 +55,11 @@ We cannot use widely available testing algorithms and methods that are widely av
     - Synthesis -> synthesis/[new_folder]/
     - Testing -> testing/[new_folder]/
 6. Login to wandb by doing:
-    - wandb login <your_api_key>
+    ```bash
+    wandb login <your_api_key>
 7. Run the script using the config:
-    - python -m <relative_path_to_script> <relative_path_run_config>
+    ```bash
+    python -m <relative_path_to_script> <relative_path_run_config>
 
 
 ## Citation
@@ -84,6 +88,7 @@ If you encounter any issues with the code or have feature requests, please check
 * [Report a Bug or Issue](https://github.com/utat-space/FINCH-Science_SyntheticData/issues)
 
 ## Project Structure
+```text
 .
 ├── data                                   
 ├── defs/
