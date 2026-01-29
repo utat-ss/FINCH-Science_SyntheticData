@@ -12,6 +12,7 @@ __pycache__/
 venv/
 .env/
 .venv/
+venv312/
 
 # Logs and outputs
 *.log
