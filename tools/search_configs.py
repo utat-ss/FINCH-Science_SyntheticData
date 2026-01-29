@@ -18,11 +18,11 @@ triples = [t for t in itertools.product(candidates, repeat=3) if t[0]<t[1]<t[2]]
 # Keep only triples where all are divisible by dim_head=64
 triples = [t for t in triples if all(x % 64 == 0 for x in t)]
 
-targets = [25_000_000]
+targets = [30_000_000]
 results = {t: [] for t in targets}
 
 for channels in triples:
-    for n_former in range(0,6):
+    for n_former in range(1,2):
         try:
             model = Epsilon_Cond1DUnet(
                 n_bands=210,
@@ -55,7 +55,7 @@ if all(len(results[t])==0 for t in targets):
     print('\nNo close matches within 5%. Showing nearest candidates:')
     nearest = []
     for channels in triples:
-        for n_former in range(0,6):
+        for n_former in range(1,2):
             try:
                 model = Epsilon_Cond1DUnet(
                     n_bands=210,
