@@ -15,8 +15,8 @@ cfg_data:
     seed: 3169
   
   cfg_dataset_save:
-    psi1_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/psi1_24m.csv'
-    psi2_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/psi2_24m.csv'
+    psi1_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4_24m/psi1_24m.csv'
+    psi2_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4_24m/psi2_24m.csv'
 
 cfg_train:
   n_epoch: 200
@@ -30,8 +30,8 @@ cfg_export:
   entity: 'UTAT-Science'
   project: 'Conditional U-Net Synthetic Data Generation'
   name: 'ExpAnalysis_002-4_24M'
-  master_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/'
-  model_save: 'diffusion_model.pth'
+  master_path: '/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4_24m/'
+  model_save: 'diffusion_model_24m.pth'
   modelinits_save: 'cfg_diffusion_setup.json'
   test_save: 'generated_test_samples.parquet'
   locallog_save: 'test_logs.txt'
