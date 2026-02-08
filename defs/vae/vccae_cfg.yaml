@@ -46,26 +46,9 @@ cfg_ae_setup:
   cfg_ae:
     conv_layers: [256, 256, 256, 256]
     mlp_layers: [256, 256, 256, 256]
-    # num_spectra: 210
     latent_dim: 128
     embedding_dim: 16
-    # out_layer: 64
-    # c_d: {'pad': 1} # Convolution details
     embedding_layers: [3, 128, 128]
-    # batch_size: 8
-  # The rest of specific configs of the diffusion get built in the script
-
-# cfg_epsilon_setup: 
-#   epsilon_type: 'Epsilon_Cond1DUnet'
-#   cfg_epsilon:
-#     ... # The specific configs for the epsilon
-
-# cfg_augmenter_setup:
-#   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
-#   cfg_augmenter:
-#     seed: 3169
-#     jitter_scale: 1.0e-4
-#     amp_scale: 1.0e-2
 
 cfg_scheduler_setup:
   scheduler_type: 'CosSchedule' # Name of the noise scheduler class
@@ -73,12 +56,6 @@ cfg_scheduler_setup:
     steps: 3000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
     offset: 8.0e-3
     exp: 2
-
-# cfg_tsampler_setup:
-#   tsampler_type: 'NormalSampling'
-#   cfg_tsampler: 
-#     t_max: 3000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
-#     t_min: 0  
 
 cfg_optim_setup:
   optim_type: 'Adam'
@@ -92,7 +69,3 @@ cfg_optim_setup:
 
 cfg_loss_setup:
   loss_type: 'LossKLSAM' 
-  # cfg_loss:
-    # noise_loss_type: 'huber'
-    # use_recons_loss: 'observe'
-  
