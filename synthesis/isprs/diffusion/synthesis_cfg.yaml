@@ -1,0 +1,24 @@
+cfg_synthesis:
+  n_targets: 210 # The total amount of 'target_size's to be generated, i.e. final dataset shape: (n_targets * Batch, n_bands)
+  norm_dict_path: 'norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted
+  architecture: GaussianDiffusion # The main class representing model architecture e.g.: GaussianDiffusion (in the diffusion code)
+  cfg_model_setup_path: 'cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
+  model_statedict_path: 'model_statedict.pth' # The path for the model's statedict
+  device: 'cuda' # The preferred device to conduct data synthesis on
+
+  cfg_absampler_setup:
+    absampler_type: 'LogNormalAbSamp'
+    cfg_absampler: # We do not include device here, it will be passed in at the config functions
+      target_shape: [100,3] # Format is: [Batch, n_endmembers]
+      seed: 3169 # Random seed for reproducibility
+
+cfg_export:
+  entity: 'UTAT-Science' # The team entity name
+  project: 'Data Synthesis' # Project name
+  name: 'ISPRS 26 - GD Streamline' # Run name
+  master_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\synthesis\isprs\diffusion' # Master save path of the folder we are running everything in (must end with '\')
+  ksi_train_path: 'generated_gdstreamline.csv' # This is the rest of the path that will be used to save the generated CSV
+  locallog_save:  'logs.txt' # Save path of the local log
+  naming_base: 'GDStreamline' # Some base naming convention that'll be used to name all the spectra
+  spectral_range: [400, 2490] # The spectral range of the data to be synthesized, used for CSV header generation
+
