@@ -1,0 +1,9 @@
+{
+    "model_type": "CCVAEncoder",
+    "cfg_autoencoder": {
+        "ae_type": "...",
+        "cfg_ae" : {
+            
+        }
+    }
+}
