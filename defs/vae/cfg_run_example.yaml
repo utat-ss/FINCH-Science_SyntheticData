@@ -29,7 +29,7 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: "Variational-CCAE Data Synthesis"
-  name: 'train_003-2'
+  name: 'test_new_SAM_loss_04'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
