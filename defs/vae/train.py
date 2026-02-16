@@ -4,7 +4,6 @@ import json
 import torch
 import random
 from torch.utils.data import DataLoader
-from training_defs import *
 
 # Not needed yet (Also directly copied from diffusion)
 from auxiliary import get_n_params, convert_tensors_to_ints
