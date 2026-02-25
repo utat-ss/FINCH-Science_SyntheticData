@@ -3,7 +3,7 @@ cfg_synthesis:
   norm_dict_path: 'norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted
   architecture: GaussianDiffusion # The main class representing model architecture e.g.: GaussianDiffusion (in the diffusion code)
   cfg_model_setup_path: 'cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
-  model_statedict_path: 'model_statedict.pth' # The path for the model's statedict
+  model_statedict_path: 'gdstreamline_statedict.pth' # The path for the model's statedict
   device: 'cuda' # The preferred device to conduct data synthesis on
 
   cfg_absampler_setup:
