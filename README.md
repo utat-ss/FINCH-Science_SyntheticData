@@ -31,15 +31,19 @@ We cannot use widely available testing algorithms and methods that are widely av
 
 ## Installation & Usage
 ### Installation
-1. Clone the repository:
+1. Install Git LFS if not installed:
+    - Go to https://git-lfs.com/, and install it
+    - open up the terminal, do 'git lfs install'
+    - if you've cloned the repo and the .pth folders are 1KB, cd to the repo folder, and do 'git lfs pull'
+2. Clone the repository:
    ```bash
    git clone [https://github.com/utat-space/FINCH-Science_SyntheticData.git](https://github.com/utat-space/FINCH-Science_SyntheticData.git)
    cd FINCH-Science_SyntheticData
-2. Create a virtual environment (recommended):
+3. Create a virtual environment (recommended):
     ```bash
     python -m venv env
     source env/bin/activate  # On Windows: env\Scripts\activate
-3. Install requirements:
+4. Install requirements:
     - Specific pytorch version first:
     ```bash
     pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/<your_cuda_version_or_cpu>
