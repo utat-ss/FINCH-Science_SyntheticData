@@ -1,0 +1,2 @@
+synthesis/isprs/ccvae/ccvae_statedict.pth filter=lfs diff=lfs merge=lfs -text
+synthesis/isprs/diffusion/gdstreamline_statedict.pth filter=lfs diff=lfs merge=lfs -text

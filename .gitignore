@@ -23,3 +23,7 @@ runs/*
 
 # WandB stuff
 wandb/*
+
+# Allow for the model statedicts used in the paper with .pth extension
+!synthesis/isprs/ccvae/ccvae_statedict.pth
+!synthesis/isprs/diffusion/gdstreamline_statedict.pth
