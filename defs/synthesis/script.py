@@ -7,6 +7,8 @@ import json
 
 import torch
 
+import subprocess
+
 def cfg_from_args():
     """
     Function to get args from the .yaml args given in the script run code
@@ -101,6 +103,9 @@ if __name__ == '__main__':
     
     finally:
         run.finish()
+
+    print("Run complete. Shutting down VM!")
+    subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
 
 #endregion
 

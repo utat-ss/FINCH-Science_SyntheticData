@@ -1,0 +1,4 @@
+[2026-03-04 19:21:33] Cfgs taken in, parsed. WandB and logging configured
+[2026-03-04 19:21:35] Unnormalizer and synthesizer model initialized
+[2026-03-04 19:21:35] Synthesis started
+[2026-03-04 19:21:35] Synthesizing batch 1 out of 106

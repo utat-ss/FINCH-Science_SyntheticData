@@ -37,7 +37,7 @@ def load_model(model_type:(str), model_statedict_path:(str), model_config_dict:(
     if model_type == 'GaussianDiffusion':
         model = _load_diffusion_model(model_config_dict, model_statedict_path)
 
-    if model_type == 'CCVAEncoder':
+    elif model_type == 'CCVAEncoder':
         model = _load_ccvae_model(model_config_dict, model_statedict_path)
 
     else:
