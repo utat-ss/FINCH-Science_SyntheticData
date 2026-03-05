@@ -49,6 +49,8 @@ tail -n 20 nohup.out
 ## grab files from vm
 ```text
 gcloud compute scp --recurse --zone=northamerica-northeast2-a "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\vm"
+
+gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\synthesis\isprs\diffusion\vm"
 ```
 
 ## shut down vm
