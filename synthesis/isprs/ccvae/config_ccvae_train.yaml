@@ -1,6 +1,6 @@
 cfg_data:
   cfg_import:
-    data_handle: '/data/simpler_data_rwc.csv' # Path for the data file
+    data_handle: '/stuff/utat_synthetic/data/simpler_data_rwc.csv' # Path for the data file
     spec_range: [400, 2490] # Spectral range, inclusive
 
   cfg_normalize:
@@ -9,6 +9,9 @@ cfg_data:
   cfg_loader:
     n_val: 100 # Number of val points used at each epoch, we use a static validation set (i.e. use the same val set each epoch)
     n_test: 123 # Number of test points at the end of training
+    num_workers: 2 # Number of workers for the dataloader
+    prefetch_factor: 1 # Prefetch factor for the dataloader, how many batches to prefetch
+    persistent_workers: False
     n_train_batch: 16 # The training batch size
     seed: 1001 # Seed for the data splitters
 
@@ -17,8 +20,8 @@ cfg_data:
     batch_size: 1
   
   cfg_dataset_save:
-    psi1_path: "defs/vae/psi_1" # Save path for the psi1 dataset do not have .csv after this since it adds the norm methods before .csv
-    psi2_path: "defs/vae/psi_2" # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
+    psi1_path: "stuff/utat_synthetic/synthesis/isprs/ccvae/psi1_ccvae.csv" # Save path for the psi1 dataset do not have .csv after this since it adds the norm methods before .csv
+    psi2_path: "stuff/utat_synthetic/synthesis/isprs/ccvae/psi2_ccvae.csv" # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
   n_epoch: 100 # Number of training epochs
@@ -29,11 +32,11 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: "Variational-CCAE Data Synthesis"
-  name: 'test_new_SAM_loss_04'
+  name: 'synthesis_02-01'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'
-  master_path: ''
+  master_path: 'D:\stuff\utat_synthetic\synthesis\isprs'
   modelinits_save: 'vccae_model_inits.json' # Path to save the model initial config
   local_log: 'test_logs.txt' # Path for the local logging of alerts prints, etc
   locallog_save: 'test_logs.txt' # Path for the local logging of alerts prints, etc (bruh)
@@ -46,26 +49,9 @@ cfg_ae_setup:
   cfg_ae:
     conv_layers: [256, 256, 256, 256]
     mlp_layers: [256, 256, 256, 256]
-    # num_spectra: 210
     latent_dim: 128
     embedding_dim: 16
-    # out_layer: 64
-    # c_d: {'pad': 1} # Convolution details
     embedding_layers: [3, 128, 128]
-    # batch_size: 8
-  # The rest of specific configs of the diffusion get built in the script
-
-# cfg_epsilon_setup: 
-#   epsilon_type: 'Epsilon_Cond1DUnet'
-#   cfg_epsilon:
-#     ... # The specific configs for the epsilon
-
-# cfg_augmenter_setup:
-#   augmenter_type: 'SpectralAugmentation' # Name of the augmenter class
-#   cfg_augmenter:
-#     seed: 3169
-#     jitter_scale: 1.0e-4
-#     amp_scale: 1.0e-2
 
 cfg_scheduler_setup:
   scheduler_type: 'CosSchedule' # Name of the noise scheduler class
@@ -73,12 +59,6 @@ cfg_scheduler_setup:
     steps: 3000 # Usually same as the tmax of tsampler, doesn't have to be if want to limit the max t during training
     offset: 8.0e-3
     exp: 2
-
-# cfg_tsampler_setup:
-#   tsampler_type: 'NormalSampling'
-#   cfg_tsampler: 
-#     t_max: 3000 # Usually same as the steps of scheduler, doesn't have to be if want to limit the max t during training
-#     t_min: 0  
 
 cfg_optim_setup:
   optim_type: 'Adam'
@@ -92,7 +72,3 @@ cfg_optim_setup:
 
 cfg_loss_setup:
   loss_type: 'LossKLSAM' 
-  # cfg_loss:
-    # noise_loss_type: 'huber'
-    # use_recons_loss: 'observe'
-  

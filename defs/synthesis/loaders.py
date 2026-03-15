@@ -70,7 +70,7 @@ def _load_diffusion_model(cfg_diffusion_setup, cfg_diffusion_statedict_path):
 def _load_ccvae_model(cfg_ccvae_setup, cfg_ccvae_statedict_path):
     from ..vae.loaders import load_vccae
 
-    cfg_ccvae = cfg_ccvae_setup['cfg_ccvae']
+    cfg_ccvae = cfg_ccvae_setup['cfg_autoencoder']
     ccvae_model = load_vccae(cfg_ccvae)
     ccvae_model.load_state_dict(torch.load(cfg_ccvae_statedict_path, weights_only=True))
     return ccvae_model

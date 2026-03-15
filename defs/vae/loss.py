@@ -38,7 +38,7 @@ class LossKLSAM(nn.Module):
         pred_loss = nn.functional.mse_loss(estimated, actual)
         divergence = -0.5 * torch.sum(1 + variation - mu.pow(2) - variation.exp()) # Kullback-Leibler
         c = F.cosine_similarity(x_0_hat, x_0, dim=1)
-        sam_loss = torch.acos(torch.clamp(c, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
+        sam_loss = msesam_ratio * torch.acos(torch.clamp(c, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
 
         loss = (a * sam_loss) + (b * divergence) + (c * pred_loss)
         loss = loss.sum() # get back a scalar. Can be sum or mean.

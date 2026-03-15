@@ -6,8 +6,8 @@ import random
 from torch.utils.data import DataLoader
 
 # Not needed yet (Also directly copied from diffusion)
-from auxiliary import get_n_params, convert_tensors_to_ints
-from plotting import plot_to_wandb
+from defs.vae.auxiliary import get_n_params, convert_tensors_to_ints
+from defs.vae.plotting import plot_to_wandb
 
 import logging
 
@@ -84,18 +84,18 @@ def train_vccae(cfg_train:(dict),
             train_loss.backward()
             optimizer.step()
 
-            tot_train_loss += float(train_loss)
+            tot_train_loss += train_loss.item()
             log_payload = {
-                'train_loss': float(train_loss),
+                'train_loss': train_loss.item(),
                 'epoch': epoch
             }
             wandb.log(log_payload)
         
         # Log average train results
         wandb.log({
-            "general/train_average_loss": tot_train_loss
+            "general/train_average_loss": tot_train_loss/n_tb_epoch
         })
-        logging.info(f"Epoch {epoch}, Average Train Loss: {tot_train_loss}")
+        logging.info(f"Epoch {epoch}, Average Train Loss: {tot_train_loss/n_tb_epoch}")
 
         # Step Scheduler, if exists
         if lr_scheduler is not None:
@@ -107,21 +107,19 @@ def train_vccae(cfg_train:(dict),
         vccae_model.eval()
 
         logging.info(f"Epoch {epoch}, Validation Step")
-        tot_val = 0
         with torch.no_grad():
             batch = next(iter_val)
 
             xb, yb, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
-            print(xb.shape)
             xb = xb.to(device) # spectrum
             yb = yb.to(device) # abundance
             estimated, mu, variation = vccae_model(xb, yb)
-            tot_val += loss_fn(estimated, xb, mu, variation) * xb.size(0)
+            tot_val = loss_fn(estimated, xb, mu, variation)
             
             wandb.log({
-                "general/validation_average_loss": tot_val
+                "general/validation_average_loss": tot_val.item()
             })
-            logging.info(f"Epoch {epoch}, Average Val Loss: {tot_val}")
+            logging.info(f"Epoch {epoch}, Average Val Loss: {tot_val.item()}")
 
             plot_to_wandb(xb, estimated, yb, name, orig_index, None, 5, epoch) # Plot the validation results
 
@@ -138,7 +136,6 @@ def train_vccae(cfg_train:(dict),
 
     ### TESTING STEP
     vccae_model.eval()
-    test_loss = 0
 
     with torch.no_grad():
         batch = next(iter_test)
@@ -148,7 +145,7 @@ def train_vccae(cfg_train:(dict),
         xb = xb.to(device) # spectrum
         yb = yb.to(device) # abundance
         estimated, mu, variation = vccae_model(xb, yb)
-        test_loss += loss_fn(estimated, xb, mu, variation) * xb.size(0)
+        test_loss = loss_fn(estimated, xb, mu, variation)
 
         wandb.log({
             "general/test_average_loss": test_loss.item()
