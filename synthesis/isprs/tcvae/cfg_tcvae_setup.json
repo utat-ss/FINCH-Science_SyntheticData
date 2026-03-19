@@ -1,0 +1,144 @@
+{
+  "cvae_type": "TCVAEncoder",
+  "cfg_tcvae": {
+    "model": {
+      "model_type": "ConditionalVAE",
+      "architecture": "dual_path_transformer",
+      "input_dim": 210,
+      "condition_dim": 3,
+      "latent_dim": 12,
+      "hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "dropout": 0.1,
+      "wavelength_params": {
+        "start_nm": 400,
+        "end_nm": 2490,
+        "step_nm": 10
+      },
+      "dual_path_transformer_params": {
+        "d_model": 128,
+        "n_heads": 8,
+        "encoder_layers": 6,
+        "decoder_layers": 2,
+        "dropout": 0.0,
+        "latent_fuse_weight": 0.85,
+        "latent_fuse_weight_min": 0.75,
+        "latent_fuse_weight_learnable": true,
+        "global_path_hidden_dim": 32,
+        "global_path_dropout": 0.5,
+        "global_path_warmup_hold_epochs": 20,
+        "global_path_warmup_ramp_epochs": 30,
+        "gated_film_init": 0.2,
+        "decoder_logit_gain": 1.0,
+        "decoder_use_film": true
+      }
+    },
+    "loss": {
+      "loss_name": "beta_vae",
+      "loss_params": {
+        "beta": 0.02,
+        "recon": "mse",
+        "des_std": 1.0,
+        "f_epo": 10,
+        "scale_eps": 1e-06,
+        "grad_weight": 0.0,
+        "grad_metric": "mse",
+        "grad_diff_order": 1,
+        "grad_diff_orders": [
+          1,
+          2
+        ],
+        "grad_order_weights": [
+          1.0,
+          0.1
+        ],
+        "kl_anneal": true,
+        "kl_anneal_mode": "linear",
+        "kl_anneal_start": 0.0,
+        "kl_anneal_warmup_epochs": null,
+        "kl_anneal_warmup_ratio": 0.5,
+        "kl_active_threshold": 0.1,
+        "free_bits_total": 2.0,
+        "masked_wavelength_ranges_nm": [
+          [
+            1700.0,
+            1900.0
+          ]
+        ],
+        "masked_wavelength_weight": 0.1,
+        "wavelength_start_nm": 400.0,
+        "wavelength_step_nm": 10.0
+      }
+    },
+    "optimizer": {
+      "lr": 0.0002,
+      "weight_decay": 0.0
+    },
+    "scheduler": {
+      "name": "cosine",
+      "T_max": 100
+    },
+    "data": {
+      "csv_path": "data/simpler_data_rwc.csv",
+      "condition_columns": [
+        "gv_fraction",
+        "npv_fraction",
+        "soil_fraction"
+      ],
+      "spectral_range": [
+        400,
+        2490,
+        10
+      ],
+      "splits": [
+        0.8,
+        0.1,
+        0.1
+      ],
+      "seed": 42,
+      "batch_size": 32,
+      "num_workers": 4,
+      "pin_memory": true
+    },
+    "sampling": {
+      "temperature": 1.0,
+      "guidance_scale": 1.0,
+      "condition_scale": 1.0,
+      "condition_dropout": 0.35
+    },
+    "artifacts": {
+      "run_dir": "outputs/ablations/run_K_lat12",
+      "config_yaml": "outputs/ablations/run_K_lat12/lightning_logs/version_0/config.yaml",
+      "hparams_yaml": "outputs/ablations/run_K_lat12/lightning_logs/version_0/hparams.yaml",
+      "resume_from_ckpt_path": null,
+      "checkpoint_dirs": {
+        "best": "outputs/checkpoints/best",
+        "interval": "outputs/checkpoints/interval"
+      },
+      "best_ckpt_path": "outputs/checkpoints/best/e_epoch=73-l_val_loss=0.0025.ckpt",
+      "interval_latest_ckpt_path": "outputs/checkpoints/interval/e_epoch=79-v14.ckpt",
+      "minmax_stats_path": "outputs/ablations/run_K_lat12/artifacts/minmax_stats.json",
+      "psi1_path": "outputs/ablations/run_K_lat12/artifacts/psi1_train_normalized.csv",
+      "psi2_path": "outputs/ablations/run_K_lat12/artifacts/psi2_test_val_normalized.csv",
+      "psi1_conditions_path": "outputs/ablations/run_K_lat12/artifacts/psi1_train_conditions_normalized.csv",
+      "psi2_conditions_path": "outputs/ablations/run_K_lat12/artifacts/psi2_test_val_conditions_normalized.csv",
+      "psi1_spectra_path": "outputs/ablations/run_K_lat12/artifacts/psi1_train_spectra_normalized.csv",
+      "psi2_spectra_path": "outputs/ablations/run_K_lat12/artifacts/psi2_test_val_spectra_normalized.csv",
+      "artifact_manifest_path": "outputs/ablations/run_K_lat12/artifacts/artifact_manifest.json"
+    },
+    "provenance": {
+      "subcommand": null,
+      "seed_everything": 42,
+      "trainer": {
+        "max_epochs": 40,
+        "precision": 32,
+        "default_root_dir": "outputs/ablations/run_K_lat12"
+      },
+      "exported_at_utc": "2026-02-15T21:05:52.540259+00:00",
+      "git_commit": "43b7737c45373b4f2d8493a101ea1a83b6e9800a"
+    }
+  }
+}
