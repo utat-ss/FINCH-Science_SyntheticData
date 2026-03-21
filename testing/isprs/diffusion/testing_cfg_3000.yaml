@@ -7,9 +7,9 @@ cfg_export:
 cfg_unmix:
 
   cfg_import:
-    ksi_train_path: 'psi1_gdstreamline.csv' # The exact path of the .csv for the generated dataset, that will be used to train the critic
-    psi2_path: 'psi2_gdstreamline.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
-    norm_dict_path: 'empty_norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted    
+    ksi_train_path: 'testing/isprs/diffusion/psi1_gdstreamline.csv' # The exact path of the .csv for the generated dataset, that will be used to train the critic
+    psi2_path: 'testing/isprs/diffusion/psi2_gdstreamline.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
+    norm_dict_path: 'testing/isprs/diffusion/empty_norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted    
     spec_range: [900, 1700] # Spectral range, inclusive
 
   cfg_loader:
