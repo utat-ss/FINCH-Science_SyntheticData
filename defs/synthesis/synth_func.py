@@ -60,7 +60,7 @@ class GaussianDiffusionSampler(SpectralSampler):
 
         return sampled_data.detach().cpu(), ab_tensor.detach().cpu()
     
-class AutoEncoderSampler(SpectralSampler):
+class CCVAEncoderSampler(SpectralSampler):
 
     def __init__(self, model:(nn.Module), lean:(bool)=True, abundance_sampler:(AbundanceSampler)=None, seed:(int)=3169):
         super().__init__(model, lean, abundance_sampler)
@@ -102,3 +102,28 @@ class AutoEncoderSampler(SpectralSampler):
 
         return sampled_data.detach().cpu(), ab_tensor.detach().cpu()
 
+
+class TCVAESampler(SpectralSampler):
+    def __init__(self, model:(nn.Module), lean:(bool)=True, abundance_sampler:(AbundanceSampler)=None, seed:(int)=3169):
+        super().__init__(model, lean, abundance_sampler)
+        self.device = next(model.parameters()).device
+        self.generator = torch.Generator(device=self.device)
+        self.generator.manual_seed(seed)
+
+    def __call__(self):
+        if self.lean:
+            super().__call__()
+
+        ab_tensor = self.abundance_sampler()
+        return self.predefined_ab_sample(ab_tensor)
+
+    def predefined_ab_sample(self, ab_tensor:(torch.Tensor)):
+        ab_tensor = ab_tensor.to(self.device)
+
+        with torch.no_grad():
+            sampled_data = self.model.sample_from_conditions(
+                ab_tensor,
+                generator=self.generator,
+            )
+
+        return sampled_data.detach().cpu(), ab_tensor.detach().cpu()
