@@ -46,6 +46,10 @@ nohup python -m defs.testing.master.script --config testing/isprs/diffusion/test
 
 nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_3000.yaml &
 
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_9000.yaml &
+
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_27000.yaml &
+
 pkill -f 'defs.testing.master.script' || true
 ```
 
