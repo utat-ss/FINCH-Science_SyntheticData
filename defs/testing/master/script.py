@@ -36,6 +36,7 @@ Workflow:
 
 
 import argparse
+from asyncio import subprocess
 import os
 import yaml
 
@@ -152,4 +153,5 @@ if __name__ == "__main__":
     finally:
         run.finish()
 
-   
+    print("Run complete. Shutting down VM!")
+    subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

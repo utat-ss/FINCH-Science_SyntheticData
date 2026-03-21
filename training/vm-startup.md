@@ -3,6 +3,8 @@
 ## copy directory onto vm
 ```text
 gcloud compute scp --recurse --zone=northamerica-northeast2-a "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/
+
+gcloud compute scp --recurse --zone=northamerica-northeast2-b "C:\work\project\git-repo\FINCH-Science_SyntheticData" micha@gpu-ddim-run:/home/micha/
 ```
 
 ## start vm:
@@ -37,6 +39,12 @@ echo "Started PID:$! LOG:$LOG"
 
 export WANDB_API_KEY=YOUR_API_KEY_HERE
 nohup python -m defs.synthesis.script --config synthesis/isprs/diffusion/synthesis_cfg.yaml &
+
+nohup python -m defs.testing.master.script --config testing/isprs/diffusion/testing_cfg_3000.yaml &
+
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_3000.yaml &
+
+pkill -f 'defs.testing.master.script' || true
 ```
 
 ### show logs
