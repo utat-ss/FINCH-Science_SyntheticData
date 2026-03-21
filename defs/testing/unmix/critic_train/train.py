@@ -65,6 +65,9 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             batch = next(iter_train)
             spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
             spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
+            # Ensure spectra have channel dimension: (batch, 1, B)
+            if spectrum.ndim == 2:
+                spectrum = spectrum.unsqueeze(1)
 
             # Zero the grads
             optimizer.zero_grad()
@@ -106,6 +109,9 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             batch = next(iter_val)
             spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
             spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
+            # Ensure spectra have channel dimension: (batch, 1, B)
+            if spectrum.ndim == 2:
+                spectrum = spectrum.unsqueeze(1)
 
             pred_abundances = critic(spectrum)
             val_loss = loss_fn(pred_abundances, abundances)
@@ -134,6 +140,9 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
         batch = next(iter_test)
         spectrum, abundances, name, orig_index = batch['spectrum'], batch['abundances'], batch['names'], batch['orig_index']
         spectrum = spectrum.to(device=device, dtype=dtype); abundances = abundances.to(device=device, dtype=dtype)
+        # Ensure spectra have channel dimension: (batch, 1, B)
+        if spectrum.ndim == 2:
+            spectrum = spectrum.unsqueeze(1)
 
         pred_abundances = critic(spectrum)
         test_loss = loss_fn(pred_abundances, abundances)
