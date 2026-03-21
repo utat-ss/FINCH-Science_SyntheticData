@@ -18,7 +18,9 @@ gcloud compute instances start gpu-ddim-run --zone=northamerica-northeast2-b
 ```text
 gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-4\config.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/config.yaml --zone=northamerica-northeast2-a
 
-gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\synthesis\isprs\diffusion\synthesis_cfg.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion/synthesis_cfg.yaml --zone=northamerica-northeast2-b
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion\testing_cfg_3000.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_3000.yaml --zone=northamerica-northeast2-b
+
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\unmix\critic_train\train.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/unmix/critic_train/train.py --zone=northamerica-northeast2-b
 ```
 
 ## ssh into vm:

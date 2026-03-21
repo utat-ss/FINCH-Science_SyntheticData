@@ -35,6 +35,7 @@ cfg_unmix:
   cfg_critic_setup:
     critic_type: 'FNO1DUnmixing' # The type of critic to be trained
     cfg_critic: # Specific configs of the critic
+      num_endmembers: 3
       modes: 64
       width: 256
       num_layers: 5
