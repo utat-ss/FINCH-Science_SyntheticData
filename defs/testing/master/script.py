@@ -36,7 +36,7 @@ Workflow:
 
 
 import argparse
-from asyncio import subprocess
+import subprocess
 import os
 import yaml
 

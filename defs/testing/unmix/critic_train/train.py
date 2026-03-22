@@ -7,6 +7,7 @@ from .auxiliary import get_r2, plot_abundances
 
 import wandb
 import logging
+import pandas as pd
 
 def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_fn:(nn.Module), optimizer:(optim), lr_scheduler:(optim.lr_scheduler), configured_data:(list)):
 
@@ -153,6 +154,34 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
         r2_payload = get_r2(ab_true=abundances, ab_pred=pred_abundances, mode='test')
         wandb.log(r2_payload)
         plot_abundances(ab_true=abundances, ab_pred=pred_abundances, mode='test')
+
+        # Save predictions to parquet
+        try:
+            # sanitize name and orig_index to native Python types
+            names_list = [
+                (n.item().decode() if hasattr(n, 'item') and isinstance(n.item(), (bytes, bytearray)) else n.item())
+                if hasattr(n, 'item') else str(n)
+                for n in name
+            ]
+            orig_idx_list = [int(x.item()) if hasattr(x, 'item') else int(x) for x in orig_index]
+            ab_true = abundances.cpu().numpy()
+            ab_pred = pred_abundances.cpu().numpy()
+            df_dict = {
+                'name': names_list,
+                'orig_index': orig_idx_list,
+                'gv_true': ab_true[:, 0],
+                'npv_true': ab_true[:, 1],
+                'soil_true': ab_true[:, 2],
+                'gv_pred': ab_pred[:, 0],
+                'npv_pred': ab_pred[:, 1],
+                'soil_pred': ab_pred[:, 2],
+            }
+            df = pd.DataFrame(df_dict)
+            # write parquet to configured path
+            df.to_parquet(test_save)
+            logging.info(f"Saved test predictions to {test_save}")
+        except Exception as e:
+            logging.exception(f"Failed to save test predictions to {test_save}: {e}")
 
     logging.info(f"Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at '{model_save}'")
 
