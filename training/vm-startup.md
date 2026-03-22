@@ -18,9 +18,12 @@ gcloud compute instances start gpu-ddim-run --zone=northamerica-northeast2-b
 ```text
 gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-4\config.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/config.yaml --zone=northamerica-northeast2-a
 
-gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion\testing_cfg_3000.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_3000.yaml --zone=northamerica-northeast2-b
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion\testing_cfg_27000.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_27000.yaml --zone=northamerica-northeast2-b
 
 gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\unmix\critic_train\train.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/unmix/critic_train/train.py --zone=northamerica-northeast2-b
+
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\master\script.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/master/script.py --zone=northamerica-northeast2-b
+
 ```
 
 ## ssh into vm:
@@ -64,11 +67,27 @@ tail -n 20 nohup.out
 ```text
 gcloud compute scp --recurse --zone=northamerica-northeast2-a "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\vm"
 
-gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\synthesis\isprs\diffusion\vm"
+gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_3k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_9k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/preds_9k.parquet" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/logs_9k.txt" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
 ```
 
 ## shut down vm
 ```text
 gcloud compute instances stop gpu-ddim-run --zone=northamerica-northeast2-a
 gcloud compute instances describe gpu-ddim-run --zone=northamerica-northeast2-a --format="get(status)"
+
+source ~/venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install pyarrow
+# (optional) also install fastparquet:
+pip install fastparquet
+
+tail -n 400 /home/micha/FINCH-Science_SyntheticData/nohup.out
+
 ```
