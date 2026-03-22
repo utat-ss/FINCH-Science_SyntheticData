@@ -69,11 +69,11 @@ gcloud compute scp --recurse --zone=northamerica-northeast2-a "micha@gpu-ddim-ru
 
 gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_3k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
 
-gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_9k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_27k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
 
-gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/preds_9k.parquet" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/preds_27k.parquet" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
 
-gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/logs_9k.txt" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/logs_27k.txt" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
 
 ```
 
