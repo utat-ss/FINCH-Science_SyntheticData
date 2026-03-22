@@ -1,9 +1,9 @@
 cfg_synthesis:
   n_targets: 106 # The total amount of 'target_size's to be generated, i.e. final dataset shape: (n_targets * Batch, n_bands)
-  norm_dict_path: 'norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted
-  architecture: CCVAEncoder # The main class representing model architecture e.g.: GaussianDiffusion (in the diffusion code)
-  cfg_model_setup_path: 'cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
-  model_statedict_path: 'model_statedict.pth' # The path for the model's statedict
+  norm_dict_path: 'synthesis/isprs/tcvae/norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted
+  architecture: TCVAE # The main class representing model architecture e.g.: GaussianDiffusion (in the diffusion code)
+  cfg_model_setup_path: 'synthesis/isprs/tcvae/cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
+  model_statedict_path: 'synthesis/isprs/tcvae/tcvae_statedict.pth' # The path for the model's statedict
   device: 'cuda' # The preferred device to conduct data synthesis on
 
   cfg_absampler_setup:
@@ -456,3 +456,15 @@ cfg_synthesis:
         ]
       ]
       zero_thresh: 0.0001
+
+cfg_export:
+  entity: 'UTAT-Science' # The team entity name
+  project: 'Data Synthesis' # Project name
+  name: 'ISPRS 26 - TCVAE' # Run name
+  # master_path: 'C:\SenkDosya\Projects\FINCH-Science_SyntheticData\synthesis\isprs\diffusion' # Master save path of the folder we are running everything in (must end with '\')
+  master_path: 'synthesis/isprs/tcvae/' # Master save path of the folder we are running everything in (must end with '\')
+  ksi_train_path: 'generated_tcvae.csv' # This is the rest of the path that will be used to save the generated CSV
+  locallog_save:  'logs.txt' # Save path of the local log
+  naming_base: 'TCVAE' # Some base naming convention that'll be used to name all the spectra
+  spectral_range: [400, 2490] # The spectral range of the data to be synthesized, used for CSV header generation
+
