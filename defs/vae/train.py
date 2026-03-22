@@ -80,7 +80,7 @@ def train_vccae(cfg_train:(dict),
             yb = yb.to(device) # abundance
             estimated, mu, variation = vccae_model(xb, yb)
             optimizer.zero_grad()
-            train_loss = loss_fn(estimated, xb, mu, variation)
+            train_loss = loss_fn(estimated, xb, mu, variation, KL_coefficient=1-(1/(1+_)))
             train_loss.backward()
             optimizer.step()
 

@@ -19,7 +19,7 @@ class LossKLSAM(nn.Module):
         self.eps = 1e-7 # Needed to adjust for cos
     
     def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), mu:(torch.Tensor), variation:(torch.Tensor), 
-                SAM_coefficient=0.5, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.5):
+                SAM_coefficient=0.5, KL_coefficient=0.1, MSE_coefficient=1, msesam_ratio = 0.05):
         """
         Gets the loss given some x_0 reconstruction, encoded mu and accounts for variation done by the algorithm
 
@@ -33,13 +33,13 @@ class LossKLSAM(nn.Module):
         a = SAM_coefficient
         b = KL_coefficient
         c = MSE_coefficient
+        d = 1
 
         # Loss
         pred_loss = nn.functional.mse_loss(estimated, actual)
         divergence = -0.5 * torch.sum(1 + variation - mu.pow(2) - variation.exp()) # Kullback-Leibler
-        c = F.cosine_similarity(x_0_hat, x_0, dim=1)
-        sam_loss = msesam_ratio * torch.acos(torch.clamp(c, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
+        c1 = F.cosine_similarity(estimated, actual, dim=1)
+        sam_loss = d * torch.acos(torch.clamp(c1, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
 
         loss = (a * sam_loss) + (b * divergence) + (c * pred_loss)
-        loss = loss.sum() # get back a scalar. Can be sum or mean.
         return loss
