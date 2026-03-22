@@ -131,6 +131,8 @@ def train_vccae(cfg_train:(dict),
             torch.save(vccae_model.state_dict(), model_save)
             # Optional: Log best metric to summary
             wandb.run.summary["val/loss_best"] = best_val_loss
+        
+        loss_fn.step_beta()
 
     logging.info(f"Finished {n_epoch} Epochs, Testing Step")
 

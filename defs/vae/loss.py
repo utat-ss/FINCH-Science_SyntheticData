@@ -8,38 +8,41 @@ project_root = Path.cwd().resolve().parents[1]
 sys.path.append(str(project_root))
 
 
-class LossKLSAM(nn.Module):
+class Loss_KL_SAM_BAnneal(nn.Module):
     """
-    Loss combining Kullback-Leibler, Spectral angle mapper and mean squared error loss used in VCCAE model
+    Loss combining Kullback-Leibler, Spectral angle mapper and mean squared error loss used in VCCAE model, also uses Beta
+    annealing.
     """
-    def __init__(self):
+    def __init__(self, total_steps:(int), start_beta:(float)=0.0, target_beta:(float)=1.0, lambda_mse:(float)=1.0, lambda_kl:(float)=1.0, lambda_sam:(float)=1.0):
         super().__init__()
 
-        self.loss_criterion = nn.MSELoss()
+        # Beta annealing related
+        self.total_steps = total_steps
+        self.start_beta = start_beta
+        self.beta = start_beta
+        self.target_beta = target_beta
+        self.current_step = 0
+
         self.eps = 1e-7 # Needed to adjust for cos
+
+        # Coeffs
+        self.lambda_mse = lambda_mse
+        self.lambda_kl = lambda_kl
+        self.lambda_sam = lambda_sam
+
+    def step_beta(self):
+        self.current_step += 1
+        self.beta = self.start_beta + (self.target_beta - self.start_beta) * min(1.0, self.current_step / self.total_steps)
     
-    def forward(self, x_0_hat:(torch.Tensor), x_0:(torch.Tensor), mu:(torch.Tensor), variation:(torch.Tensor), 
-                SAM_coefficient=0.5, KL_coefficient=1, MSE_coefficient=1, msesam_ratio = 0.5):
+    def forward(self, pred:(torch.Tensor), actual:(torch.Tensor), mu:(torch.Tensor), logvar:(torch.Tensor)):
         """
         Gets the loss given some x_0 reconstruction, encoded mu and accounts for variation done by the algorithm
 
-        Coefficients:
-            a: SAM
-            b: KL
-            c: MSE
+        Loss = lambda_mse * MSE + lambda_kl * beta * KL + lambda_sam * SAM
         """
-        estimated = x_0_hat
-        actual = x_0
-        a = SAM_coefficient
-        b = KL_coefficient
-        c = MSE_coefficient
-
         # Loss
-        pred_loss = nn.functional.mse_loss(estimated, actual)
-        divergence = -0.5 * torch.sum(1 + variation - mu.pow(2) - variation.exp()) # Kullback-Leibler
-        c = F.cosine_similarity(x_0_hat, x_0, dim=1)
-        sam_loss = msesam_ratio * torch.acos(torch.clamp(c, -1.0 + self.eps, 1.0 - self.eps)).mean() # Take the mean so that we get a scalar
+        loss_MSE = F.mse_loss(pred, actual, reduction='none').sum(dim=1).mean()
+        loss_KL = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
+        loss_SAM = torch.acos(torch.clamp(F.cosine_similarity(pred, actual, dim=1), -1.0 + self.eps, 1.0 - self.eps)).mean()
 
-        loss = (a * sam_loss) + (b * divergence) + (c * pred_loss)
-        loss = loss.sum() # get back a scalar. Can be sum or mean.
-        return loss
+        return self.lambda_mse*loss_MSE + self.lambda_kl*self.beta*loss_KL + self.lambda_sam*loss_SAM

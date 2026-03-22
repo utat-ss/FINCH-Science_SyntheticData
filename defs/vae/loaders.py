@@ -84,29 +84,3 @@ def load_scheduler(cfg_scheduler_setup):
     
     scheduler = scheduler_cls(**cfg_scheduler)
     return scheduler
-
-# def load_tsampler(cfg_tsampler_setup):
-
-#     tsampler_type = cfg_tsampler_setup['tsampler_type']
-#     cfg_tsampler = cfg_tsampler_setup['cfg_tsampler']
-
-#     if hasattr(noise_sampling, tsampler_type):
-#         tsampler_cls = getattr(noise_sampling, tsampler_type)
-#     else:
-#         raise ValueError(f"Unknown/Unsupported time sampler type: {tsampler_type}")
-    
-#     tsampler = tsampler_cls(**cfg_tsampler)
-#     return tsampler
-
-# def load_augmenter(cfg_augmenter_setup):
-
-#     augmenter_type = cfg_augmenter_setup['augmenter_type']
-#     cfg_augmenter = cfg_augmenter_setup.get('cfg_augmenter', {})
-
-#     if hasattr(data_augmentation, augmenter_type):
-#         augmenter_cls = getattr(data_augmentation, augmenter_type)
-#     else:
-#         raise ValueError(f"Unknown/Unsupported augmenter type: {augmenter_type}")
-    
-#     augmenter = augmenter_cls(**cfg_augmenter)
-#     return augmenter
