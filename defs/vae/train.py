@@ -80,13 +80,17 @@ def train_vccae(cfg_train:(dict),
             yb = yb.to(device) # abundance
             estimated, mu, variation = vccae_model(xb, yb)
             optimizer.zero_grad()
-            train_loss = loss_fn(estimated, xb, mu, variation)
+            train_loss, mse_train, kl_train, sam_train, beta_train = loss_fn(estimated, xb, mu, variation)
             train_loss.backward()
             optimizer.step()
 
             tot_train_loss += train_loss.item()
             log_payload = {
                 'train_loss': train_loss.item(),
+                'train_mse_loss': mse_train.item(),
+                'train_kl_loss': kl_train.item(),
+                'train_sam_loss': sam_train.item(),
+                'train_beta': beta_train.item(),
                 'epoch': epoch
             }
             wandb.log(log_payload)
@@ -114,10 +118,14 @@ def train_vccae(cfg_train:(dict),
             xb = xb.to(device) # spectrum
             yb = yb.to(device) # abundance
             estimated, mu, variation = vccae_model(xb, yb)
-            tot_val = loss_fn(estimated, xb, mu, variation)
+            tot_val, mse_val, kl_val, sam_val, beta_val = loss_fn(estimated, xb, mu, variation)
             
             wandb.log({
-                "general/validation_average_loss": tot_val.item()
+                "general/validation_average_loss": tot_val.item(),
+                "validation/mse_loss": mse_val.item(),
+                "validation/kl_loss": kl_val.item(),
+                "validation/sam_loss": sam_val.item(),
+                "validation/beta": beta_val.item()
             })
             logging.info(f"Epoch {epoch}, Average Val Loss: {tot_val.item()}")
 

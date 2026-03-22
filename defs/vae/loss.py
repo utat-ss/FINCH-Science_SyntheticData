@@ -45,4 +45,4 @@ class Loss_KL_SAM_BAnneal(nn.Module):
         loss_KL = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
         loss_SAM = torch.acos(torch.clamp(F.cosine_similarity(pred, actual, dim=1), -1.0 + self.eps, 1.0 - self.eps)).mean()
 
-        return self.lambda_mse*loss_MSE + self.lambda_kl*self.beta*loss_KL + self.lambda_sam*loss_SAM
+        return self.lambda_mse*loss_MSE + self.lambda_kl*self.beta*loss_KL + self.lambda_sam*loss_SAM, loss_MSE, loss_KL, loss_SAM, self.beta
