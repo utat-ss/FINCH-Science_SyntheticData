@@ -5,8 +5,8 @@ import json
 from ...diffusion.data.data_preperation import get_unnormalizer
 from .data.combined import get_combined_data
 from .near_neigh.serialized import serialize_nearneigh
-from .auxiliary.export import export_metrics, export_blobs
-from .auxiliary.blobs import blobs
+from .auxiliary.export import export_metrics
+
 
 def parse_cfg_dict(cfg_run:(dict)):
     """
@@ -77,9 +77,3 @@ def nearneigh_script(cfg_export_master, cfg_nearneigh):
     # Export the metrics into a csv
     export_metrics(metric_dict, cfg_export)
     logging.info(f"Metrics have been exported to: {cfg_export['metrics_save']}")
-
-    # If blobs are enabled, get the blobs
-    if cfg_blobs is not None:
-        blob = blobs(cfg_blobs)
-        export_blobs(blob, cfg_export)
-        logging.info(f"Blobs have been made and saved to the folder: {cfg_export['blobs_save']}")

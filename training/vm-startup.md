@@ -3,6 +3,8 @@
 ## copy directory onto vm
 ```text
 gcloud compute scp --recurse --zone=northamerica-northeast2-a "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/
+
+gcloud compute scp --recurse --zone=northamerica-northeast2-b "C:\work\project\git-repo\FINCH-Science_SyntheticData" micha@gpu-ddim-run:/home/micha/
 ```
 
 ## start vm:
@@ -16,7 +18,12 @@ gcloud compute instances start gpu-ddim-run --zone=northamerica-northeast2-b
 ```text
 gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\diffusion\ExpAnalysis_002-4\config.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion/ExpAnalysis_002-4/config.yaml --zone=northamerica-northeast2-a
 
-gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\synthesis\isprs\diffusion\synthesis_cfg.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion/synthesis_cfg.yaml --zone=northamerica-northeast2-b
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion\testing_cfg_27000.yaml" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_27000.yaml --zone=northamerica-northeast2-b
+
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\unmix\critic_train\train.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/unmix/critic_train/train.py --zone=northamerica-northeast2-b
+
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\master\script.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/master/script.py --zone=northamerica-northeast2-b
+
 ```
 
 ## ssh into vm:
@@ -37,6 +44,16 @@ echo "Started PID:$! LOG:$LOG"
 
 export WANDB_API_KEY=YOUR_API_KEY_HERE
 nohup python -m defs.synthesis.script --config synthesis/isprs/diffusion/synthesis_cfg.yaml &
+
+nohup python -m defs.testing.master.script --config testing/isprs/diffusion/testing_cfg_3000.yaml &
+
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_3000.yaml &
+
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_9000.yaml &
+
+nohup python -m defs.testing.master.script --config /home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/testing_cfg_27000.yaml &
+
+pkill -f 'defs.testing.master.script' || true
 ```
 
 ### show logs
@@ -50,11 +67,27 @@ tail -n 20 nohup.out
 ```text
 gcloud compute scp --recurse --zone=northamerica-northeast2-a "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/training/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\training\vm"
 
-gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion" "C:\work\project\git-repo\FINCH-Science_SyntheticData\synthesis\isprs\diffusion\vm"
+gcloud compute scp --recurse --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_3k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/gdstreamlined_27k_critic.pth" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/preds_27k.parquet" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
+gcloud compute scp --zone=northamerica-northeast2-b "micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/logs_27k.txt" "C:\work\project\git-repo\FINCH-Science_SyntheticData\testing\isprs\diffusion"
+
 ```
 
 ## shut down vm
 ```text
 gcloud compute instances stop gpu-ddim-run --zone=northamerica-northeast2-a
 gcloud compute instances describe gpu-ddim-run --zone=northamerica-northeast2-a --format="get(status)"
+
+source ~/venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install pyarrow
+# (optional) also install fastparquet:
+pip install fastparquet
+
+tail -n 400 /home/micha/FINCH-Science_SyntheticData/nohup.out
+
 ```
