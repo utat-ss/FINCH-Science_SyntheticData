@@ -36,7 +36,10 @@ cfg_unmix:
     critic_type: 'MLP' # The type of critic to be trained
     cfg_critic: # Specific configs of the critic
       hidden_dim: [128, 128, 128, 128]
+<<<<<<< HEAD
       dropout: 0.25
+=======
+>>>>>>> b04a5651f926d8053e527722711cc244d89e3902
 
   cfg_optim_setup:
     loss_type: 'MSELoss' # The name of loss function to train critic

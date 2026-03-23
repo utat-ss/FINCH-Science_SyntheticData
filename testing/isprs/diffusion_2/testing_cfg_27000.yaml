@@ -37,7 +37,10 @@ cfg_unmix:
     cfg_critic: # Specific configs of the critic
       hidden_dim: [128, 128, 128, 128]
 <<<<<<< HEAD
+<<<<<<< HEAD
       dropout: 0.25
+=======
+>>>>>>> b04a5651f926d8053e527722711cc244d89e3902
 =======
 >>>>>>> b04a5651f926d8053e527722711cc244d89e3902
 
