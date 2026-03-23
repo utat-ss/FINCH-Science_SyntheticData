@@ -24,6 +24,8 @@ gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\te
 
 gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\master\script.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/master/script.py --zone=northamerica-northeast2-b
 
+gcloud compute scp "C:\work\project\git-repo\FINCH-Science_SyntheticData\defs\testing\unmix\critics\models\mlp.py" micha@gpu-ddim-run:/home/micha/FINCH-Science_SyntheticData/defs/testing/unmix/critics/models/mlp.py --zone=northamerica-northeast2-b
+
 ```
 
 ## ssh into vm:
