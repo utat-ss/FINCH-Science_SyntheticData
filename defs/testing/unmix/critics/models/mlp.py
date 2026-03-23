@@ -7,7 +7,11 @@ class MLP(nn.Module):
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     def __init__(self, hidden_dim:list[int], i_dim:(int)=210, o_dim:(int)=3, dropout:(float)=0.1, leaky_slope:(float)=0.2):
+=======
+    def __init__(self, hidden_dim:list[int], i_dim:(int)=81, o_dim:(int)=3, dropout:(float)=0.1, leaky_slope:(float)=0.2):
+>>>>>>> b04a5651f926d8053e527722711cc244d89e3902
 =======
     def __init__(self, hidden_dim:list[int], i_dim:(int)=81, o_dim:(int)=3, dropout:(float)=0.1, leaky_slope:(float)=0.2):
 >>>>>>> b04a5651f926d8053e527722711cc244d89e3902
