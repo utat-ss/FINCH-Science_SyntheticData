@@ -4,7 +4,7 @@ import torch.nn as nn
 from diffusers.models.activations import get_activation
 
 class MLP(nn.Module):
-    def __init__(self, hidden_dim:list[int], i_dim:(int)=210, o_dim:(int)=3, dropout:(float)=0.1, leaky_slope:(float)=0.2):
+    def __init__(self, hidden_dim:list[int], i_dim:(int)=81, o_dim:(int)=3, dropout:(float)=0.1, leaky_slope:(float)=0.2):
         super().__init__()
 
         self.i_dim = i_dim
