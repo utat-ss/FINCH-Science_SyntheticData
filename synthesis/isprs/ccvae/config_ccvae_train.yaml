@@ -24,7 +24,7 @@ cfg_data:
     psi2_path: "stuff/utat_synthetic/synthesis/isprs/ccvae/psi2_ccvae.csv" # Save path for the psi2 dataset do not have .csv after this since it adds the norm methods before .csv 
 
 cfg_train: 
-  n_epoch: 100 # Number of training epochs
+  n_epoch: 40 # Number of training epochs
   n_tb_epoch: 100 # Number of training instances/batches, will have this many batches in training
   device: 'cpu' # Device to be used
   dtype: 'float32' # Datatype to be used
@@ -32,7 +32,7 @@ cfg_train:
 cfg_export:
   entity: 'UTAT-Science' # The team entity name
   project: "Variational-CCAE Data Synthesis"
-  name: 'synthesis_02-01'
+  name: 'synthesis_02-05'
   model_save: 'vccae_model.pth' # The save path for the model that was trained, can have .pth, adds it automatically
   test_save: 'generated_test_samples.parquet' # Save path for the generated test samples
   norm_save: 'norm_dict.json'

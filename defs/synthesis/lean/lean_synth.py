@@ -34,8 +34,10 @@ def get_lean_synthesis(model_type:(str), model:(nn.Module)) -> SpectralSampler:
 
     if model_type == 'GaussianDiffusion':
         lean_sampler = GaussianDiffusionSampler(model=model, lean=True)
-    elif model_type == 'AutoEncoder':
-        lean_sampler = AutoEncoderSampler(model=model, lean=True)
+    elif model_type == 'CCVAEncoder':
+        lean_sampler = CCVAESampler(model=model, lean=True)
+    elif model_type == 'TCVAEncoder':
+        lean_sampler = TCVAESampler(model=model, lean=True)
     else:
         raise ValueError(f"Unknown/Unsupported model_type: {model_type}")
 
@@ -80,4 +82,3 @@ def synthesize(cfg_lean_synthesis, sampler:(SpectralSampler), ab_tensor:(torch.T
 
     return sampled_spectra
     
-
