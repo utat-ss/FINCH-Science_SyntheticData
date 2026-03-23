@@ -4,6 +4,7 @@ This file is to define all sorts of loaders from model loaders to abundance gene
 
 from . import abundance_sampler
 from .synth_func import *
+from ..tcvae.tcvae_model import TCVAESynthesisModel
 
 import torch
 
@@ -40,6 +41,9 @@ def load_model(model_type:(str), model_statedict_path:(str), model_config_dict:(
     elif model_type == 'CCVAEncoder':
         model = _load_ccvae_model(model_config_dict, model_statedict_path)
 
+    elif model_type == 'TCVAEncoder':
+        model = _load_tcvae_model(model_config_dict, model_statedict_path)
+
     else:
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
     
@@ -75,6 +79,13 @@ def _load_ccvae_model(cfg_ccvae_setup, cfg_ccvae_statedict_path):
     ccvae_model.load_state_dict(torch.load(cfg_ccvae_statedict_path, weights_only=True))
     return ccvae_model
 
+
+def _load_tcvae_model(cfg_tcvae_setup, cfg_tcvae_statedict_path):
+    tcvae_model = TCVAESynthesisModel.from_setup_dict(cfg_tcvae_setup)
+    tcvae_model.load_state_dict(torch.load(cfg_tcvae_statedict_path, map_location="cpu", weights_only=True))
+    tcvae_model.eval()
+    return tcvae_model
+
 def load_sampler(model_type:(str), model, ab_sampler):
 
     if model_type == 'GaussianDiffusion':
@@ -83,11 +94,14 @@ def load_sampler(model_type:(str), model, ab_sampler):
 
     elif model_type == 'CCVAEncoder':
         
-        spectra_sampler = CCVAEncoderSampler(model, lean=False, abundance_sampler=ab_sampler)
+        spectra_sampler = CCVAESampler(model, lean=False, abundance_sampler=ab_sampler)
+
+    elif model_type == 'TCVAEncoder':
+
+        spectra_sampler = TCVAESampler(model, lean=False, abundance_sampler=ab_sampler)
 
     else: 
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
     
     return spectra_sampler
-
 

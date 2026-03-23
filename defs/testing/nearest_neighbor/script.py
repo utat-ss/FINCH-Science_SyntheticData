@@ -1,4 +1,5 @@
 import logging
+import os
 import torch
 import json
 
@@ -44,6 +45,7 @@ def parse_cfg_dict(cfg_run:(dict)):
 
     with open(cfg_synthesis['cfg_model_setup_path']) as f:
         cfg_model_setup = json.load(f)
+    cfg_model_setup['__cfg_dir__'] = os.path.dirname(os.path.abspath(cfg_synthesis['cfg_model_setup_path']))
     cfg_synthesis['model_config_dict'] = cfg_model_setup
     cfg_synthesis.pop('cfg_model_setup_path', None)
 
