@@ -90,7 +90,7 @@ def train_vccae(cfg_train:(dict),
                 'train_mse_loss': mse_train.item(),
                 'train_kl_loss': kl_train.item(),
                 'train_sam_loss': sam_train.item(),
-                'train_beta': beta_train.item(),
+                'train_beta': beta_train,
                 'epoch': epoch
             }
             wandb.log(log_payload)
@@ -125,7 +125,7 @@ def train_vccae(cfg_train:(dict),
                 "validation/mse_loss": mse_val.item(),
                 "validation/kl_loss": kl_val.item(),
                 "validation/sam_loss": sam_val.item(),
-                "validation/beta": beta_val.item()
+                "validation/beta": beta_val
             })
             logging.info(f"Epoch {epoch}, Average Val Loss: {tot_val.item()}")
 
