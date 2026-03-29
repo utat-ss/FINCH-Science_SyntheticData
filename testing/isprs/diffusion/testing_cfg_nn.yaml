@@ -7,16 +7,16 @@ cfg_export:
 cfg_nearneigh:
 
   cfg_import:
-    psi2_path: 'testing\isprs\diffusion\psi2_gdstreamline.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
+    psi2_path: '/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/psi2_gdstreamline.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
     spec_range: [400, 2490] # Spectral range, inclusive, will be used to synthesize the data, has to match the trained model specs
     separation_ratio: 0.5 # The exact separation ratio for the data to be synthesized and preserved, # of real = sep_ratio * len(dataset)
 
   # Specifics of synthesis
   cfg_synthesis:
     model_type: GaussianDiffusion # The main class representing model architecture/type e.g.: GaussianDiffusion (in the diffusion code)
-    cfg_model_setup_path: 'synthesis/isprs/diffusion/cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
-    model_statedict_path: 'synthesis\isprs\diffusion\gdstreamline_statedict.pth' # The path for the model's statedict
-    norm_dict_path: 'norm_dict.json' # The path for the norm dict used during training, needed for proper denormalization
+    cfg_model_setup_path: '/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion/cfg_diffusion_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
+    model_statedict_path: '/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion/gdstreamline_statedict.pth' # The path for the model's statedict
+    norm_dict_path: '/home/micha/FINCH-Science_SyntheticData/synthesis/isprs/diffusion/norm_dict.json' # The path for the norm dict used during training, needed for proper denormalization
     max_batch_size: 50 # The maximum batch size to be used during synthesis of points, usually safe to max out, any number more than the actual size defaults to the actual size, hard capped at 32
     device: 'cuda'
 

@@ -2,6 +2,7 @@
 
 Usage:
   python synthesized_sanitycheck.py [--csv PATH] [--n N] [--out PATH] [--no-show]
+  python synthesized_sanitycheck.py --csv diffusion/psi2_gdstreamline.csv --n 30 --out diffusion/groundtruth_psi2.png
 
 Loads the generated CSV in the same directory by default and plots a handful
 of spectra (evenly sampled). Saves an output PNG by default.
@@ -59,12 +60,23 @@ def plot_spectra(csv_path: Path, n: int = 6, out: Path | None = None, show: bool
 	ax.legend(fontsize='small', ncol=2)
 
 	if out is None:
-		out = csv_path.with_name(csv_path.stem + '_spectra.png')
+		png_out = csv_path.with_name(csv_path.stem + '_spectra.png')
+		svg_out = csv_path.with_name(csv_path.stem + '_spectra.svg')
+	else:
+		out = Path(out)
+		if out.suffix.lower() == '.svg':
+			svg_out = out
+			png_out = out.with_suffix('.png')
+		else:
+			png_out = out
+			svg_out = out.with_suffix('.svg')
+
 	fig.tight_layout()
-	fig.savefig(out, dpi=200)
+	fig.savefig(png_out, dpi=200)
+	fig.savefig(svg_out, dpi=200)
 	if show:
 		plt.show()
-	print(f'Wrote plot to: {out}')
+	print(f'Wrote plots to: {png_out} and {svg_out}')
 
 
 def main():
