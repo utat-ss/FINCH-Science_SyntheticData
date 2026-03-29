@@ -1,0 +1,35 @@
+{
+  "title": "UTAT FINCH Mission: Deep Learning Models Conditional Synthetic Data Generation",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Artan, Ege",
+      "affiliation": "University of Toronto",
+      "orcid": "0009-0009-3882-1991"
+    },
+    {
+      "name": "Chen, Shuo",
+      "affiliation": "University of Toronto",
+      "orcid": "0009-0006-0122-7540"
+    },
+    {
+      "name": "Peng, Andrew",
+      "affiliation": "University of Toronto",
+      "orcid": "0009-0002-1567-9274"
+    },
+    {
+      "name": "Karya, Sammuel Aldrich",
+      "affiliation": "University of Toronto",
+      "orcid": "0009-0000-3312-3443"
+    },
+    {
+      "name": "Thiha, Kyaw",
+      "affiliation": "University of Toronto",
+      "orcid": "0009-0001-0526-5732"
+    }
+  ],
+  "description": "<p>This codebase includes all the source code, configuration files, and intermediary scripts that were used for the submitted ISPRS Archives publication. The codebase has extensive scripts to train, test, and validate both deep learning based hyperspectral unmixing and conditional hyperspectral data generation models.</p>",
+  "version": "1.0.0"
+}
