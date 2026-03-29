@@ -9,7 +9,7 @@ cfg_synthesis:
   cfg_absampler_setup:
     absampler_type: 'LogNormalAbSamp'
     cfg_absampler: # We do not include device here, it will be passed in at the config functions
-      target_shape: [256,3]
+      target_shape: [125,3]
       seed: 3169
       device: 'cuda'
       mix_weights: [

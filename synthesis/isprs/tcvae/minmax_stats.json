@@ -1,0 +1,54 @@
+{
+  "normalization_policy": "dataset_wide_minmax",
+  "csv_path": "data/simpler_data_rwc.csv",
+  "spectral_range": [
+    400,
+    2490,
+    10
+  ],
+  "seed": 42,
+  "splits": [
+    0.8,
+    0.1,
+    0.1
+  ],
+  "spectra_raw_min": -0.03396700322628021,
+  "spectra_raw_max": 0.9995661973953247,
+  "raw_reference": {
+    "min": -0.03396700322628021,
+    "max": 0.9995661973953247
+  },
+  "normalized_reference": {
+    "min": 0.0,
+    "max": 1.0
+  },
+  "diffusion_reference": {
+    "mean": 0.2234611213207245,
+    "std": 0.1275130957365036,
+    "norm_type": "statistical"
+  },
+  "train": {
+    "normalized_min": 0.010156029835343361,
+    "normalized_max": 1.0,
+    "raw_min": -0.023470409214496613,
+    "raw_max": 0.9995661973953247
+  },
+  "val": {
+    "normalized_min": 0.03286493569612503,
+    "normalized_max": 0.990981936454773,
+    "raw_min": 0.0,
+    "raw_max": 0.9902456998825073
+  },
+  "test": {
+    "normalized_min": 0.0,
+    "normalized_max": 0.9845608472824097,
+    "raw_min": -0.03396700322628021,
+    "raw_max": 0.9836093783378601
+  },
+  "test_val": {
+    "normalized_min": 0.0,
+    "normalized_max": 0.990981936454773,
+    "raw_min": -0.03396700322628021,
+    "raw_max": 0.9902456998825073
+  }
+}
