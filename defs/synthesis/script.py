@@ -7,6 +7,8 @@ import json
 
 import torch
 
+import subprocess
+
 def cfg_from_args():
     """
     Function to get args from the .yaml args given in the script run code
@@ -21,6 +23,8 @@ def cfg_from_args():
     
     with open(args.config, 'r') as f:
         cfg_run = yaml.safe_load(f)
+
+    cfg_run['__config_path__'] = os.path.abspath(args.config)
 
     return cfg_run
 
@@ -40,6 +44,12 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_synthesis = cfg_run['cfg_synthesis']
     cfg_export = cfg_run['cfg_export']
     cfg_absampler_setup = cfg_synthesis['cfg_absampler_setup']
+    cfg_base_dir = os.path.dirname(cfg_run['__config_path__'])
+
+    def _resolve_with_base(path_str:(str)) -> str:
+        if os.path.isabs(path_str):
+            return path_str
+        return os.path.normpath(os.path.join(cfg_base_dir, path_str))
 
     # Set the device
     device_str = cfg_synthesis['device']
@@ -51,11 +61,16 @@ def parse_cfg_dict(cfg_run:(dict)):
     cfg_synthesis['device'] = torch.device(device_str)
     cfg_synthesis['cfg_absampler_setup']['cfg_absampler']['device'] = torch.device(device_str) # This was not passed in at the cfg yaml
 
+    cfg_synthesis['norm_dict_path'] = _resolve_with_base(cfg_synthesis['norm_dict_path'])
+    cfg_synthesis['cfg_model_setup_path'] = _resolve_with_base(cfg_synthesis['cfg_model_setup_path'])
+    cfg_synthesis['model_statedict_path'] = _resolve_with_base(cfg_synthesis['model_statedict_path'])
+
     with open(cfg_synthesis['norm_dict_path']) as f:
         norm_dict = json.load(f)
 
     with open(cfg_synthesis['cfg_model_setup_path']) as f:
         cfg_model_setup = json.load(f)
+    cfg_model_setup['__cfg_dir__'] = os.path.dirname(cfg_synthesis['cfg_model_setup_path'])
 
     return cfg_synthesis, cfg_export, norm_dict, cfg_model_setup, cfg_absampler_setup
 
@@ -102,5 +117,7 @@ if __name__ == '__main__':
     finally:
         run.finish()
 
-#endregion
+    # print("Run complete. Shutting down VM!")
+    # subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
 
+#endregion

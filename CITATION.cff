@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "UTAT FINCH Mission: Deep Learning Models Conditional Synthetic Data Generation"
+version: 1.0.0
+date-released: 2026-03-30
+authors:
+  - family-names: "Artan"
+    given-names: "Ege"
+    orcid: "https://orcid.org/0009-0009-3882-1991"
+    affiliation: "University of Toronto"
+  - family-names: "Chen"
+    given-names: "Shuo"
+    orcid: "https://orcid.org/0009-0006-0122-7540"
+    affiliation: "University of Toronto"
+  - family-names: "Peng"
+    given-names: "Andrew"
+    orcid: "https://orcid.org/0009-0002-1567-9274"
+    affiliation: "University of Toronto"
+  - family-names: "Karya"
+    given-names: "Sammuel Aldrich"
+    orcid: "https://orcid.org/0009-0000-3312-3443"
+    affiliation: "University of Toronto"
+  - family-names: "Thiha"
+    given-names: "Kyaw"
+    orcid: "https://orcid.org/0009-0001-0526-5732"
+    affiliation: "University of Toronto"
+repository-code: "https://github.com/utat-ss/FINCH-Science_SyntheticData"
+abstract: >-
+  This codebase includes all the source code, configuration files, and intermediary scripts that were used for the submitted ISPRS Archives publication. The codebase has extensive scripts to train, test, and validate both deep learning based hyperspectral unmixing and conditional hyperspectral data generation models.

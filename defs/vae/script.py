@@ -89,10 +89,10 @@ def parse_cfg_dict(cfg_run:(dict)):
 
 #region Main Loop
 
-from loaders import *
-from data.data_preparation import *
-from train import train_vccae
-from auxiliary import setup_logging, save_vccae_inits, setup_wandb
+from defs.vae.loaders import *
+from defs.vae.data.data_preparation import *
+from defs.vae.train import train_vccae
+from defs.vae.auxiliary import setup_logging, save_vccae_inits, setup_wandb
 
 import traceback
 import logging

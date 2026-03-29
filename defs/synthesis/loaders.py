@@ -4,6 +4,7 @@ This file is to define all sorts of loaders from model loaders to abundance gene
 
 from . import abundance_sampler
 from .synth_func import *
+from ..tcvae.tcvae_model import TCVAESynthesisModel
 
 import torch
 
@@ -37,6 +38,12 @@ def load_model(model_type:(str), model_statedict_path:(str), model_config_dict:(
     if model_type == 'GaussianDiffusion':
         model = _load_diffusion_model(model_config_dict, model_statedict_path)
 
+    elif model_type == 'CCVAEncoder':
+        model = _load_ccvae_model(model_config_dict, model_statedict_path)
+
+    elif model_type == 'TCVAEncoder':
+        model = _load_tcvae_model(model_config_dict, model_statedict_path)
+
     else:
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
     
@@ -64,19 +71,37 @@ def _load_diffusion_model(cfg_diffusion_setup, cfg_diffusion_statedict_path):
 
     return diffusion_model
 
+def _load_ccvae_model(cfg_ccvae_setup, cfg_ccvae_statedict_path):
+    from ..vae.loaders import load_vccae
+
+    cfg_ccvae = cfg_ccvae_setup['cfg_autoencoder']
+    ccvae_model = load_vccae(cfg_ccvae)
+    ccvae_model.load_state_dict(torch.load(cfg_ccvae_statedict_path, weights_only=True))
+    return ccvae_model
+
+
+def _load_tcvae_model(cfg_tcvae_setup, cfg_tcvae_statedict_path):
+    tcvae_model = TCVAESynthesisModel.from_setup_dict(cfg_tcvae_setup)
+    tcvae_model.load_state_dict(torch.load(cfg_tcvae_statedict_path, map_location="cpu", weights_only=True))
+    tcvae_model.eval()
+    return tcvae_model
+
 def load_sampler(model_type:(str), model, ab_sampler):
 
     if model_type == 'GaussianDiffusion':
 
         spectra_sampler = GaussianDiffusionSampler(model, lean=False, abundance_sampler=ab_sampler)
 
-    elif model_type == 'AutoEncoder':
+    elif model_type == 'CCVAEncoder':
         
-        spectra_sampler = AutoEncoderSampler(model, lean=False, abundance_sampler=ab_sampler)
+        spectra_sampler = CCVAESampler(model, lean=False, abundance_sampler=ab_sampler)
+
+    elif model_type == 'TCVAEncoder':
+
+        spectra_sampler = TCVAESampler(model, lean=False, abundance_sampler=ab_sampler)
 
     else: 
         raise ValueError(f'Unknown/Unsupported synthesizer model type: {model_type}')
     
     return spectra_sampler
-
 
