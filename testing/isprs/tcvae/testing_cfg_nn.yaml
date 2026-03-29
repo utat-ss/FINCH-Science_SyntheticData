@@ -16,7 +16,7 @@ cfg_nearneigh:
     model_type: GaussianDiffusion # The main class representing model architecture/type e.g.: GaussianDiffusion (in the diffusion code)
     cfg_model_setup_path: 'synthesis/isprs/tcvae/cfg_tcvae_setup.json' # The path to the model dict, for diffusion this would be cfg_diffusion_setup.json outputted after diffusion training
     model_statedict_path: 'synthesis/isprs/tcvae/tcvae_statedict.pth' # The path for the model's statedict
-    norm_dict_path: 'norm_dict.json' # The path for the norm dict used during training, needed for proper denormalization
+    norm_dict_path: 'synthesis/isprs/tcvae/norm_dict.json' # The path for the norm dict used during training, needed for proper denormalization
     max_batch_size: 50 # The maximum batch size to be used during synthesis of points, usually safe to max out, any number more than the actual size defaults to the actual size, hard capped at 32
     device: 'cuda'
 

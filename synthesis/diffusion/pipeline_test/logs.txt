@@ -1,8 +1,0 @@
-[2026-01-19 11:12:27] Cfgs taken in, parsed. WandB and logging configured
-[2026-01-19 11:12:32] Unnormalizer and synthesizer model initialized
-[2026-01-19 11:12:32] Synthesis started
-[2026-01-19 11:12:32] Synthesizing batch 1 out of 2
-[2026-01-19 11:13:53] Synthesizing batch 2 out of 2
-[2026-01-19 11:15:13] Saving synthesized data to C:\SenkDosya\Projects\FINCH-Science_SyntheticData\synthesis\diffusion\pipeline_test\ksi_train.csv
-[2026-01-19 11:15:13] Data successfully saved.
-[2026-01-19 11:15:13] Synthesis successfully finished
