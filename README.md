@@ -7,15 +7,10 @@ This repository is used for the development of synthetic data to be used by Scie
 ## Synthesizer Models 
 To perform this, there are a couple of models that have been explored so far. These are as follows:
 - AutoEncoder-based:
-    - Conditional AutoEncoders:
-        - MLP based
-        - CNN based
-    - Conditional Variational AutoEncoders:
-        - MLP based
-        - CNN based
+    - Conditional Convolutional Variational AutoEncoder (not included in the ISPRS 2026 manuscript)
+    - Dual-Path Transformer Conditional Variational AutoEncoder
 - Gaussian Diffusion-based: 
     - Denoising Diffusion Probabilistic Model:
-        - MLP based epsilon network
         - Conditional Conformer based U-Net epsilon network
     - Denoising Diffusion Implicit Model:
         - Conditional Conformer based U-Net epsilon network
@@ -72,7 +67,7 @@ We cannot use widely available testing algorithms and methods that are widely av
 
 
 ## Citation
-If you use this code or dataset in your research or works, please cite our upcoming ISPRS 2026 paper:
+If you use this code or dataset in your research or works, please cite our upcoming ISPRS 2026 paper.
 
 ## License
 The code is licensed under MIT License.
@@ -95,77 +90,3 @@ For questions regarding the codebase, the paper, or reproduction of results, ple
 ### Found a Bug?
 If you encounter any issues with the code or have feature requests, please check if the issue has already been reported. If not, feel free to open a new issue on our repository:
 * [Report a Bug or Issue](https://github.com/utat-space/FINCH-Science_SyntheticData/issues)
-
-## Project Structure
-```text
-.
-├── data                                   
-├── defs/
-│   ├── diffusion/
-│   │   ├── data/
-│   │   │   ├── data_augmentation.py
-│   │   │   └── data_preperation.py
-│   │   ├── epsilon/
-│   │   │   ├── auxiliary/
-│   │   │   ├── mlp.py
-│   │   │   └── unet.py
-│   │   ├── noise/
-│   │   │   ├── noise_sampling.py
-│   │   │   └── noise_scheduling.py
-│   │   ├── auxiliary.py
-│   │   ├── cfg_run_example.yaml
-│   │   ├── diffusion.py
-│   │   ├── example_cmd.txt
-│   │   ├── loaders.py
-│   │   ├── loss.py
-│   │   ├── plotting.py
-│   │   ├── script.py
-│   │   └── train.py
-│   ├── synthesis/
-│   │   ├── lean/
-│   │   │   └── lean_synth.py
-│   │   ├── abundance_sampler.py
-│   │   ├── cfg_run_example.py
-│   │   ├── data.py
-│   │   ├── loaders.py
-│   │   ├── script.py
-│   │   ├── synth_func.py
-│   │   └── synthesize.py
-│   ├── testing/
-│   │   ├── master/
-│   │   │   ├── example_cfg.yaml
-│   │   │   └── script.py
-│   │   ├── nearest_neighbor/
-│   │   │   ├── auxiliary/
-│   │   │   ├── data/
-│   │   │   ├── near_neigh/
-│   │   │   └── script.py
-│   │   └── unmix/
-│   │       ├── auxiliary/
-│   │       ├── critic_train/
-│   │       ├── critics/
-│   │       ├── data/
-│   │       ├── loaders/
-│   │       └── script.py
-│   ├── tools/
-│   │   ├── count_params.py
-│   │   └── search_configs.py
-│   └── vae/
-│       ├── data
-│       ├── noise
-│       ├── tests
-│       ├── ae.py
-│       ├── auixiliary.py
-│       ├── cfg_run_example.yaml
-│       ├── loaders.py
-│       ├── loss.py
-│       ├── plotting.py
-│       ├── script.py
-│       ├── train.py
-│       └── training_defs.py
-├── synthesis
-├── testing
-├── training
-├── .gitignore
-├── LICENSE
-└── README.md
