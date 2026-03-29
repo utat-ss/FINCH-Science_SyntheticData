@@ -153,5 +153,5 @@ if __name__ == "__main__":
     finally:
         run.finish()
 
-    print("Run complete. Shutting down VM!")
-    subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
+    # print("Run complete. Shutting down VM!")
+    # subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

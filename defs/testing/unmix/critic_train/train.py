@@ -74,7 +74,14 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             optimizer.zero_grad()
 
             # Get the predictions
-            pred_abundances = critic(spectrum)
+            # If critic is an MLP (has Linear layers but no Conv1d), flatten spectrum
+            has_linear = any(isinstance(m, torch.nn.Linear) for m in critic.modules())
+            has_conv1d = any(isinstance(m, torch.nn.Conv1d) for m in critic.modules())
+            inp = spectrum
+            if inp.ndim == 3 and has_linear and not has_conv1d:
+                inp = inp.view(inp.size(0), -1)
+
+            pred_abundances = critic(inp)
 
             # Calculate the loss, backprop it, and take optimizer step
             train_loss = loss_fn(pred_abundances, abundances)
@@ -114,7 +121,14 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
             if spectrum.ndim == 2:
                 spectrum = spectrum.unsqueeze(1)
 
-            pred_abundances = critic(spectrum)
+            # If critic is an MLP (has Linear layers but no Conv1d), flatten spectrum
+            has_linear = any(isinstance(m, torch.nn.Linear) for m in critic.modules())
+            has_conv1d = any(isinstance(m, torch.nn.Conv1d) for m in critic.modules())
+            inp = spectrum
+            if inp.ndim == 3 and has_linear and not has_conv1d:
+                inp = inp.view(inp.size(0), -1)
+
+            pred_abundances = critic(inp)
             val_loss = loss_fn(pred_abundances, abundances)
 
             wandb.log({
@@ -145,7 +159,14 @@ def train_critic(cfg_train:(dict), cfg_export:(dict), critic:(nn.Module), loss_f
         if spectrum.ndim == 2:
             spectrum = spectrum.unsqueeze(1)
 
-        pred_abundances = critic(spectrum)
+        # If critic is an MLP (has Linear layers but no Conv1d), flatten spectrum
+        has_linear = any(isinstance(m, torch.nn.Linear) for m in critic.modules())
+        has_conv1d = any(isinstance(m, torch.nn.Conv1d) for m in critic.modules())
+        inp = spectrum
+        if inp.ndim == 3 and has_linear and not has_conv1d:
+            inp = inp.view(inp.size(0), -1)
+
+        pred_abundances = critic(inp)
         test_loss = loss_fn(pred_abundances, abundances)
 
         wandb.log({
