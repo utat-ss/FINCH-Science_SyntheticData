@@ -1,0 +1,69 @@
+{
+  "run_name": "cnn_l_seed42",
+  "seed": 42,
+  "device": "cpu",
+  "run_dir": "runs/cnn_l_seed42_20260122_233252_seed42",
+  "best_epoch": 77,
+  "best_val_mse": 0.013143562711775303,
+  "train_mse_at_best": 0.011186560504694484,
+  "val_mse_at_best": 0.013143562711775303,
+  "test_mse": 0.01370150875300169,
+  "val_r2": 0.8569114804267883,
+  "test_r2": 0.8416160941123962,
+  "generalization_gap": 0.001957002207080819,
+  "epochs_ran": 80,
+  "num_features": 210,
+  "num_targets": 3,
+  "config": {
+    "run": {
+      "name": "cnn_l_seed42",
+      "seed": 42,
+      "output_dir": "runs"
+    },
+    "data": {
+      "csv_path": "data/simpler_data_rwc.csv",
+      "target_cols": [
+        "gv_fraction",
+        "npv_fraction",
+        "soil_fraction"
+      ],
+      "feature_cols": null,
+      "split": {
+        "train": 0.7,
+        "val": 0.15,
+        "test": 0.15
+      },
+      "shuffle": true,
+      "num_workers": 4
+    },
+    "model": {
+      "num_bands": 210,
+      "num_endmembers": 3,
+      "channels": [
+        96,
+        192,
+        384
+      ],
+      "kernel_size": 7,
+      "dropout": 0.08,
+      "norm": "batch",
+      "residual": true,
+      "res_blocks_per_stage": 2,
+      "pool": "avg"
+    },
+    "train": {
+      "batch_size": 1024,
+      "max_epochs": 80,
+      "lr": 0.001,
+      "weight_decay": 0.0001,
+      "grad_clip_norm": 1.0,
+      "patience": 25,
+      "min_delta": 0.0,
+      "scheduler": {
+        "factor": 0.5,
+        "patience": 6,
+        "min_lr": 1e-06
+      }
+    }
+  }
+}
