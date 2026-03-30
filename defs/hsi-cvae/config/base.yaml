@@ -1,0 +1,131 @@
+seed_everything: 42
+
+fit:
+  run_batch_size_finder: false
+  batch_size_finder_mode: power
+  run_lr_finder: false
+  show_lr_plot: true
+
+trainer:
+  max_epochs: 100
+  precision: 32
+  gradient_clip_val: 1.0
+  default_root_dir: outputs
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: ${trainer.default_root_dir}/checkpoints/best
+        filename: e_{epoch}-l_{val_loss:.4f}
+        monitor: val_loss
+        mode: min
+        save_top_k: 1
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: ${trainer.default_root_dir}/checkpoints/interval
+        filename: e_{epoch}
+        every_n_epochs: 5
+        save_top_k: -1
+        save_last: false
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+    - class_path: callbacks.sample_images.SampleImages
+      init_args:
+        num_per_class: 8
+    - class_path: callbacks.line_charts.SampleLineCharts
+      init_args:
+        out_dir: outputs/line_charts
+        start_nm: 400
+        step_nm: 10
+        class_names:
+          - gv_only
+          - npv_only
+          - soil_only
+        custom_conditions:
+          - [1.0, 0.0, 0.0]
+          - [0.0, 1.0, 0.0]
+          - [0.0, 0.0, 1.0]
+        normalize_custom_conditions: true
+    - class_path: callbacks.pure_line_charts.PureLineCharts
+      init_args:
+        csv_path: data/simpler_data_rwc.csv
+        out_dir: outputs/line_charts/pure
+        start_nm: 400
+        end_nm: 2490
+        step_nm: 10
+        condition_columns:
+          - gv_fraction
+          - npv_fraction
+          - soil_fraction
+        spectrum_id_column: Spectra
+        normalization: dataset
+        max_original_samples: 2
+        random_seed: 42
+        run_every_n_epochs: 1
+    - class_path: callbacks.latent_diversity_line_charts.LatentDiversityLineCharts
+      init_args:
+        csv_path: data/simpler_data_rwc.csv
+        out_dir: outputs/line_charts/latent_diversity
+        start_nm: 400
+        end_nm: 2490
+        step_nm: 10
+        condition_columns:
+          - gv_fraction
+          - npv_fraction
+          - soil_fraction
+        spectrum_id_column: Spectra
+        normalization: dataset
+        max_original_samples: 2
+        random_seed: 42
+        run_every_n_epochs: 1
+        samples_per_condition: 16
+        sample_temperature: 1.0
+    - class_path: callbacks.predict_images.SavePredictionsCallback
+      init_args:
+        out_dir: outputs/predict
+        grid_nrow: 8
+    - class_path: callbacks.train_timing.SaveTrainingTime
+      init_args:
+        out_dir: outputs/checkpoints
+    - class_path: callbacks.data_artifacts.SaveDataArtifacts
+      init_args:
+        out_dir: outputs/artifacts
+        save_npy: true
+        emit_diffusion_compatible_names: true
+        label_auxiliary_files: true
+    - class_path: callbacks.cvae_setup_json.SaveCVAESetupJSON
+      init_args:
+        out_dir: outputs/artifacts
+        filename: cfg_tcvae_setup.json
+
+model:
+  architecture: dual_path_transformer
+  input_dim: 210
+  condition_dim: 3
+  latent_dim: 32
+  wavelength_params:
+    start_nm: 400
+    end_nm: 2490
+    step_nm: 10
+  hidden_dims: [512, 256, 128]
+  dropout: 0.1
+  lr: 0.001
+  weight_decay: 0.0
+  scheduler_cfg:
+    name: cosine
+    T_max: 100
+
+data:
+  csv_path: data/simpler_data_rwc.csv
+  condition_columns:
+    - gv_fraction
+    - npv_fraction
+    - soil_fraction
+  spectral_range: [400, 2490, 10]
+  batch_size: 32
+  num_workers: 4
+  splits: [0.8, 0.1, 0.1]
+  seed: 42
+  pin_memory: true
+
+ckpt_path: null
