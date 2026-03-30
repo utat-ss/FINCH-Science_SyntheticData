@@ -4,6 +4,8 @@ Conditional Variational AutoEncoder models for generating synthetic hyperspectra
 
 The final selected model in this repository is the **TCVAE**, implemented as a **Dual-Path Transformer Conditional Variational AutoEncoder**. After comparing multiple CVAE backbones, this model gave the best overall tradeoff between reconstruction quality, latent usage, and conditional spectral diversity.
 
+For original repo used for development, see [Repo](https://github.com/Kyaw-Thiha/hsi-cvae).
+
 ## Final Model Selection
 
 ### Selected model
