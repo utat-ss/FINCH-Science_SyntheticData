@@ -1,0 +1,51 @@
+cfg_export:
+  entity: 'UTAT-Science'
+  project: 'Data Testing'
+  name: 'ISPRS 26 - GD Streamline - 27k Critic'
+  local_log: 'logs_27k.txt' # Path for the local loggging of alerts prints, etc
+  
+cfg_unmix:
+
+  cfg_import:
+    ksi_train_path: '/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/psi1_gdstreamline.csv' # The exact path of the .csv for the generated dataset, that will be used to train the critic
+    psi2_path: '/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/psi2_gdstreamline.csv' # The exact path for the psi_2/ksi_val+ksi_tests dataset, which is the dataset NOT used to train the synthesizer, only used in val/test
+    norm_dict_path: '/home/micha/FINCH-Science_SyntheticData/testing/isprs/diffusion/norm_dict.json' # The path (...json) that has the dict storing how normalization was conducted    
+    spec_range: [900, 1700] # Spectral range, inclusive
+
+  cfg_loader:
+    n_val: 100 # Number of val datapoints in ksi_val
+    n_test: 123 # Number of test datapoints in ksi_val
+    n_train_batch: 8 # Size of training batches in ksi_train
+    num_workers: 4 # Number of workers in train loader
+    prefetch_factor: 12 # How many batches each worker will prefetch
+    seed: 3169 # Seed to seperate val and test in ksi_val
+
+  cfg_train:  
+    n_epoch: 80 # Total number of epochs
+    n_tb_epoch: 3375 # Total number of training batches per epoch
+    device: 'cuda' # Device used
+    dtype: 'float32' # Dtype used
+    verbose: True # If want to output all the losses
+    use_autocast: False # If want to use autocast (float16) to speed up calcs
+
+  cfg_export:
+    model_save: 'gdstreamlined_27k_critic.pth' # The save path for the model (critic) that was trained, can have .pth, adds it automatically
+    test_save: 'preds_27k.parquet' # Save path for the predictions on test data
+    
+  cfg_critic_setup:
+    critic_type: 'MLP' # The type of critic to be trained
+    cfg_critic: # Specific configs of the critic
+      hidden_dim: [128, 128, 128, 128]
+      dropout: 0.25
+
+  cfg_optim_setup:
+    loss_type: 'MSELoss' # The name of loss function to train critic
+    cfg_loss: 
+    optim_type: 'AdamW'
+    cfg_optim:
+      lr: 1.0e-3
+      weight_decay: 1.0e-2
+      cfg_lrscheduler_setup: # If this is not given, lr scheduler will default to None
+        lrscheduler_type: 'CosineAnnealingLR'
+        cfg_lrscheduler:
+          T_max: 80

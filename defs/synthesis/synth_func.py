@@ -60,7 +60,7 @@ class GaussianDiffusionSampler(SpectralSampler):
 
         return sampled_data.detach().cpu(), ab_tensor.detach().cpu()
     
-class CCVAEncoderSampler(SpectralSampler):
+class CCVAESampler(SpectralSampler):
 
     def __init__(self, model:(nn.Module), lean:(bool)=True, abundance_sampler:(AbundanceSampler)=None, seed:(int)=3169):
         super().__init__(model, lean, abundance_sampler)

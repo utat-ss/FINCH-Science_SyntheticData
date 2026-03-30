@@ -1,0 +1,54 @@
+cfg_export:
+  project: 'Data Testing'
+  name: 'ISPRS 26 - TCVAE - 3k Critic'
+  local_log: 'testing/isprs/tcvae/logs_3k.txt'
+
+cfg_unmix:
+
+  cfg_import:
+    ksi_train_path: 'synthesis/isprs/tcvae/generated_tcvae_3000.csv'
+    psi2_path: 'synthesis/isprs/tcvae/psi2_tcvae.csv'
+    norm_dict_path: 'synthesis/isprs/tcvae/norm_dict.json'
+    spec_range: [900, 1700]
+
+  cfg_loader:
+    n_val: 100
+    n_test: 123
+    n_train_batch: 8
+    num_workers: 4
+    prefetch_factor: 12
+    seed: 3169
+
+  cfg_train:
+    n_epoch: 80
+    n_tb_epoch: 375
+    device: 'cuda'
+    dtype: 'float32'
+    verbose: True
+    use_autocast: False
+
+  cfg_export:
+    model_save: 'testing/isprs/tcvae/tcvae_3k_critic.pth'
+    test_save: 'testing/isprs/tcvae/preds_3k.parquet'
+
+  cfg_critic_setup:
+    critic_type: 'FNO1DUnmixing'
+    cfg_critic:
+      num_endmembers: 3
+      modes: 64
+      width: 256
+      num_layers: 5
+      dropout: 0.0
+      pool: "mean"
+
+  cfg_optim_setup:
+    loss_type: 'MSELoss'
+    cfg_loss:
+    optim_type: 'AdamW'
+    cfg_optim:
+      lr: 1.0e-3
+      weight_decay: 1.0e-2
+      cfg_lrscheduler_setup:
+        lrscheduler_type: 'CosineAnnealingLR'
+        cfg_lrscheduler:
+          T_max: 80

@@ -1,0 +1,412 @@
+[2026-03-25 23:42:18] CAUTION: Nearest neighborhood metric is disabled
+[2026-03-25 23:42:27] Unmix metric calculations are enabled, proceeding
+[2026-03-25 23:42:27] Cfgs taken in, parsed
+[2026-03-25 23:42:27] Data configured
+[2026-03-25 23:42:27] Critic, optimizer, lr_scheduler, loss_fn configured
+[2026-03-25 23:42:27] Training function called
+[2026-03-25 23:42:27] Training has started, will train for 80 epochs
+[2026-03-25 23:42:27] Epoch 1, Training Step
+[2026-03-25 23:42:33] Epoch 1, Average Train Loss: 0.07757304703361459
+[2026-03-25 23:42:33] LR Scheduler updated
+[2026-03-25 23:42:33] Epoch 1, Validation Step
+[2026-03-25 23:42:33] Epoch 1, Validation Loss: 0.07727543264627457
+[2026-03-25 23:42:33] Epoch 2, Training Step
+[2026-03-25 23:42:39] Epoch 2, Average Train Loss: 0.05997015894701083
+[2026-03-25 23:42:39] LR Scheduler updated
+[2026-03-25 23:42:39] Epoch 2, Validation Step
+[2026-03-25 23:42:39] Epoch 2, Validation Loss: 0.07042376697063446
+[2026-03-25 23:42:39] Epoch 3, Training Step
+[2026-03-25 23:42:44] Epoch 3, Average Train Loss: 0.05610921497311857
+[2026-03-25 23:42:44] LR Scheduler updated
+[2026-03-25 23:42:44] Epoch 3, Validation Step
+[2026-03-25 23:42:44] Epoch 3, Validation Loss: 0.06941978633403778
+[2026-03-25 23:42:44] Epoch 4, Training Step
+[2026-03-25 23:42:49] Epoch 4, Average Train Loss: 0.05300754066142771
+[2026-03-25 23:42:49] LR Scheduler updated
+[2026-03-25 23:42:49] Epoch 4, Validation Step
+[2026-03-25 23:42:49] Epoch 4, Validation Loss: 0.0645083412528038
+[2026-03-25 23:42:49] Epoch 5, Training Step
+[2026-03-25 23:42:54] Epoch 5, Average Train Loss: 0.049746890319304335
+[2026-03-25 23:42:54] LR Scheduler updated
+[2026-03-25 23:42:54] Epoch 5, Validation Step
+[2026-03-25 23:42:54] Epoch 5, Validation Loss: 0.0653301253914833
+[2026-03-25 23:42:54] Epoch 6, Training Step
+[2026-03-25 23:42:59] Epoch 6, Average Train Loss: 0.04887408671942022
+[2026-03-25 23:42:59] LR Scheduler updated
+[2026-03-25 23:42:59] Epoch 6, Validation Step
+[2026-03-25 23:42:59] Epoch 6, Validation Loss: 0.06879867613315582
+[2026-03-25 23:42:59] Epoch 7, Training Step
+[2026-03-25 23:43:05] Epoch 7, Average Train Loss: 0.0470003355724944
+[2026-03-25 23:43:05] LR Scheduler updated
+[2026-03-25 23:43:05] Epoch 7, Validation Step
+[2026-03-25 23:43:05] Epoch 7, Validation Loss: 0.07073619961738586
+[2026-03-25 23:43:05] Epoch 8, Training Step
+[2026-03-25 23:43:10] Epoch 8, Average Train Loss: 0.04584243024554518
+[2026-03-25 23:43:10] LR Scheduler updated
+[2026-03-25 23:43:10] Epoch 8, Validation Step
+[2026-03-25 23:43:10] Epoch 8, Validation Loss: 0.05824878066778183
+[2026-03-25 23:43:10] Epoch 9, Training Step
+[2026-03-25 23:43:15] Epoch 9, Average Train Loss: 0.045328401867714196
+[2026-03-25 23:43:15] LR Scheduler updated
+[2026-03-25 23:43:15] Epoch 9, Validation Step
+[2026-03-25 23:43:15] Epoch 9, Validation Loss: 0.057226844131946564
+[2026-03-25 23:43:15] Epoch 10, Training Step
+[2026-03-25 23:43:20] Epoch 10, Average Train Loss: 0.04324380185786221
+[2026-03-25 23:43:20] LR Scheduler updated
+[2026-03-25 23:43:20] Epoch 10, Validation Step
+[2026-03-25 23:43:20] Epoch 10, Validation Loss: 0.07265302538871765
+[2026-03-25 23:43:20] Epoch 11, Training Step
+[2026-03-25 23:43:26] Epoch 11, Average Train Loss: 0.04183755003536741
+[2026-03-25 23:43:26] LR Scheduler updated
+[2026-03-25 23:43:26] Epoch 11, Validation Step
+[2026-03-25 23:43:26] Epoch 11, Validation Loss: 0.07540953159332275
+[2026-03-25 23:43:26] Epoch 12, Training Step
+[2026-03-25 23:43:31] Epoch 12, Average Train Loss: 0.04112526326274706
+[2026-03-25 23:43:31] LR Scheduler updated
+[2026-03-25 23:43:31] Epoch 12, Validation Step
+[2026-03-25 23:43:31] Epoch 12, Validation Loss: 0.07773285359144211
+[2026-03-25 23:43:31] Epoch 13, Training Step
+[2026-03-25 23:43:36] Epoch 13, Average Train Loss: 0.03959944947850373
+[2026-03-25 23:43:36] LR Scheduler updated
+[2026-03-25 23:43:36] Epoch 13, Validation Step
+[2026-03-25 23:43:36] Epoch 13, Validation Loss: 0.06944260746240616
+[2026-03-25 23:43:36] Epoch 14, Training Step
+[2026-03-25 23:43:41] Epoch 14, Average Train Loss: 0.04055114061054256
+[2026-03-25 23:43:41] LR Scheduler updated
+[2026-03-25 23:43:41] Epoch 14, Validation Step
+[2026-03-25 23:43:41] Epoch 14, Validation Loss: 0.0737614557147026
+[2026-03-25 23:43:41] Epoch 15, Training Step
+[2026-03-25 23:43:46] Epoch 15, Average Train Loss: 0.03971263601920671
+[2026-03-25 23:43:46] LR Scheduler updated
+[2026-03-25 23:43:46] Epoch 15, Validation Step
+[2026-03-25 23:43:46] Epoch 15, Validation Loss: 0.07054822146892548
+[2026-03-25 23:43:46] Epoch 16, Training Step
+[2026-03-25 23:43:52] Epoch 16, Average Train Loss: 0.039198297652519414
+[2026-03-25 23:43:52] LR Scheduler updated
+[2026-03-25 23:43:52] Epoch 16, Validation Step
+[2026-03-25 23:43:52] Epoch 16, Validation Loss: 0.06539271771907806
+[2026-03-25 23:43:52] Epoch 17, Training Step
+[2026-03-25 23:43:57] Epoch 17, Average Train Loss: 0.0384112874045968
+[2026-03-25 23:43:57] LR Scheduler updated
+[2026-03-25 23:43:57] Epoch 17, Validation Step
+[2026-03-25 23:43:57] Epoch 17, Validation Loss: 0.07228317111730576
+[2026-03-25 23:43:57] Epoch 18, Training Step
+[2026-03-25 23:44:02] Epoch 18, Average Train Loss: 0.03909488423168659
+[2026-03-25 23:44:02] LR Scheduler updated
+[2026-03-25 23:44:02] Epoch 18, Validation Step
+[2026-03-25 23:44:02] Epoch 18, Validation Loss: 0.07753341645002365
+[2026-03-25 23:44:02] Epoch 19, Training Step
+[2026-03-25 23:44:07] Epoch 19, Average Train Loss: 0.0381218720032937
+[2026-03-25 23:44:07] LR Scheduler updated
+[2026-03-25 23:44:07] Epoch 19, Validation Step
+[2026-03-25 23:44:07] Epoch 19, Validation Loss: 0.05636613816022873
+[2026-03-25 23:44:07] Epoch 20, Training Step
+[2026-03-25 23:44:12] Epoch 20, Average Train Loss: 0.038065308574587106
+[2026-03-25 23:44:12] LR Scheduler updated
+[2026-03-25 23:44:12] Epoch 20, Validation Step
+[2026-03-25 23:44:12] Epoch 20, Validation Loss: 0.06706427782773972
+[2026-03-25 23:44:12] Epoch 21, Training Step
+[2026-03-25 23:44:18] Epoch 21, Average Train Loss: 0.03742124754356013
+[2026-03-25 23:44:18] LR Scheduler updated
+[2026-03-25 23:44:18] Epoch 21, Validation Step
+[2026-03-25 23:44:18] Epoch 21, Validation Loss: 0.06459269672632217
+[2026-03-25 23:44:18] Epoch 22, Training Step
+[2026-03-25 23:44:23] Epoch 22, Average Train Loss: 0.036852901369333266
+[2026-03-25 23:44:23] LR Scheduler updated
+[2026-03-25 23:44:23] Epoch 22, Validation Step
+[2026-03-25 23:44:23] Epoch 22, Validation Loss: 0.06305733323097229
+[2026-03-25 23:44:23] Epoch 23, Training Step
+[2026-03-25 23:44:28] Epoch 23, Average Train Loss: 0.037204776612006954
+[2026-03-25 23:44:28] LR Scheduler updated
+[2026-03-25 23:44:28] Epoch 23, Validation Step
+[2026-03-25 23:44:28] Epoch 23, Validation Loss: 0.07064519077539444
+[2026-03-25 23:44:28] Epoch 24, Training Step
+[2026-03-25 23:44:33] Epoch 24, Average Train Loss: 0.03690858802240756
+[2026-03-25 23:44:33] LR Scheduler updated
+[2026-03-25 23:44:33] Epoch 24, Validation Step
+[2026-03-25 23:44:33] Epoch 24, Validation Loss: 0.07409126311540604
+[2026-03-25 23:44:33] Epoch 25, Training Step
+[2026-03-25 23:44:38] Epoch 25, Average Train Loss: 0.03686770653103789
+[2026-03-25 23:44:38] LR Scheduler updated
+[2026-03-25 23:44:38] Epoch 25, Validation Step
+[2026-03-25 23:44:38] Epoch 25, Validation Loss: 0.058853715658187866
+[2026-03-25 23:44:38] Epoch 26, Training Step
+[2026-03-25 23:44:44] Epoch 26, Average Train Loss: 0.03726604469493031
+[2026-03-25 23:44:44] LR Scheduler updated
+[2026-03-25 23:44:44] Epoch 26, Validation Step
+[2026-03-25 23:44:44] Epoch 26, Validation Loss: 0.08450765907764435
+[2026-03-25 23:44:44] Epoch 27, Training Step
+[2026-03-25 23:44:49] Epoch 27, Average Train Loss: 0.03676522353953785
+[2026-03-25 23:44:49] LR Scheduler updated
+[2026-03-25 23:44:49] Epoch 27, Validation Step
+[2026-03-25 23:44:49] Epoch 27, Validation Loss: 0.059679992496967316
+[2026-03-25 23:44:49] Epoch 28, Training Step
+[2026-03-25 23:44:54] Epoch 28, Average Train Loss: 0.034609044925620155
+[2026-03-25 23:44:54] LR Scheduler updated
+[2026-03-25 23:44:54] Epoch 28, Validation Step
+[2026-03-25 23:44:54] Epoch 28, Validation Loss: 0.07524246722459793
+[2026-03-25 23:44:54] Epoch 29, Training Step
+[2026-03-25 23:44:59] Epoch 29, Average Train Loss: 0.03573878466627664
+[2026-03-25 23:44:59] LR Scheduler updated
+[2026-03-25 23:44:59] Epoch 29, Validation Step
+[2026-03-25 23:44:59] Epoch 29, Validation Loss: 0.07108496874570847
+[2026-03-25 23:44:59] Epoch 30, Training Step
+[2026-03-25 23:45:04] Epoch 30, Average Train Loss: 0.03587662303985821
+[2026-03-25 23:45:04] LR Scheduler updated
+[2026-03-25 23:45:04] Epoch 30, Validation Step
+[2026-03-25 23:45:04] Epoch 30, Validation Loss: 0.06678671389818192
+[2026-03-25 23:45:04] Epoch 31, Training Step
+[2026-03-25 23:45:09] Epoch 31, Average Train Loss: 0.034177733504109915
+[2026-03-25 23:45:09] LR Scheduler updated
+[2026-03-25 23:45:09] Epoch 31, Validation Step
+[2026-03-25 23:45:10] Epoch 31, Validation Loss: 0.07023445516824722
+[2026-03-25 23:45:10] Epoch 32, Training Step
+[2026-03-25 23:45:15] Epoch 32, Average Train Loss: 0.03464489356511169
+[2026-03-25 23:45:15] LR Scheduler updated
+[2026-03-25 23:45:15] Epoch 32, Validation Step
+[2026-03-25 23:45:15] Epoch 32, Validation Loss: 0.07396892458200455
+[2026-03-25 23:45:15] Epoch 33, Training Step
+[2026-03-25 23:45:20] Epoch 33, Average Train Loss: 0.035165826612876525
+[2026-03-25 23:45:20] LR Scheduler updated
+[2026-03-25 23:45:20] Epoch 33, Validation Step
+[2026-03-25 23:45:20] Epoch 33, Validation Loss: 0.07544990628957748
+[2026-03-25 23:45:20] Epoch 34, Training Step
+[2026-03-25 23:45:25] Epoch 34, Average Train Loss: 0.03393362200570603
+[2026-03-25 23:45:25] LR Scheduler updated
+[2026-03-25 23:45:25] Epoch 34, Validation Step
+[2026-03-25 23:45:25] Epoch 34, Validation Loss: 0.07906947284936905
+[2026-03-25 23:45:25] Epoch 35, Training Step
+[2026-03-25 23:45:30] Epoch 35, Average Train Loss: 0.03430976132199996
+[2026-03-25 23:45:30] LR Scheduler updated
+[2026-03-25 23:45:30] Epoch 35, Validation Step
+[2026-03-25 23:45:30] Epoch 35, Validation Loss: 0.07342996448278427
+[2026-03-25 23:45:30] Epoch 36, Training Step
+[2026-03-25 23:45:36] Epoch 36, Average Train Loss: 0.03390575951627559
+[2026-03-25 23:45:36] LR Scheduler updated
+[2026-03-25 23:45:36] Epoch 36, Validation Step
+[2026-03-25 23:45:36] Epoch 36, Validation Loss: 0.07467997074127197
+[2026-03-25 23:45:36] Epoch 37, Training Step
+[2026-03-25 23:45:41] Epoch 37, Average Train Loss: 0.03419184140074584
+[2026-03-25 23:45:41] LR Scheduler updated
+[2026-03-25 23:45:41] Epoch 37, Validation Step
+[2026-03-25 23:45:41] Epoch 37, Validation Loss: 0.07867226749658585
+[2026-03-25 23:45:41] Epoch 38, Training Step
+[2026-03-25 23:45:46] Epoch 38, Average Train Loss: 0.03367356172307498
+[2026-03-25 23:45:46] LR Scheduler updated
+[2026-03-25 23:45:46] Epoch 38, Validation Step
+[2026-03-25 23:45:46] Epoch 38, Validation Loss: 0.07611042261123657
+[2026-03-25 23:45:46] Epoch 39, Training Step
+[2026-03-25 23:45:51] Epoch 39, Average Train Loss: 0.03280933415951828
+[2026-03-25 23:45:51] LR Scheduler updated
+[2026-03-25 23:45:51] Epoch 39, Validation Step
+[2026-03-25 23:45:51] Epoch 39, Validation Loss: 0.077757328748703
+[2026-03-25 23:45:51] Epoch 40, Training Step
+[2026-03-25 23:45:57] Epoch 40, Average Train Loss: 0.03256555028321843
+[2026-03-25 23:45:57] LR Scheduler updated
+[2026-03-25 23:45:57] Epoch 40, Validation Step
+[2026-03-25 23:45:57] Epoch 40, Validation Loss: 0.07463380694389343
+[2026-03-25 23:45:57] Epoch 41, Training Step
+[2026-03-25 23:46:02] Epoch 41, Average Train Loss: 0.03158862682121495
+[2026-03-25 23:46:02] LR Scheduler updated
+[2026-03-25 23:46:02] Epoch 41, Validation Step
+[2026-03-25 23:46:02] Epoch 41, Validation Loss: 0.07393993437290192
+[2026-03-25 23:46:02] Epoch 42, Training Step
+[2026-03-25 23:46:07] Epoch 42, Average Train Loss: 0.03236960828511251
+[2026-03-25 23:46:07] LR Scheduler updated
+[2026-03-25 23:46:07] Epoch 42, Validation Step
+[2026-03-25 23:46:07] Epoch 42, Validation Loss: 0.04896607995033264
+[2026-03-25 23:46:07] Epoch 43, Training Step
+[2026-03-25 23:46:13] Epoch 43, Average Train Loss: 0.03167035420901246
+[2026-03-25 23:46:13] LR Scheduler updated
+[2026-03-25 23:46:13] Epoch 43, Validation Step
+[2026-03-25 23:46:13] Epoch 43, Validation Loss: 0.06370877474546432
+[2026-03-25 23:46:13] Epoch 44, Training Step
+[2026-03-25 23:46:18] Epoch 44, Average Train Loss: 0.03130783988411228
+[2026-03-25 23:46:18] LR Scheduler updated
+[2026-03-25 23:46:18] Epoch 44, Validation Step
+[2026-03-25 23:46:18] Epoch 44, Validation Loss: 0.07957245409488678
+[2026-03-25 23:46:18] Epoch 45, Training Step
+[2026-03-25 23:46:23] Epoch 45, Average Train Loss: 0.03195867603065239
+[2026-03-25 23:46:23] LR Scheduler updated
+[2026-03-25 23:46:23] Epoch 45, Validation Step
+[2026-03-25 23:46:23] Epoch 45, Validation Loss: 0.061343513429164886
+[2026-03-25 23:46:23] Epoch 46, Training Step
+[2026-03-25 23:46:28] Epoch 46, Average Train Loss: 0.031385365169909266
+[2026-03-25 23:46:28] LR Scheduler updated
+[2026-03-25 23:46:28] Epoch 46, Validation Step
+[2026-03-25 23:46:28] Epoch 46, Validation Loss: 0.0709175392985344
+[2026-03-25 23:46:28] Epoch 47, Training Step
+[2026-03-25 23:46:34] Epoch 47, Average Train Loss: 0.03136630277997918
+[2026-03-25 23:46:34] LR Scheduler updated
+[2026-03-25 23:46:34] Epoch 47, Validation Step
+[2026-03-25 23:46:34] Epoch 47, Validation Loss: 0.0766884982585907
+[2026-03-25 23:46:34] Epoch 48, Training Step
+[2026-03-25 23:46:39] Epoch 48, Average Train Loss: 0.030974170813130007
+[2026-03-25 23:46:39] LR Scheduler updated
+[2026-03-25 23:46:39] Epoch 48, Validation Step
+[2026-03-25 23:46:39] Epoch 48, Validation Loss: 0.07578541338443756
+[2026-03-25 23:46:39] Epoch 49, Training Step
+[2026-03-25 23:46:44] Epoch 49, Average Train Loss: 0.030894752461463212
+[2026-03-25 23:46:44] LR Scheduler updated
+[2026-03-25 23:46:44] Epoch 49, Validation Step
+[2026-03-25 23:46:44] Epoch 49, Validation Loss: 0.05743023008108139
+[2026-03-25 23:46:44] Epoch 50, Training Step
+[2026-03-25 23:46:49] Epoch 50, Average Train Loss: 0.031279238750951156
+[2026-03-25 23:46:49] LR Scheduler updated
+[2026-03-25 23:46:49] Epoch 50, Validation Step
+[2026-03-25 23:46:49] Epoch 50, Validation Loss: 0.06954865902662277
+[2026-03-25 23:46:49] Epoch 51, Training Step
+[2026-03-25 23:46:54] Epoch 51, Average Train Loss: 0.0309416480610768
+[2026-03-25 23:46:54] LR Scheduler updated
+[2026-03-25 23:46:54] Epoch 51, Validation Step
+[2026-03-25 23:46:54] Epoch 51, Validation Loss: 0.064937062561512
+[2026-03-25 23:46:54] Epoch 52, Training Step
+[2026-03-25 23:46:59] Epoch 52, Average Train Loss: 0.030684306202042433
+[2026-03-25 23:46:59] LR Scheduler updated
+[2026-03-25 23:46:59] Epoch 52, Validation Step
+[2026-03-25 23:46:59] Epoch 52, Validation Loss: 0.0744350478053093
+[2026-03-25 23:46:59] Epoch 53, Training Step
+[2026-03-25 23:47:05] Epoch 53, Average Train Loss: 0.030716886846555602
+[2026-03-25 23:47:05] LR Scheduler updated
+[2026-03-25 23:47:05] Epoch 53, Validation Step
+[2026-03-25 23:47:05] Epoch 53, Validation Loss: 0.08321782201528549
+[2026-03-25 23:47:05] Epoch 54, Training Step
+[2026-03-25 23:47:10] Epoch 54, Average Train Loss: 0.030369895169718397
+[2026-03-25 23:47:10] LR Scheduler updated
+[2026-03-25 23:47:10] Epoch 54, Validation Step
+[2026-03-25 23:47:10] Epoch 54, Validation Loss: 0.08558230102062225
+[2026-03-25 23:47:10] Epoch 55, Training Step
+[2026-03-25 23:47:15] Epoch 55, Average Train Loss: 0.02991930813425117
+[2026-03-25 23:47:15] LR Scheduler updated
+[2026-03-25 23:47:15] Epoch 55, Validation Step
+[2026-03-25 23:47:15] Epoch 55, Validation Loss: 0.06590376794338226
+[2026-03-25 23:47:15] Epoch 56, Training Step
+[2026-03-25 23:47:20] Epoch 56, Average Train Loss: 0.029226632753594054
+[2026-03-25 23:47:20] LR Scheduler updated
+[2026-03-25 23:47:20] Epoch 56, Validation Step
+[2026-03-25 23:47:20] Epoch 56, Validation Loss: 0.06771738827228546
+[2026-03-25 23:47:20] Epoch 57, Training Step
+[2026-03-25 23:47:25] Epoch 57, Average Train Loss: 0.029622915178744328
+[2026-03-25 23:47:25] LR Scheduler updated
+[2026-03-25 23:47:25] Epoch 57, Validation Step
+[2026-03-25 23:47:25] Epoch 57, Validation Loss: 0.07146052271127701
+[2026-03-25 23:47:25] Epoch 58, Training Step
+[2026-03-25 23:47:31] Epoch 58, Average Train Loss: 0.02965939338877797
+[2026-03-25 23:47:31] LR Scheduler updated
+[2026-03-25 23:47:31] Epoch 58, Validation Step
+[2026-03-25 23:47:31] Epoch 58, Validation Loss: 0.057705365121364594
+[2026-03-25 23:47:31] Epoch 59, Training Step
+[2026-03-25 23:47:36] Epoch 59, Average Train Loss: 0.028885198753741053
+[2026-03-25 23:47:36] LR Scheduler updated
+[2026-03-25 23:47:36] Epoch 59, Validation Step
+[2026-03-25 23:47:36] Epoch 59, Validation Loss: 0.05020789057016373
+[2026-03-25 23:47:36] Epoch 60, Training Step
+[2026-03-25 23:47:41] Epoch 60, Average Train Loss: 0.029576470740139485
+[2026-03-25 23:47:41] LR Scheduler updated
+[2026-03-25 23:47:41] Epoch 60, Validation Step
+[2026-03-25 23:47:41] Epoch 60, Validation Loss: 0.07345130294561386
+[2026-03-25 23:47:41] Epoch 61, Training Step
+[2026-03-25 23:47:46] Epoch 61, Average Train Loss: 0.028640184929594397
+[2026-03-25 23:47:46] LR Scheduler updated
+[2026-03-25 23:47:46] Epoch 61, Validation Step
+[2026-03-25 23:47:46] Epoch 61, Validation Loss: 0.0651385709643364
+[2026-03-25 23:47:46] Epoch 62, Training Step
+[2026-03-25 23:47:51] Epoch 62, Average Train Loss: 0.028632609646146497
+[2026-03-25 23:47:51] LR Scheduler updated
+[2026-03-25 23:47:51] Epoch 62, Validation Step
+[2026-03-25 23:47:52] Epoch 62, Validation Loss: 0.06484871357679367
+[2026-03-25 23:47:52] Epoch 63, Training Step
+[2026-03-25 23:47:57] Epoch 63, Average Train Loss: 0.02853983957713677
+[2026-03-25 23:47:57] LR Scheduler updated
+[2026-03-25 23:47:57] Epoch 63, Validation Step
+[2026-03-25 23:47:57] Epoch 63, Validation Loss: 0.06736578792333603
+[2026-03-25 23:47:57] Epoch 64, Training Step
+[2026-03-25 23:48:02] Epoch 64, Average Train Loss: 0.028357715454987355
+[2026-03-25 23:48:02] LR Scheduler updated
+[2026-03-25 23:48:02] Epoch 64, Validation Step
+[2026-03-25 23:48:02] Epoch 64, Validation Loss: 0.061341580003499985
+[2026-03-25 23:48:02] Epoch 65, Training Step
+[2026-03-25 23:48:07] Epoch 65, Average Train Loss: 0.028968490295939977
+[2026-03-25 23:48:07] LR Scheduler updated
+[2026-03-25 23:48:07] Epoch 65, Validation Step
+[2026-03-25 23:48:07] Epoch 65, Validation Loss: 0.0667518898844719
+[2026-03-25 23:48:07] Epoch 66, Training Step
+[2026-03-25 23:48:13] Epoch 66, Average Train Loss: 0.02828591983579099
+[2026-03-25 23:48:13] LR Scheduler updated
+[2026-03-25 23:48:13] Epoch 66, Validation Step
+[2026-03-25 23:48:13] Epoch 66, Validation Loss: 0.07245736569166183
+[2026-03-25 23:48:13] Epoch 67, Training Step
+[2026-03-25 23:48:18] Epoch 67, Average Train Loss: 0.02909212715841002
+[2026-03-25 23:48:18] LR Scheduler updated
+[2026-03-25 23:48:18] Epoch 67, Validation Step
+[2026-03-25 23:48:18] Epoch 67, Validation Loss: 0.07489767670631409
+[2026-03-25 23:48:18] Epoch 68, Training Step
+[2026-03-25 23:48:23] Epoch 68, Average Train Loss: 0.02779457464420961
+[2026-03-25 23:48:23] LR Scheduler updated
+[2026-03-25 23:48:23] Epoch 68, Validation Step
+[2026-03-25 23:48:23] Epoch 68, Validation Loss: 0.07038795948028564
+[2026-03-25 23:48:23] Epoch 69, Training Step
+[2026-03-25 23:48:28] Epoch 69, Average Train Loss: 0.02777099882149034
+[2026-03-25 23:48:28] LR Scheduler updated
+[2026-03-25 23:48:28] Epoch 69, Validation Step
+[2026-03-25 23:48:28] Epoch 69, Validation Loss: 0.07317199558019638
+[2026-03-25 23:48:28] Epoch 70, Training Step
+[2026-03-25 23:48:33] Epoch 70, Average Train Loss: 0.0283961736973789
+[2026-03-25 23:48:33] LR Scheduler updated
+[2026-03-25 23:48:33] Epoch 70, Validation Step
+[2026-03-25 23:48:33] Epoch 70, Validation Loss: 0.07473631203174591
+[2026-03-25 23:48:33] Epoch 71, Training Step
+[2026-03-25 23:48:39] Epoch 71, Average Train Loss: 0.028707459246532785
+[2026-03-25 23:48:39] LR Scheduler updated
+[2026-03-25 23:48:39] Epoch 71, Validation Step
+[2026-03-25 23:48:39] Epoch 71, Validation Loss: 0.06589780747890472
+[2026-03-25 23:48:39] Epoch 72, Training Step
+[2026-03-25 23:48:44] Epoch 72, Average Train Loss: 0.028226638524482647
+[2026-03-25 23:48:44] LR Scheduler updated
+[2026-03-25 23:48:44] Epoch 72, Validation Step
+[2026-03-25 23:48:44] Epoch 72, Validation Loss: 0.060832805931568146
+[2026-03-25 23:48:44] Epoch 73, Training Step
+[2026-03-25 23:48:49] Epoch 73, Average Train Loss: 0.02763021423150268
+[2026-03-25 23:48:49] LR Scheduler updated
+[2026-03-25 23:48:49] Epoch 73, Validation Step
+[2026-03-25 23:48:49] Epoch 73, Validation Loss: 0.07191938161849976
+[2026-03-25 23:48:49] Epoch 74, Training Step
+[2026-03-25 23:48:54] Epoch 74, Average Train Loss: 0.027798548811011844
+[2026-03-25 23:48:54] LR Scheduler updated
+[2026-03-25 23:48:54] Epoch 74, Validation Step
+[2026-03-25 23:48:54] Epoch 74, Validation Loss: 0.06891117244958878
+[2026-03-25 23:48:54] Epoch 75, Training Step
+[2026-03-25 23:48:59] Epoch 75, Average Train Loss: 0.028025116705025235
+[2026-03-25 23:48:59] LR Scheduler updated
+[2026-03-25 23:48:59] Epoch 75, Validation Step
+[2026-03-25 23:48:59] Epoch 75, Validation Loss: 0.07308252155780792
+[2026-03-25 23:48:59] Epoch 76, Training Step
+[2026-03-25 23:49:05] Epoch 76, Average Train Loss: 0.02784240392761098
+[2026-03-25 23:49:05] LR Scheduler updated
+[2026-03-25 23:49:05] Epoch 76, Validation Step
+[2026-03-25 23:49:05] Epoch 76, Validation Loss: 0.060033589601516724
+[2026-03-25 23:49:05] Epoch 77, Training Step
+[2026-03-25 23:49:10] Epoch 77, Average Train Loss: 0.028031423069950608
+[2026-03-25 23:49:10] LR Scheduler updated
+[2026-03-25 23:49:10] Epoch 77, Validation Step
+[2026-03-25 23:49:10] Epoch 77, Validation Loss: 0.0527525395154953
+[2026-03-25 23:49:10] Epoch 78, Training Step
+[2026-03-25 23:49:15] Epoch 78, Average Train Loss: 0.02792494819727209
+[2026-03-25 23:49:15] LR Scheduler updated
+[2026-03-25 23:49:15] Epoch 78, Validation Step
+[2026-03-25 23:49:15] Epoch 78, Validation Loss: 0.07221879810094833
+[2026-03-25 23:49:15] Epoch 79, Training Step
+[2026-03-25 23:49:20] Epoch 79, Average Train Loss: 0.02716273584920499
+[2026-03-25 23:49:20] LR Scheduler updated
+[2026-03-25 23:49:20] Epoch 79, Validation Step
+[2026-03-25 23:49:20] Epoch 79, Validation Loss: 0.08099936693906784
+[2026-03-25 23:49:20] Epoch 80, Training Step
+[2026-03-25 23:49:25] Epoch 80, Average Train Loss: 0.028047845009507404
+[2026-03-25 23:49:25] LR Scheduler updated
+[2026-03-25 23:49:25] Epoch 80, Validation Step
+[2026-03-25 23:49:25] Epoch 80, Validation Loss: 0.07165810465812683
+[2026-03-25 23:49:25] Finished 80 Epochs, Testing Step
+[2026-03-25 23:49:26] Saved test predictions to preds_9k_hybrid.parquet
+[2026-03-25 23:49:26] Testing finished, Training of the Diffusion Model is Complete. The Difussion Model is saved at 'gdstreamlined_9k_critic_hybrid.pth'
+[2026-03-25 23:49:26] Training finished, synthesized data tested
+[2026-03-25 23:49:26] Unmix metric calculations succesfully completed

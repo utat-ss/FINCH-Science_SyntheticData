@@ -1,0 +1,29 @@
+seed: 43
+use_cuda: true
+
+data:
+  csv_path: data/simpler_data_rwc.csv
+  target_cols: ["gv_fraction", "npv_fraction", "soil_fraction"]
+  val_frac: 0.15
+  test_frac: 0.15
+
+model:
+  modes: 64
+  width: 256
+  num_layers: 5
+  dropout: 0.0
+  pool: "mean"
+
+training:
+  batch_size: 64
+  learning_rate: 0.001
+  epochs: 80
+  patience: 15
+  grad_clip: 1.0
+
+  use_plateau_scheduler: true
+  plateau_factor: 0.5
+  plateau_patience: 7
+
+  run_dir: "runs"
+  run_name: "fno_xl_seed43"

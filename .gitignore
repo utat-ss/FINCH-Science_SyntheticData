@@ -12,6 +12,7 @@ __pycache__/
 venv/
 .env/
 .venv/
+venv312/
 
 # Logs and outputs
 *.log
@@ -22,3 +23,7 @@ runs/*
 
 # WandB stuff
 wandb/*
+
+# Allow for the model statedicts used in the paper with .pth extension
+!synthesis/isprs/tcvae/tcvae_statedict.pth
+!synthesis/isprs/diffusion/gdstreamline_statedict.pth
