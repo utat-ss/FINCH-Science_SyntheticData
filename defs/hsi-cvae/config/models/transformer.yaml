@@ -1,0 +1,11 @@
+model:
+  architecture: transformer
+  transformer_params:
+    d_model: 256
+    n_heads: 8
+    n_layers: 6
+    dropout: 0.1
+    latent_gate:
+      start: 0.0
+      end: 1.0
+      warmup_steps: 20000

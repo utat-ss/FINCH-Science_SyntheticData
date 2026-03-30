@@ -1,0 +1,22 @@
+data:
+  predict_conditions:
+    - [0.0, 0.5, 0.5]
+    - [0.5, 0.0, 0.5]
+    - [0.5, 0.5, 0.0]
+  predict_samples_per_condition: 10
+
+trainer:
+  callbacks:
+    - class_path: callbacks.predict_line_charts.PredictLineCharts
+      init_args:
+        out_dir: outputs/predictions_half/charts
+        start_nm: 400
+        step_nm: 10
+        class_names:
+          - gv0_np50_soil50
+          - gv50_np0_soil50
+          - gv50_np50_soil0
+        normalize_custom_conditions: true
+        save_spectra: true
+        spectra_format: csv
+        spectra_subdir: spectra

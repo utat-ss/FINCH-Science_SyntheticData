@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Optional, Sequence
+
+import lightning as L
+import torch
+import json
+from torch.utils.data import DataLoader, Dataset, random_split
+
+from dataset import HyperspectralDataset, PredictConditionDataset
+
+
+class HyperspectralDataModule(L.LightningDataModule):
+    """LightningDataModule that splits the CSV-backed dataset into train/val/test."""
+
+    def __init__(
+        self,
+        csv_path: str,
+        condition_columns: Sequence[str],
+        spectral_range: Sequence[int],
+        batch_size: int = 256,
+        num_workers: int = 4,
+        splits: Sequence[float] = (0.8, 0.1, 0.1),
+        seed: int = 42,
+        pin_memory: bool = True,
+        predict_conditions: Optional[Sequence[Sequence[float]]] = None,
+        predict_samples_per_condition: int = 10,
+        predict_fallback_condition: Optional[Sequence[float]] = None,
+    ) -> None:
+        super().__init__()
+        self.csv_path = csv_path
+        self.condition_columns = list(condition_columns)
+        self.spectral_range = self._parse_spectral_range(spectral_range)
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.splits = tuple(splits)
+        self.seed = seed
+        self.pin_memory = pin_memory
+        self.predict_conditions = predict_conditions
+        self.predict_samples_per_condition = max(int(predict_samples_per_condition), 1)
+        self.predict_fallback_condition = predict_fallback_condition
+        if predict_conditions:
+            self.resolved_predict_conditions: Optional[list[list[float]]] = [list(map(float, cond)) for cond in predict_conditions]
+        elif predict_fallback_condition is not None:
+            self.resolved_predict_conditions = [list(map(float, predict_fallback_condition))]
+        else:
+            self.resolved_predict_conditions = None
+
+        self.dataset: Optional[HyperspectralDataset] = None
+        self.train_set: Optional[Dataset] = None
+        self.val_set: Optional[Dataset] = None
+        self.test_set: Optional[Dataset] = None
+        self.predict_set: Optional[Dataset] = None
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        del stage
+        if self.dataset is not None:
+            return
+
+        self.dataset = HyperspectralDataset(
+            csv_path=self.csv_path,
+            condition_columns=self.condition_columns,
+            spectral_range=self.spectral_range,
+        )
+
+        n_total = len(self.dataset)
+        train_len = int(n_total * self.splits[0])
+        val_len = int(n_total * self.splits[1])
+        test_len = n_total - train_len - val_len
+
+        self.train_set, self.val_set, self.test_set = random_split(
+            self.dataset,
+            lengths=[train_len, val_len, test_len],
+            generator=torch.Generator().manual_seed(self.seed),
+        )
+        split_path = Path("outputs/checkpoints") / f"data_{self.seed}.json"
+        split_path.parent.mkdir(parents=True, exist_ok=True)
+        split_payload = {
+            "seed": int(self.seed),
+            "csv_path": str(self.csv_path),
+            "splits": [float(value) for value in self.splits],
+            "n_total": int(n_total),
+            "train_indices": list(self.train_set.indices),
+            "val_indices": list(self.val_set.indices),
+            "test_indices": list(self.test_set.indices),
+        }
+        split_path.write_text(json.dumps(split_payload, indent=2), encoding="utf-8")
+        predict_dataset = PredictConditionDataset(
+            condition_dim=self.dataset.condition_dim,
+            conditions=self.predict_conditions,
+            samples_per_condition=self.predict_samples_per_condition,
+            fallback_condition=self.predict_fallback_condition,
+            source_conditions=self.dataset.conditions,
+        )
+        self.predict_set = predict_dataset
+        if self.resolved_predict_conditions is None:
+            self.resolved_predict_conditions = [row.tolist() for row in predict_dataset.base_conditions]
+
+    def dataloader(self, dataset: Optional[Dataset], shuffle: bool) -> DataLoader:
+        if dataset is None:
+            raise RuntimeError("DataModule.setup() must be called before requesting dataloaders.")
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            shuffle=shuffle,
+            pin_memory=self.pin_memory,
+        )
+
+    def train_dataloader(self) -> DataLoader:
+        return self.dataloader(self.train_set, shuffle=True)
+
+    def val_dataloader(self) -> DataLoader:
+        return self.dataloader(self.val_set, shuffle=False)
+
+    def test_dataloader(self) -> DataLoader:
+        return self.dataloader(self.test_set, shuffle=False)
+
+    def predict_dataloader(self) -> DataLoader:
+        return self.dataloader(self.predict_set, shuffle=False)
+
+    @staticmethod
+    def _parse_spectral_range(range_like: Sequence[int]) -> tuple[int, int, int]:
+        if len(range_like) != 3:
+            raise ValueError("spectral_range must contain exactly three integers: (start, end, step).")
+        start, end, step = (int(value) for value in range_like)
+        if step <= 0:
+            raise ValueError("spectral_range step must be positive.")
+        return start, end, step
