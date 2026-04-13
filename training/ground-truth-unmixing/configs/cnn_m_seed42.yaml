@@ -1,0 +1,39 @@
+run:
+  name: cnn_m_seed42
+  seed: 42
+  output_dir: runs
+
+data:
+  csv_path: data/simpler_data_rwc.csv
+  target_cols: [gv_fraction, npv_fraction, soil_fraction]
+  feature_cols: null   # auto-infer numeric non-target cols
+  split:
+    train: 0.7
+    val: 0.15
+    test: 0.15
+  shuffle: true
+  num_workers: 4
+
+model:
+  num_bands: 210
+  num_endmembers: 3
+  channels: [64, 128, 256]
+  kernel_size: 7
+  dropout: 0.05
+  norm: batch
+  residual: true
+  res_blocks_per_stage: 1
+  pool: avg
+
+train:
+  batch_size: 1024
+  max_epochs: 80
+  lr: 0.001
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  patience: 20
+  min_delta: 0.0
+  scheduler:
+    factor: 0.5
+    patience: 5
+    min_lr: 0.000001

@@ -4,7 +4,7 @@ This file is to define all sorts of loaders from model loaders to abundance gene
 
 from . import abundance_sampler
 from .synth_func import *
-from .tcvae_model import TCVAESynthesisModel
+from ..tcvae.tcvae_model import TCVAESynthesisModel
 
 import torch
 
@@ -94,7 +94,7 @@ def load_sampler(model_type:(str), model, ab_sampler):
 
     elif model_type == 'CCVAEncoder':
         
-        spectra_sampler = CCVAEncoderSampler(model, lean=False, abundance_sampler=ab_sampler)
+        spectra_sampler = CCVAESampler(model, lean=False, abundance_sampler=ab_sampler)
 
     elif model_type == 'TCVAEncoder':
 

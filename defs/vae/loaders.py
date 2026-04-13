@@ -1,14 +1,14 @@
-import ae
+import defs.vae.ae as ae
 
 # from .epsilon import unet
 # from .epsilon import mlp
 
 import torch.optim as optim
 
-import loss as custom_losses
+import defs.vae.loss as custom_losses
 import torch.nn as nn
 
-from noise import noise_scheduling
+from defs.vae.noise import noise_scheduling
 # from .noise import noise_sampling
 # from .data import data_augmentation
 
@@ -25,20 +25,6 @@ def load_vccae(cfg_ae_setup):
     ae_model = ae_cls(**cfg_ae)
     return ae_model
 
-# def load_epsilon(cfg_epsilon_setup):
-
-#     epsilon_type = cfg_epsilon_setup['epsilon_type']
-#     cfg_epsilon = cfg_epsilon_setup['cfg_epsilon']
-
-#     if hasattr(unet, epsilon_type):
-#         epsilon_cls = getattr(unet, epsilon_type)
-#     elif hasattr(mlp, epsilon_type):
-#         epsilon_cls = getattr(mlp, epsilon_type)
-#     else:
-#         raise ValueError(f"Unknown/Unsupported epsilon type: {epsilon_type}")
-
-#     epsilon = epsilon_cls(**cfg_epsilon)
-#     return epsilon
 
 def load_optim(model, cfg_optim_setup): #epsilon excluded
 

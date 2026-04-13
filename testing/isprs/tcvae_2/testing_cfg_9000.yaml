@@ -1,0 +1,49 @@
+cfg_export:
+  project: 'Data Testing'
+  name: 'ISPRS 26 - TCVAE - 9k Critic'
+  local_log: 'testing/isprs/tcvae_2/logs_9k.txt'
+
+cfg_unmix:
+
+  cfg_import:
+    ksi_train_path: 'synthesis/isprs/tcvae/generated_tcvae_9000.csv'
+    psi2_path: 'synthesis/isprs/tcvae/psi2_tcvae.csv'
+    norm_dict_path: 'synthesis/isprs/tcvae/norm_dict.json'
+    spec_range: [900, 1700]
+
+  cfg_loader:
+    n_val: 100
+    n_test: 123
+    n_train_batch: 8
+    num_workers: 4
+    prefetch_factor: 12
+    seed: 3169
+
+  cfg_train:
+    n_epoch: 80
+    n_tb_epoch: 1125
+    device: 'cuda'
+    dtype: 'float32'
+    verbose: True
+    use_autocast: False
+
+  cfg_export:
+    model_save: 'testing/isprs/tcvae_2/tcvae_9k_critic.pth'
+    test_save: 'testing/isprs/tcvae_2/preds_9k.parquet'
+
+  cfg_critic_setup:
+    critic_type: 'MLP' # The type of critic to be trained
+    cfg_critic: # Specific configs of the critic
+      hidden_dim: [128, 128, 128, 128]
+
+  cfg_optim_setup:
+    loss_type: 'MSELoss'
+    cfg_loss:
+    optim_type: 'AdamW'
+    cfg_optim:
+      lr: 1.0e-3
+      weight_decay: 1.0e-2
+      cfg_lrscheduler_setup:
+        lrscheduler_type: 'CosineAnnealingLR'
+        cfg_lrscheduler:
+          T_max: 80
